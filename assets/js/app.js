@@ -1,0 +1,1201 @@
+/* ORBITAL NEXUS — application: state, interface and the operations simulator */
+
+/* ---------------------------------------------------------------- *
+ * state                                                            *
+ * ---------------------------------------------------------------- */
+var S;
+function freshState() {
+  return {
+    phase: 0, seen: 0,
+    programId: null, destId: null,
+    busId: null, powerType: 'solar', arrayArea: 0, rtgUnits: 0, batteryWh: 0,
+    propId: null, propellantKg: 0, edlId: null,
+    instruments: [],
+    antennaD: null, bandId: 'x', twtaW: null, groundId: null, shieldingId: 'none',
+    launcherId: null, devMonths: null,
+    /* operations */
+    turn: 0, alive: true, launchSuccess: true, failReason: null,
+    storage: {}, collected: {}, downlinked: {}, dead: {},
+    bonusScience: 0, budgetLeft: 0, propLeft: 0,
+    arrayHealth: 1, permScience: 1, permDl: 1, permPower: 1, permImaging: 1, permAnomaly: 1,
+    alloc: { sci: 60, dl: 30 }, active: {},
+    log: [], strip: [], pendingEvent: null, usedEvents: {},
+    rng: (Math.random() * 4294967296) >>> 0
+  };
+}
+
+/* seeded RNG so a mission can be replayed/debugged */
+function rnd() {
+  S.rng = (S.rng + 0x6D2B79F5) >>> 0;
+  var t = S.rng;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+
+/* ---------------------------------------------------------------- *
+ * small helpers                                                    *
+ * ---------------------------------------------------------------- */
+function $(id) { return document.getElementById(id); }
+function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function n0(v) { return (isFinite(v) ? v : 0).toFixed(0); }
+function n1(v) { return (isFinite(v) ? v : 0).toFixed(1); }
+function n2(v) { return (isFinite(v) ? v : 0).toFixed(2); }
+function money(v) { return '$' + n0(v) + 'M'; }
+function gb(v) { if (v >= 1000) return n1(v / 1000) + ' Tb'; return n0(v) + ' Gb'; }
+function bps(v) {
+  if (!isFinite(v) || v <= 0) return '—';
+  if (v >= 1e9) return n1(v / 1e9) + ' Gbps';
+  if (v >= 1e6) return n1(v / 1e6) + ' Mbps';
+  if (v >= 1e3) return n1(v / 1e3) + ' kbps';
+  return n0(v) + ' bps';
+}
+function statusClass(ratio) { return ratio >= 0.15 ? 'ok' : (ratio >= 0 ? 'warn' : 'bad'); }
+
+var CACHE = null;
+function comp() { CACHE = ENG.compute(S); return CACHE; }
+
+/* ---------------------------------------------------------------- *
+ * starfield                                                        *
+ * ---------------------------------------------------------------- */
+function starfield() {
+  var cv = $('starfield'), ctx = cv.getContext('2d'), stars = [];
+  function size() {
+    cv.width = window.innerWidth; cv.height = window.innerHeight;
+    stars = [];
+    var n = Math.min(260, Math.round(cv.width * cv.height / 7000));
+    for (var i = 0; i < n; i++) stars.push({
+      x: Math.random() * cv.width, y: Math.random() * cv.height,
+      r: Math.random() * 1.25 + 0.2, a: Math.random() * 0.55 + 0.12
+    });
+    draw();
+  }
+  function draw() {
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    for (var i = 0; i < stars.length; i++) {
+      var s = stars[i];
+      ctx.beginPath();
+      ctx.fillStyle = 'rgba(200,220,255,' + s.a + ')';
+      ctx.arc(s.x, s.y, s.r, 0, 6.2832);
+      ctx.fill();
+    }
+  }
+  window.addEventListener('resize', size);
+  size();
+}
+
+/* ---------------------------------------------------------------- *
+ * chrome: stepper + HUD + nav                                      *
+ * ---------------------------------------------------------------- */
+var STEPS = ['step_mission', 'step_platform', 'step_science', 'step_link', 'step_launch', 'step_ops', 'step_report'];
+
+function renderStepper() {
+  var h = '';
+  for (var i = 0; i < STEPS.length; i++) {
+    var p = i + 1;
+    var cls = S.phase === p ? 'active' : (S.phase > p ? 'done' : '');
+    h += '<span class="step ' + cls + '"><span class="dot">' + (S.phase > p ? '✓' : p) + '</span>' + esc(t(STEPS[i])) + '</span>';
+  }
+  $('stepper').innerHTML = S.phase === 0 ? '' : h;
+}
+
+function chip(label, val, sub, cls, pct) {
+  return '<div class="chip"><div class="chip-top"><span class="chip-label">' + esc(label) + '</span>' +
+    '<span class="chip-val s-' + cls + '">' + val + '</span></div>' +
+    (sub ? '<div class="chip-sub">' + sub + '</div>' : '') +
+    (pct != null ? '<div class="meter"><i class="m-' + cls + '" style="width:' + ENG.clamp(pct * 100, 0, 100) + '%"></i></div>' : '') +
+    '</div>';
+}
+
+function renderHUD() {
+  var hud = $('hud');
+  if (S.phase < 1 || S.phase > 6 || !S.destId) { hud.hidden = true; return; }
+  hud.hidden = false;
+  var c = CACHE || comp();
+  var h = '';
+
+  h += chip(t('h_cost'), money(c.cost.total), money(c.cost.budget) + ' · ' + t('margin') + ' ' + money(c.cost.margin),
+    statusClass(c.cost.marginPct), c.cost.budget ? c.cost.total / c.cost.budget : 0);
+
+  h += chip(t('h_mass'), n0(c.mass.launch) + ' kg',
+    c.lvCap ? (t('avail') + ' ' + n0(c.lvCap) + ' kg') : (t('req') + ' — '),
+    c.lvCap ? (c.mass.launch <= c.lvCap * 0.85 ? 'ok' : (c.mass.launch <= c.lvCap ? 'warn' : 'bad')) : 'warn',
+    c.lvCap ? c.mass.launch / c.lvCap : 0);
+
+  h += chip(t('h_power'), n0(c.power.genEOL) + ' W',
+    t('used') + ' ' + n0(c.power.peak) + ' W · ' + t('margin') + ' ' + n0(c.power.marginPct * 100) + '%',
+    statusClass(c.power.marginPct), c.power.genEOL ? c.power.peak / c.power.genEOL : 0);
+
+  h += chip(t('h_dv'), n2(c.dv.available) + ' km/s',
+    t('req') + ' ' + n2(c.dv.required) + ' km/s',
+    c.dv.required > 0 ? statusClass(c.dv.margin / Math.max(0.01, c.dv.required)) : 'ok',
+    c.dv.available ? c.dv.required / c.dv.available : 0);
+
+  h += chip(t('h_data'), bps(c.link.bps),
+    gb(c.link.gbPerTurn) + '/' + t('turn').toLowerCase() + ' · ' + t('used') + ' ' + gb(c.link.collectGbPerTurn),
+    c.link.ratio >= 0.6 ? 'ok' : (c.link.ratio >= 0.25 ? 'warn' : 'bad'),
+    c.link.ratio ? Math.min(1, c.link.collectGbPerTurn / Math.max(1, c.link.gbPerTurn)) : 0);
+
+  h += chip(t('h_payload'), n0(c.mass.payload) + ' kg',
+    (c.bus ? t('avail') + ' ' + c.bus.payloadMax + ' kg' : '—') + ' · ' + c.instr.length + ' instr.',
+    c.bus ? (c.mass.payload <= c.bus.payloadMax ? 'ok' : 'bad') : 'warn',
+    c.bus ? c.mass.payload / c.bus.payloadMax : 0);
+
+  hud.innerHTML = h;
+}
+
+/* which selections each phase demands before you may continue */
+function gateMissing(c) {
+  var m = [];
+  function need(cond, es, en) { if (!cond) m.push({ es: es, en: en }); }
+  if (S.phase === 1) {
+    need(S.programId, 'Elige una clase de programa.', 'Pick a program class.');
+    need(S.destId, 'Elige un destino.', 'Pick a destination.');
+  }
+  if (S.phase === 2) {
+    need(S.busId, 'Elige un bus.', 'Pick a bus.');
+    need(S.powerType === 'solar' ? S.arrayArea > 0 : S.rtgUnits > 0,
+      'Dimensiona la fuente de energía.', 'Size the power source.');
+    need(S.propId, 'Elige un sistema de propulsión.', 'Pick a propulsion system.');
+    if (c.dest && c.dest.lander) need(S.edlId, 'Elige un sistema de aterrizaje.', 'Pick a landing system.');
+  }
+  if (S.phase === 3) need(S.instruments.length > 0, 'Selecciona al menos un instrumento.', 'Select at least one instrument.');
+  if (S.phase === 4) {
+    need(S.antennaD, 'Elige una antena.', 'Pick an antenna.');
+    need(S.twtaW, 'Elige un amplificador.', 'Pick an amplifier.');
+    need(S.groundId, 'Elige una estación terrena.', 'Pick a ground station.');
+  }
+  if (S.phase === 5) need(S.launcherId, 'Elige un lanzador.', 'Pick a launch vehicle.');
+  return m;
+}
+
+function renderNav() {
+  var nav = $('navbar');
+  if (S.phase === 0 || S.phase === 7) { nav.hidden = true; return; }
+  nav.hidden = false;
+  var c = CACHE || comp();
+  var miss = gateMissing(c);
+  var msgs = [];
+  for (var i = 0; i < miss.length; i++) msgs.push(L(miss[i]));
+  for (i = 0; i < c.viol.length; i++) msgs.push(L(c.viol[i]));
+
+  var blocked = msgs.length > 0;
+  $('nav-msgs').innerHTML = blocked
+    ? '<b>' + esc(t('blocked')) + '</b> ' + esc(msgs.slice(0, 2).join(' · ')) + (msgs.length > 2 ? ' (+' + (msgs.length - 2) + ')' : '')
+    : '';
+
+  var back = $('btn-back'), next = $('btn-next');
+  back.textContent = t('back');
+  back.disabled = S.phase <= 1 || S.phase === 6;
+  if (S.phase === 5) next.textContent = t('launch_btn');
+  else if (S.phase === 6) next.textContent = (S.alive && S.turn < c.opsTurns) ? t('next_turn') : t('end_mission');
+  else next.textContent = t('next');
+  next.disabled = S.phase === 6 ? false : blocked;
+}
+
+/* ---------------------------------------------------------------- *
+ * phase 0 — splash                                                 *
+ * ---------------------------------------------------------------- */
+function viewSplash() {
+  return '<div class="splash">' +
+    '<div class="tag">' + esc(t('splash_tag')) + '</div>' +
+    '<h1>' + esc(t('splash_title')) + '</h1>' +
+    '<p>' + esc(t('splash_body')) + '</p>' +
+    '<div class="cta"><button class="btn primary" data-act="start">' + esc(t('splash_start')) + '</button></div>' +
+    '<div class="feat">' +
+    '<div><strong>' + esc(t('splash_f1t')) + '</strong><span>' + esc(t('splash_f1b')) + '</span></div>' +
+    '<div><strong>' + esc(t('splash_f2t')) + '</strong><span>' + esc(t('splash_f2b')) + '</span></div>' +
+    '<div><strong>' + esc(t('splash_f3t')) + '</strong><span>' + esc(t('splash_f3b')) + '</span></div>' +
+    '<div><strong>' + esc(t('splash_f4t')) + '</strong><span>' + esc(t('splash_f4b')) + '</span></div>' +
+    '</div></div>';
+}
+
+function head(kick, title, lead) {
+  return '<div class="phase-head"><div class="phase-kicker">' + esc(t(kick)) + '</div>' +
+    '<h1>' + esc(t(title)) + '</h1><p>' + esc(t(lead)) + '</p></div>';
+}
+
+function specs(arr) {
+  var h = '<div class="specs">';
+  for (var i = 0; i < arr.length; i++) h += '<span class="spec">' + arr[i] + '</span>';
+  return h + '</div>';
+}
+
+function card(o) {
+  return '<button class="card' + (o.on ? ' on' : '') + (o.locked ? ' locked' : '') + '"' +
+    (o.locked ? ' disabled' : '') + ' data-act="' + o.act + '" data-k="' + (o.k || '') + '" data-v="' + o.v + '">' +
+    (o.tag ? '<span class="card-tag">' + esc(o.tag) + '</span>' : '') +
+    '<span class="card-name">' + esc(o.name) + '</span>' +
+    (o.desc ? '<p class="card-desc">' + esc(o.desc) + '</p>' : '') +
+    (o.specs ? specs(o.specs) : '') +
+    (o.lock ? '<div class="lock-note">' + esc(o.lock) + '</div>' : '') +
+    '</button>';
+}
+
+function slider(k, label, val, min, max, step, unit, hint) {
+  return '<div class="ctrl"><div class="ctrl-top"><label>' + esc(label) + '</label>' +
+    '<output>' + (Math.round(val * 100) / 100) + ' ' + esc(unit) + '</output></div>' +
+    '<input type="range" data-k="' + k + '" data-unit="' + esc(unit) + '" min="' + min + '" max="' + max + '" step="' + step + '" value="' + val + '">' +
+    (hint ? '<div class="hint">' + esc(hint) + '</div>' : '') + '</div>';
+}
+
+function rows(list) {
+  var h = '<div class="rows">';
+  for (var i = 0; i < list.length; i++)
+    h += '<div class="row' + (list[i][2] ? ' total' : '') + '"><span>' + esc(list[i][0]) + '</span><b>' + list[i][1] + '</b></div>';
+  return h + '</div>';
+}
+
+function alerts(c) {
+  var h = '';
+  for (var i = 0; i < c.viol.length; i++) h += '<div class="alert bad"><span class="alert-icon">✕</span><span>' + esc(L(c.viol[i])) + '</span></div>';
+  for (i = 0; i < c.warn.length; i++) h += '<div class="alert warn"><span class="alert-icon">!</span><span>' + esc(L(c.warn[i])) + '</span></div>';
+  if (!h) h = '<div class="alert ok"><span class="alert-icon">✓</span><span>' +
+    esc(LANG === 'es' ? 'Sin violaciones de diseño en esta fase.' : 'No design violations in this phase.') + '</span></div>';
+  return h;
+}
+
+/* ---------------------------------------------------------------- *
+ * phase 1 — mission                                                *
+ * ---------------------------------------------------------------- */
+function viewMission(c) {
+  var h = head('p1_kick', 'p1_title', 'p1_lead') + '<div class="cols"><div>';
+
+  h += '<div class="panel"><h2>' + esc(t('program')) + '</h2><div class="grid c2">';
+  for (var i = 0; i < DATA.programs.length; i++) {
+    var p = DATA.programs[i];
+    h += card({
+      act: 'pick', k: 'programId', v: p.id, on: S.programId === p.id,
+      tag: L(p.tag), name: L(p.name), desc: L(p.desc),
+      specs: ['<b>' + money(p.budget) + '</b> ' + (LANG === 'es' ? 'presupuesto' : 'budget'),
+      '<b>' + p.devNominal + '</b> ' + t('u_mo')]
+    });
+  }
+  h += '</div></div>';
+
+  h += '<div class="panel"><h2>' + esc(t('destination')) + '</h2><div class="grid c2">';
+  for (i = 0; i < DATA.destinations.length; i++) {
+    var d = DATA.destinations[i];
+    var locked = !S.programId || DATA.find(DATA.programs, S.programId).rank < d.minProgram;
+    h += card({
+      act: 'pick', k: 'destId', v: d.id, on: S.destId === d.id, locked: locked,
+      tag: L(d.tag), name: L(d.name), desc: L(d.blurb),
+      specs: ['Δv <b>' + n2(d.dv) + '</b> km/s',
+      (LANG === 'es' ? 'crucero' : 'cruise') + ' <b>' + d.cruiseDays + '</b> d',
+      (LANG === 'es' ? 'enlace' : 'link') + ' <b>' + (d.commAu < 0.02 ? n0(d.commAu * AU_M / 1000) + ' km' : n1(d.commAu) + ' UA') + '</b>',
+      (LANG === 'es' ? 'sol' : 'sun') + ' <b>' + n2(d.solarAu) + '</b> UA',
+      (LANG === 'es' ? 'radiación' : 'radiation') + ' <b>' + d.radKrad + '</b> krad',
+      '<b>' + d.opsTurns + '</b> ' + (LANG === 'es' ? 'turnos' : 'turns')],
+      lock: locked ? t('min_class') + ': ' + L(DATA.programs[d.minProgram].name) : null
+    });
+  }
+  h += '</div></div></div><div class="side">';
+
+  if (c.dest) {
+    h += '<div class="panel"><h2>' + esc(t('objectives')) + '</h2><p class="hint" style="margin:-6px 0 12px">' + esc(t('obj_hint')) + '</p>';
+    for (i = 0; i < c.dest.objectives.length; i++) {
+      var o = c.dest.objectives[i];
+      var names = [];
+      for (var j = 0; j < o.instr.length; j++) names.push(tagName(o.instr[j]));
+      h += '<div class="obj unmet"><div class="obj-top"><span class="obj-name">' + esc(L(o.name)) + '</span>' +
+        '<span class="obj-val">' + o.value + ' ' + esc(t('science_value')) + '</span></div>' +
+        '<div class="obj-need">' + esc(t('needs_instr')) + ': ' + esc(names.join(' + ')) + ' · ' +
+        esc(t('data_needed')) + ' ' + gb(o.dataGb) + '</div></div>';
+    }
+    h += '<h3>' + esc(t('env')) + '</h3>' + rows([
+      [LANG === 'es' ? 'Energía de lanzamiento' : 'Launch energy', esc(L(DATA.c3Labels[c.dest.c3]))],
+      [LANG === 'es' ? 'Entorno térmico' : 'Thermal environment', esc(L(DATA.thermalLabels[c.dest.thermal]))],
+      [LANG === 'es' ? 'Fracción en eclipse' : 'Eclipse fraction', n0(c.dest.eclipse * 100) + '%'],
+      [LANG === 'es' ? 'Potencia solar relativa' : 'Relative solar power', n0(100 / (c.dest.solarAu * c.dest.solarAu)) + '%'],
+      [LANG === 'es' ? 'Dosis total' : 'Total dose', c.dest.radKrad + ' krad']
+    ]) + '</div>';
+  }
+  return h + '</div></div>';
+}
+
+function tagName(tag) {
+  for (var i = 0; i < DATA.instruments.length; i++)
+    if (DATA.instruments[i].tags.indexOf(tag) >= 0) {
+      var nm = L(DATA.instruments[i].name);
+      if (tag === 'cam') return LANG === 'es' ? 'cámara' : 'camera';
+      if (tag === 'spec_vnir') return LANG === 'es' ? 'espectrómetro VIS/NIR' : 'VIS/NIR spectrometer';
+      if (tag === 'spec_uv') return LANG === 'es' ? 'espectrógrafo UV' : 'UV spectrograph';
+      if (tag === 'tir') return LANG === 'es' ? 'radiómetro térmico' : 'thermal radiometer';
+      return nm;
+    }
+  return tag;
+}
+
+/* ---------------------------------------------------------------- *
+ * phase 2 — platform                                               *
+ * ---------------------------------------------------------------- */
+function viewPlatform(c) {
+  var h = head('p2_kick', 'p2_title', 'p2_lead') + '<div class="cols"><div>';
+
+  h += '<div class="panel"><h2>' + esc(t('bus')) + '</h2><div class="grid c2">';
+  for (var i = 0; i < DATA.buses.length; i++) {
+    var b = DATA.buses[i];
+    h += card({
+      act: 'pick', k: 'busId', v: b.id, on: S.busId === b.id,
+      name: L(b.name), desc: L(b.desc),
+      specs: [(LANG === 'es' ? 'seco' : 'dry') + ' <b>' + b.dryMass + '</b> kg',
+      (LANG === 'es' ? 'carga' : 'payload') + ' <b>' + b.payloadMax + '</b> kg',
+      (LANG === 'es' ? 'paneles' : 'arrays') + ' ≤<b>' + b.arrayMax + '</b> m²',
+      (LANG === 'es' ? 'antena' : 'antenna') + ' ≤<b>' + b.antennaMax + '</b> m',
+      (LANG === 'es' ? 'tanques' : 'tanks') + ' ≤<b>' + b.propMax + '</b> kg',
+      (LANG === 'es' ? 'memoria' : 'memory') + ' <b>' + b.storeGb + '</b> Gb',
+      '<b>' + money(b.cost) + '</b>']
+    });
+  }
+  h += '</div></div>';
+
+  /* power */
+  h += '<div class="panel"><h2>' + esc(t('power_src')) + '</h2><div class="pills">';
+  var rtgLock = !c.bus || !c.bus.allowsRTG || !c.prog || c.prog.rank < DATA.power.rtg.minProgram;
+  h += '<button class="pill' + (S.powerType === 'solar' ? ' on' : '') + '" data-act="pick" data-k="powerType" data-v="solar">' + esc(t('solar')) + '</button>';
+  h += '<button class="pill' + (S.powerType === 'rtg' ? ' on' : '') + (rtgLock ? ' locked' : '') + '"' + (rtgLock ? ' disabled' : '') +
+    ' data-act="pick" data-k="powerType" data-v="rtg">' + esc(t('rtg')) + '</button>';
+  h += '</div>';
+
+  if (S.powerType === 'solar') {
+    var amax = c.bus ? c.bus.arrayMax : 10;
+    h += slider('arrayArea', t('array_area'), S.arrayArea, 0, amax, amax > 20 ? 1 : 0.2, 'm²',
+      (LANG === 'es' ? 'A ' : 'At ') + n2(c.dest ? c.dest.solarAu : 1) + ' UA ' +
+      (LANG === 'es' ? 'cada m² entrega ' : 'each m² delivers ') +
+      n0(ENG.solarPower(1, c.dest ? c.dest.solarAu : 1, 0)) + ' W ' +
+      (LANG === 'es' ? 'al inicio y ' : 'at start and ') +
+      n0(ENG.solarPower(1, c.dest ? c.dest.solarAu : 1, c.years)) + ' W ' +
+      (LANG === 'es' ? 'al final de la misión.' : 'at end of mission.'));
+  } else {
+    h += slider('rtgUnits', t('rtg_units'), S.rtgUnits, 0, 4, 1, 'MMRTG',
+      (LANG === 'es' ? '110 W y 45 kg por unidad, independiente de la distancia al Sol. ' + money(DATA.power.rtg.costPerUnit) + ' cada uno.'
+        : '110 W and 45 kg per unit, independent of distance from the Sun. ' + money(DATA.power.rtg.costPerUnit) + ' each.'));
+  }
+  var bmax = c.bus ? c.bus.batteryMax : 3000;
+  h += slider('batteryWh', t('battery'), S.batteryWh, 0, bmax, bmax > 5000 ? 250 : 50, 'Wh',
+    c.battery.eclipseH > 0
+      ? (LANG === 'es' ? 'Eclipses de ' + n1(c.battery.eclipseH) + ' h exigen ~' + n0(c.battery.need) + ' Wh.'
+        : n1(c.battery.eclipseH) + ' h eclipses demand about ' + n0(c.battery.need) + ' Wh.')
+      : (LANG === 'es' ? 'Este destino no tiene eclipses: la batería solo cubre transitorios.'
+        : 'This destination has no eclipses: the battery only covers transients.'));
+  h += '</div>';
+
+  /* propulsion */
+  h += '<div class="panel"><h2>' + esc(t('propulsion')) + '</h2><div class="grid c2">';
+  for (i = 0; i < DATA.propulsion.length; i++) {
+    var p = DATA.propulsion[i];
+    var lock = !c.bus || p.minRank > c.bus.rank;
+    h += card({
+      act: 'pick', k: 'propId', v: p.id, on: S.propId === p.id, locked: lock,
+      name: L(p.name), desc: L(p.desc),
+      specs: ['Isp <b>' + p.isp + '</b> s', (LANG === 'es' ? 'seco' : 'dry') + ' <b>' + p.dryBase + '</b> kg+' + n0(p.dryFrac * 100) + '%',
+      p.powerW ? '<b>' + p.powerW + '</b> W' : ''],
+      lock: lock ? (LANG === 'es' ? 'Necesita un bus mayor' : 'Needs a larger bus') : null
+    });
+  }
+  h += '</div>';
+  var pmax = c.bus ? c.bus.propMax : 100;
+  h += slider('propellantKg', t('propellant'), S.propellantKg, 0, pmax, pmax > 500 ? 10 : 1, 'kg',
+    c.prop ? (LANG === 'es' ? 'Δv disponible ' + n2(c.dv.available) + ' km/s frente a ' + n2(c.dv.required) + ' km/s requeridos (inserción + mantenimiento de órbita durante ' + c.opsTurns + ' turnos).'
+      : 'Δv available ' + n2(c.dv.available) + ' km/s against ' + n2(c.dv.required) + ' km/s required (insertion + station keeping over ' + c.opsTurns + ' turns).') : '');
+  h += '</div>';
+
+  if (c.dest && c.dest.lander) {
+    h += '<div class="panel"><h2>' + esc(LANG === 'es' ? 'Entrada, descenso y aterrizaje' : 'Entry, descent and landing') + '</h2><div class="grid c3">';
+    for (i = 0; i < DATA.edl.length; i++) {
+      var e = DATA.edl[i];
+      h += card({
+        act: 'pick', k: 'edlId', v: e.id, on: S.edlId === e.id,
+        name: L(e.name), desc: L(e.desc),
+        specs: ['+<b>' + n0(e.massFrac * 100) + '%</b> ' + (LANG === 'es' ? 'de masa' : 'mass'),
+        '<b>' + n0(e.success * 100) + '%</b> ' + (LANG === 'es' ? 'éxito' : 'success'), '<b>' + money(e.cost) + '</b>']
+      });
+    }
+    h += '</div></div>';
+  }
+
+  h += '</div><div class="side"><div class="panel"><h2>' + esc(LANG === 'es' ? 'Presupuestos' : 'Budgets') + '</h2>';
+  h += rows([
+    [LANG === 'es' ? 'Masa seca' : 'Dry mass', n0(c.mass.dry) + ' kg'],
+    [LANG === 'es' ? '· bus' : '· bus', n0(c.mass.bus) + ' kg'],
+    [LANG === 'es' ? '· energía' : '· power', n0(c.mass.power) + ' kg'],
+    [LANG === 'es' ? '· propulsión' : '· propulsion', n0(c.mass.propDry) + ' kg'],
+    [LANG === 'es' ? '· aterrizaje' : '· landing', n0(c.mass.edl) + ' kg'],
+    [LANG === 'es' ? 'Propelente' : 'Propellant', n0(c.mass.propellant) + ' kg'],
+    [LANG === 'es' ? 'Masa de lanzamiento' : 'Launch mass', n0(c.mass.launch) + ' kg', true]
+  ]);
+  h += '<h3>' + esc(LANG === 'es' ? 'Potencia' : 'Power') + '</h3>' + rows([
+    [LANG === 'es' ? 'Generada (inicio)' : 'Generated (start)', n0(c.power.genBOL) + ' W'],
+    [LANG === 'es' ? 'Generada (fin de vida)' : 'Generated (end of life)', n0(c.power.genEOL) + ' W'],
+    [LANG === 'es' ? 'Bus + calefactores' : 'Bus + heaters', n0(c.power.overhead) + ' W'],
+    [LANG === 'es' ? 'Margen' : 'Margin', n0(c.power.genEOL - c.power.overhead) + ' W', true]
+  ]);
+  h += '<h3>' + esc(LANG === 'es' ? 'Revisión de diseño' : 'Design review') + '</h3>' + alerts(c) + '</div></div></div>';
+  return h;
+}
+
+/* ---------------------------------------------------------------- *
+ * phase 3 — science payload                                         *
+ * ---------------------------------------------------------------- */
+function viewScience(c) {
+  var h = head('p3_kick', 'p3_title', 'p3_lead') + '<div class="cols"><div>';
+  h += '<div class="panel"><h2>' + esc(t('payload')) + '</h2><div class="grid c2">';
+  for (var i = 0; i < DATA.instruments.length; i++) {
+    var it = DATA.instruments[i];
+    var lock = false, lockMsg = null;
+    if (it.landerOnly && c.dest && !c.dest.lander) { lock = true; lockMsg = t('lander_only'); }
+    if (it.minBusRank != null && c.bus && c.bus.rank < it.minBusRank) { lock = true; lockMsg = LANG === 'es' ? 'Requiere un bus mayor' : 'Requires a larger bus'; }
+    var useful = false;
+    if (c.dest) for (var j = 0; j < c.dest.objectives.length; j++)
+      for (var k = 0; k < c.dest.objectives[j].instr.length; k++)
+        if (it.tags.indexOf(c.dest.objectives[j].instr[k]) >= 0) useful = true;
+    h += card({
+      act: 'instr', v: it.id, on: S.instruments.indexOf(it.id) >= 0, locked: lock,
+      tag: useful ? (LANG === 'es' ? 'Útil aquí' : 'Useful here') : (LANG === 'es' ? 'Sin objetivo aquí' : 'No objective here'),
+      name: L(it.name), desc: L(it.desc),
+      specs: ['<b>' + it.mass + '</b> kg', '<b>' + it.powerW + '</b> W',
+      '<b>' + gb(it.dataGb) + '</b>/' + (LANG === 'es' ? 'turno' : 'turn'),
+      '<b>' + money(it.cost) + '</b>',
+      (LANG === 'es' ? 'riesgo' : 'risk') + ' <b>' + ['—', 'bajo', 'medio', 'alto'][it.risk] + '</b>'],
+      lock: lockMsg
+    });
+  }
+  h += '</div></div></div><div class="side"><div class="panel"><h2>' + esc(t('obj_coverage')) + '</h2>';
+  for (i = 0; i < c.coverage.length; i++) {
+    var cv = c.coverage[i];
+    var cls = cv.full ? 'met' : (cv.have > 0 ? 'partial' : 'unmet');
+    h += '<div class="obj ' + cls + '"><div class="obj-top"><span class="obj-name">' + esc(L(cv.obj.name)) + '</span>' +
+      '<span class="obj-val">' + cv.obj.value + ' ' + esc(t('science_value')) + '</span></div>' +
+      '<div class="obj-need">' + (cv.have >= cv.need ? esc(t('covered')) : cv.have + '/' + cv.need + ' · ' + esc(t('not_covered'))) +
+      ' · ' + gb(cv.obj.dataGb) + '</div></div>';
+  }
+  h += '<h3>' + esc(LANG === 'es' ? 'Carga útil' : 'Payload') + '</h3>' + rows([
+    [LANG === 'es' ? 'Masa' : 'Mass', n0(c.mass.payload) + ' / ' + (c.bus ? c.bus.payloadMax : '—') + ' kg'],
+    [LANG === 'es' ? 'Potencia' : 'Power', n0(c.power.payloadW) + ' W'],
+    [LANG === 'es' ? 'Datos a pleno régimen' : 'Data at full duty', gb(c.link.collectGbPerTurn) + '/' + (LANG === 'es' ? 'turno' : 'turn')],
+    [LANG === 'es' ? 'Costo' : 'Cost', money(c.cost.payload), true]
+  ]);
+  h += '<h3>' + esc(LANG === 'es' ? 'Revisión de diseño' : 'Design review') + '</h3>' + alerts(c) + '</div></div></div>';
+  return h;
+}
+
+/* ---------------------------------------------------------------- *
+ * phase 4 — link and survival                                       *
+ * ---------------------------------------------------------------- */
+function viewLink(c) {
+  var h = head('p4_kick', 'p4_title', 'p4_lead') + '<div class="cols"><div>';
+
+  h += '<div class="panel"><h2>' + esc(t('antenna')) + '</h2><div class="pills">';
+  for (var i = 0; i < DATA.antennas.length; i++) {
+    var d = DATA.antennas[i];
+    var lock = c.bus && d > c.bus.antennaMax;
+    h += '<button class="pill' + (S.antennaD === d ? ' on' : '') + (lock ? ' locked' : '') + '"' + (lock ? ' disabled' : '') +
+      ' data-act="pick" data-k="antennaD" data-v="' + d + '">' + d + ' m · ' + n0(DATA.antennaMass(d)) + ' kg · ' + money(DATA.antennaCost(d)) + '</button>';
+  }
+  h += '</div><div class="hint">' + esc(LANG === 'es'
+    ? 'La ganancia crece con el cuadrado del diámetro: duplicar la antena cuadruplica la tasa de datos, pero la masa también se cuadruplica.'
+    : 'Gain grows with the square of diameter: doubling the antenna quadruples data rate, but mass quadruples too.') + '</div>';
+
+  h += '<h3>' + esc(t('band')) + '</h3><div class="grid c3">';
+  for (i = 0; i < DATA.bands.length; i++) {
+    var b = DATA.bands[i];
+    h += card({
+      act: 'pick', k: 'bandId', v: b.id, on: S.bandId === b.id,
+      name: L(b.name), desc: L(b.desc),
+      specs: ['<b>' + b.ghz + '</b> GHz', '+<b>' + b.extraMass + '</b> kg', '+<b>' + money(b.extraCost) + '</b>']
+    });
+  }
+  h += '</div>';
+
+  h += '<h3>' + esc(t('twta')) + '</h3><div class="pills">';
+  for (i = 0; i < DATA.twtas.length; i++) {
+    var w = DATA.twtas[i];
+    h += '<button class="pill' + (S.twtaW === w ? ' on' : '') + '" data-act="pick" data-k="twtaW" data-v="' + w + '">' +
+      w + ' W RF · ' + n0(DATA.twtaDC(w)) + ' W DC · ' + n0(DATA.twtaMass(w)) + ' kg</button>';
+  }
+  h += '</div></div>';
+
+  h += '<div class="panel"><h2>' + esc(t('ground')) + '</h2><div class="grid c3">';
+  for (i = 0; i < DATA.grounds.length; i++) {
+    var g = DATA.grounds[i];
+    h += card({
+      act: 'pick', k: 'groundId', v: g.id, on: S.groundId === g.id,
+      name: L(g.name), desc: L(g.desc),
+      specs: ['<b>' + g.dia + '</b> m', '<b>' + n0(g.maxHoursPerTurn) + '</b> h/' + (LANG === 'es' ? 'turno' : 'turn'),
+      '<b>' + money(g.costPerTurn) + '</b>/' + (LANG === 'es' ? 'turno' : 'turn')]
+    });
+  }
+  h += '</div></div>';
+
+  h += '<div class="panel"><h2>' + esc(t('shielding')) + '</h2><div class="grid c2">';
+  for (i = 0; i < DATA.shielding.length; i++) {
+    var s = DATA.shielding[i];
+    h += card({
+      act: 'pick', k: 'shieldingId', v: s.id, on: S.shieldingId === s.id,
+      name: L(s.name), desc: L(s.desc),
+      specs: ['+<b>' + n0(s.massFrac * 100) + '%</b> ' + (LANG === 'es' ? 'masa' : 'mass'),
+      (LANG === 'es' ? 'tolera' : 'tolerates') + ' <b>' + s.krad + '</b> krad', '<b>' + money(s.cost) + '</b>'],
+      lock: c.dest && c.dest.radKrad > s.krad ? (LANG === 'es' ? 'Insuficiente para ' + c.dest.radKrad + ' krad' : 'Insufficient for ' + c.dest.radKrad + ' krad') : null
+    });
+  }
+  h += '</div></div>';
+
+  h += '</div><div class="side"><div class="panel"><h2>' + esc(t('link_calc')) + '</h2>' + rows([
+    [LANG === 'es' ? 'Distancia de diseño' : 'Design distance', c.dest ? (c.dest.commAu < 0.02 ? n0(c.dest.commAu * AU_M / 1000) + ' km' : n2(c.dest.commAu) + ' UA') : '—'],
+    [LANG === 'es' ? 'Tasa de bajada' : 'Downlink rate', bps(c.link.bps)],
+    [LANG === 'es' ? 'Horas de contacto' : 'Contact hours', n0(c.link.hours) + ' h/' + (LANG === 'es' ? 'turno' : 'turn')],
+    [LANG === 'es' ? 'Capacidad por turno' : 'Capacity per turn', gb(c.link.gbPerTurn)],
+    [LANG === 'es' ? 'Generación de datos' : 'Data production', gb(c.link.collectGbPerTurn) + '/' + (LANG === 'es' ? 'turno' : 'turn')],
+    [LANG === 'es' ? 'Cobertura del enlace' : 'Link coverage', n0(c.link.ratio * 100) + '%', true]
+  ]);
+  h += '<h3>' + esc(LANG === 'es' ? 'Masa y costo del enlace' : 'Link mass and cost') + '</h3>' + rows([
+    [LANG === 'es' ? 'Masa de comunicaciones' : 'Comms mass', n0(c.mass.comms) + ' kg'],
+    [LANG === 'es' ? 'Consumo DC del TWTA' : 'TWTA DC draw', n0(c.power.twtaDC) + ' W'],
+    [LANG === 'es' ? 'Blindaje' : 'Shielding', n0(c.mass.shield) + ' kg'],
+    [LANG === 'es' ? 'Costo' : 'Cost', money(c.cost.comms + c.cost.shield + c.cost.ops), true]
+  ]);
+  h += '<h3>' + esc(LANG === 'es' ? 'Revisión de diseño' : 'Design review') + '</h3>' + alerts(c) + '</div></div></div>';
+  return h;
+}
+
+/* ---------------------------------------------------------------- *
+ * phase 5 — launch                                                  *
+ * ---------------------------------------------------------------- */
+function viewLaunch(c) {
+  var h = head('p5_kick', 'p5_title', 'p5_lead') + '<div class="cols"><div>';
+  h += '<div class="panel"><h2>' + esc(t('launcher')) + '</h2><div class="grid c2">';
+  for (var i = 0; i < DATA.launchers.length; i++) {
+    var lv = DATA.launchers[i];
+    var cap = c.dest ? (lv.cap[c.dest.c3] || 0) : 0;
+    var lock = cap <= 0 || (lv.onlyDest && c.dest && lv.onlyDest.indexOf(c.dest.id) < 0) ||
+      (lv.minProgram != null && c.prog && c.prog.rank < lv.minProgram);
+    var lockMsg = null;
+    if (cap <= 0) lockMsg = LANG === 'es' ? 'No alcanza esa energía' : 'Cannot reach that energy';
+    else if (lv.onlyDest && c.dest && lv.onlyDest.indexOf(c.dest.id) < 0) lockMsg = LANG === 'es' ? 'Órbita fija incompatible' : 'Fixed orbit incompatible';
+    else if (lv.minProgram != null && c.prog && c.prog.rank < lv.minProgram) lockMsg = LANG === 'es' ? 'Fuera de esta clase de programa' : 'Outside this program class';
+    h += card({
+      act: 'pick', k: 'launcherId', v: lv.id, on: S.launcherId === lv.id, locked: lock,
+      name: L(lv.name), desc: L(lv.desc),
+      specs: ['<b>' + n0(cap) + '</b> kg ' + (LANG === 'es' ? 'al destino' : 'to target'),
+      (LANG === 'es' ? 'fiabilidad' : 'reliability') + ' <b>' + n1(lv.reliability * 100) + '%</b>',
+      (LANG === 'es' ? 'cofre' : 'fairing') + ' <b>' + lv.fairing + '</b> m',
+      '<b>' + money(lv.cost) + '</b>'],
+      lock: lockMsg
+    });
+  }
+  h += '</div></div>';
+
+  h += '<div class="panel"><h2>' + esc(t('dev_time')) + '</h2>';
+  h += slider('devMonths', t('dev_time'), c.devMonths, 18, 132, 1, t('u_mo'),
+    (LANG === 'es' ? 'Complejidad del diseño ' + n1(c.complexity) + ' → desarrollo recomendado ' + c.devNeed + ' meses. Cada mes cuesta ' + money(c.prog ? c.prog.burnPerMonth : 0) + '.'
+      : 'Design complexity ' + n1(c.complexity) + ' → recommended development ' + c.devNeed + ' months. Each month costs ' + money(c.prog ? c.prog.burnPerMonth : 0) + '.'));
+  var od = ENG.successOdds(c);
+  h += rows([
+    [LANG === 'es' ? 'Éxito del lanzamiento' : 'Launch success', n1(od.launch * 100) + '%'],
+    [LANG === 'es' ? 'Puesta en servicio' : 'Commissioning', n1(od.commission * 100) + '%'],
+    (c.dest && c.dest.lander ? [LANG === 'es' ? 'Aterrizaje' : 'Landing', n1(od.edl * 100) + '%'] : null),
+    [LANG === 'es' ? 'Probabilidad total de operar' : 'Overall chance of operating', n1(od.total * 100) + '%', true]
+  ].filter(function (x) { return x; }));
+  h += '</div></div><div class="side"><div class="panel"><h2>' + esc(LANG === 'es' ? 'Hoja de datos final' : 'Final data sheet') + '</h2>';
+  h += rows([
+    [LANG === 'es' ? 'Masa de lanzamiento' : 'Launch mass', n0(c.mass.launch) + ' kg'],
+    [LANG === 'es' ? 'Capacidad del cohete' : 'Rocket capability', n0(c.lvCap) + ' kg'],
+    [LANG === 'es' ? 'Margen de masa' : 'Mass margin', n0(c.lvCap - c.mass.launch) + ' kg'],
+    [LANG === 'es' ? 'Margen de potencia' : 'Power margin', n0(c.power.marginPct * 100) + '%'],
+    [LANG === 'es' ? 'Margen de Δv' : 'Δv margin', n0(c.dv.margin * 1000) + ' m/s'],
+    [LANG === 'es' ? 'Duración total' : 'Total duration', n1(c.years) + ' ' + (LANG === 'es' ? 'años' : 'years')],
+    [LANG === 'es' ? 'Costo total' : 'Total cost', money(c.cost.total)],
+    [LANG === 'es' ? 'Reserva' : 'Reserve', money(c.cost.margin), true]
+  ]);
+  h += '<h3>' + esc(LANG === 'es' ? 'Desglose de costo' : 'Cost breakdown') + '</h3>' + rows([
+    [LANG === 'es' ? 'Bus' : 'Bus', money(c.cost.bus)],
+    [LANG === 'es' ? 'Instrumentos' : 'Instruments', money(c.cost.payload)],
+    [LANG === 'es' ? 'Energía' : 'Power', money(c.cost.power)],
+    [LANG === 'es' ? 'Comunicaciones' : 'Comms', money(c.cost.comms)],
+    [LANG === 'es' ? 'Propulsión' : 'Propulsion', money(c.cost.prop)],
+    [LANG === 'es' ? 'Blindaje y aterrizaje' : 'Shielding and landing', money(c.cost.shield + c.cost.edl)],
+    [LANG === 'es' ? 'Lanzador' : 'Launcher', money(c.cost.launcher)],
+    [LANG === 'es' ? 'Desarrollo' : 'Development', money(c.cost.dev)],
+    [LANG === 'es' ? 'Operaciones' : 'Operations', money(c.cost.ops)]
+  ]);
+  h += '<h3>' + esc(LANG === 'es' ? 'Revisión de diseño' : 'Design review') + '</h3>' + alerts(c) + '</div></div></div>';
+  return h;
+}
+
+/* ---------------------------------------------------------------- *
+ * launch resolution                                                 *
+ * ---------------------------------------------------------------- */
+function doLaunch() {
+  var c = comp();
+  var od = ENG.successOdds(c);
+  var ok = true, reason = null;
+  if (rnd() > od.launch) { ok = false; reason = { es: 'El vehículo de lanzamiento falló durante el ascenso.', en: 'The launch vehicle failed during ascent.' }; }
+  else if (rnd() > od.commission) {
+    ok = false;
+    reason = c.readiness < 0.9
+      ? { es: 'La nave nunca completó la puesta en servicio: un defecto que una campaña de pruebas más larga habría encontrado.', en: 'The spacecraft never completed commissioning: a defect a longer test campaign would have caught.' }
+      : { es: 'Una falla de la plataforma durante la puesta en servicio dejó la nave sin control.', en: 'A platform failure during commissioning left the spacecraft uncontrolled.' };
+  } else if (c.dest.lander && rnd() > od.edl) {
+    ok = false; reason = { es: 'La nave se perdió durante la entrada, el descenso y el aterrizaje.', en: 'The spacecraft was lost during entry, descent and landing.' };
+  }
+
+  S.launchSuccess = ok;
+  S.failReason = reason;
+
+  if (!ok) { S.alive = false; S.phase = 7; render(); return; }
+
+  /* insertion burn, then whatever propellant is left funds station keeping */
+  var m0 = c.mass.launch;
+  var used = m0 * (1 - Math.exp(-c.dest.dv * 1000 / (c.prop.isp * G0)));
+  S.propLeft = Math.max(0, c.mass.propellant - used);
+  S.budgetLeft = c.cost.margin;
+  for (var i = 0; i < c.instr.length; i++) S.active[c.instr[i].id] = true;
+  S.phase = 6;
+  logit({ es: 'Lanzamiento nominal. Crucero de ' + c.cruiseDays + ' días completado; inserción consumió ' + n0(used) + ' kg de propelente.',
+          en: 'Nominal launch. ' + c.cruiseDays + ' day cruise completed; insertion consumed ' + n0(used) + ' kg of propellant.' }, 'good');
+  render();
+}
+
+function logit(msg, cls) { S.log.unshift({ turn: S.turn, msg: msg, cls: cls || '' }); }
+
+/* ---------------------------------------------------------------- *
+ * phase 6 — operations                                             *
+ * ---------------------------------------------------------------- */
+function storedTotal() { var s = 0; for (var k in S.storage) s += S.storage[k]; return s; }
+function dlTotal() { var s = 0; for (var k in S.downlinked) s += S.downlinked[k]; return s; }
+
+function viewOps(c) {
+  var h = head('p6_kick', 'p6_title', 'p6_lead');
+  var stored = storedTotal();
+
+  h += '<div class="cols"><div>';
+
+  /* turn strip */
+  h += '<div class="panel"><h2>' + esc(t('turn')) + ' ' + S.turn + ' ' + esc(t('of')) + ' ' + c.opsTurns + '</h2><div class="turnstrip">';
+  for (var i = 0; i < c.opsTurns; i++) {
+    var cls = S.strip[i] || '';
+    h += '<span class="tcell ' + cls + (i === S.turn ? ' now' : '') + '"></span>';
+  }
+  h += '</div><div class="hint">' + esc(LANG === 'es'
+    ? 'Violeta: ciencia recolectada · Cian: turno dominado por transmisión · Ámbar: anomalía · Rojo: pérdida grave'
+    : 'Violet: science collected · Cyan: downlink-dominated turn · Amber: anomaly · Red: serious loss') + '</div></div>';
+
+  /* allocation */
+  var hk = 100 - S.alloc.sci - S.alloc.dl;
+  h += '<div class="panel"><h2>' + esc(t('alloc')) + '</h2>';
+  h += slider('allocSci', t('a_science'), S.alloc.sci, 0, 100, 5, '%', '');
+  h += slider('allocDl', t('a_downlink'), S.alloc.dl, 0, 100, 5, '%', '');
+  h += '<div class="ctrl"><div class="ctrl-top"><label>' + esc(t('a_house')) + '</label><output>' + hk + ' %</output></div>' +
+    '<div class="meter"><i class="m-ok" style="width:' + hk + '%"></i></div>' +
+    '<div class="hint">' + esc(LANG === 'es'
+      ? 'El mantenimiento no produce ciencia, pero reduce la probabilidad de anomalías. Es el seguro más barato que tienes.'
+      : 'Maintenance produces no science, but it lowers the anomaly probability. It is the cheapest insurance you have.') + '</div></div>';
+  h += '</div>';
+
+  /* instruments */
+  h += '<div class="panel"><h2>' + esc(t('instruments_on')) + '</h2>';
+  var avail = powerAvailable(c);
+  var draw = 0;
+  for (i = 0; i < c.instr.length; i++) if (S.active[c.instr[i].id] && !S.dead[c.instr[i].id]) draw += c.instr[i].powerW;
+  for (i = 0; i < c.instr.length; i++) {
+    var it = c.instr[i], dead = !!S.dead[it.id], on = !!S.active[it.id] && !dead;
+    h += '<div class="instr-row"><span class="nm">' + esc(L(it.name)) +
+      '<small>' + it.powerW + ' W · ' + gb(it.dataGb) + '/' + (LANG === 'es' ? 'turno' : 'turn') +
+      ' · ' + esc(LANG === 'es' ? 'bajado' : 'downlinked') + ' ' + gb(S.downlinked[it.id] || 0) +
+      (dead ? ' · ' + esc(LANG === 'es' ? 'FUERA DE SERVICIO' : 'FAILED') : '') + '</small></span>' +
+      '<span class="switch' + (on ? ' on' : '') + (dead ? ' dead' : '') + '" data-act="toggle" data-v="' + it.id + '"></span></div>';
+  }
+  h += '<div class="hint">' + esc(LANG === 'es'
+    ? 'Potencia disponible para instrumentos: ' + n0(avail) + ' W. Demanda actual: ' + n0(draw) + ' W.'
+    : 'Power available to instruments: ' + n0(avail) + ' W. Current demand: ' + n0(draw) + ' W.') +
+    (draw > avail ? ' <b style="color:var(--bad)">' + esc(LANG === 'es' ? 'Sobredemanda: los instrumentos operarán a ciclo reducido.' : 'Over-demand: instruments will run at reduced duty cycle.') + '</b>' : '') +
+    '</div></div>';
+
+  h += '</div><div class="side"><div class="panel"><h2>' + esc(LANG === 'es' ? 'Estado de la nave' : 'Spacecraft status') + '</h2>';
+  h += rows([
+    [t('storage'), gb(stored) + ' / ' + gb(c.bus.storeGb)],
+    [t('downlinked'), gb(dlTotal())],
+    [t('ops_budget'), money(S.budgetLeft)],
+    [LANG === 'es' ? 'Propelente restante' : 'Propellant left', n0(S.propLeft) + ' kg'],
+    [LANG === 'es' ? 'Salud de paneles' : 'Array health', n0(S.arrayHealth * 100) + '%'],
+    [LANG === 'es' ? 'Potencia disponible' : 'Power available', n0(avail) + ' W'],
+    [LANG === 'es' ? 'Capacidad de bajada' : 'Downlink capacity', gb(c.link.gbPerTurn * S.permDl) + '/' + (LANG === 'es' ? 'turno' : 'turn'), true]
+  ]);
+  h += '<div class="bar"><i style="width:' + ENG.clamp(stored / c.bus.storeGb * 100, 0, 100) + '%"></i></div>';
+
+  h += '<h3>' + esc(t('objectives')) + '</h3>';
+  var sc = ENG.score(S, c);
+  for (i = 0; i < sc.objectives.length; i++) {
+    var o = sc.objectives[i];
+    var cls = o.frac >= 1 ? 'met' : (o.frac > 0 ? 'partial' : 'unmet');
+    h += '<div class="obj ' + cls + '"><div class="obj-top"><span class="obj-name">' + esc(L(o.obj.name)) + '</span>' +
+      '<span class="obj-val">' + n0(o.frac * 100) + '%</span></div>' +
+      '<div class="bar"><i style="width:' + ENG.clamp(o.frac * 100, 0, 100) + '%"></i></div></div>';
+  }
+  h += '</div>';
+
+  h += '<div class="panel"><h2>' + esc(t('mission_log')) + '</h2><div class="log">';
+  for (i = 0; i < Math.min(S.log.length, 40); i++)
+    h += '<div class="log-item ' + S.log[i].cls + '"><span class="log-t">T' + S.log[i].turn + '</span><span class="log-x">' + esc(L(S.log[i].msg)) + '</span></div>';
+  h += '</div></div></div></div>';
+  return h;
+}
+
+function powerAvailable(c) {
+  var years = (c.cruiseDays + S.turn * 30) / 365.25;
+  var gen = (S.powerType === 'solar'
+    ? ENG.solarPower(S.arrayArea, c.dest.solarAu, years)
+    : ENG.rtgPower(S.rtgUnits, years)) * S.arrayHealth * S.permPower;
+  return Math.max(0, gen - c.power.overhead - c.power.twtaDC * (S.alloc.dl / 100));
+}
+
+/* ----- event roll ----- */
+function rollEvent(c) {
+  var hk = (100 - S.alloc.sci - S.alloc.dl) / 100;
+  var radFactor = ENG.clamp(c.dest.radKrad / Math.max(1, c.shd.krad), 0.25, 3);
+  var p = 0.16 * (1.25 - hk * 1.1) * S.permAnomaly * radFactor * (1 + Math.max(0, 1 - c.readiness) * 1.5);
+  if (rnd() > ENG.clamp(p, 0.02, 0.8)) return null;
+
+  var pool = [];
+  for (var i = 0; i < DATA.events.length; i++) {
+    var e = DATA.events[i];
+    if (e.onlyDest && e.onlyDest.indexOf(c.dest.id) < 0) continue;
+    if (e.radMin && c.dest.radKrad < e.radMin) continue;
+    if (S.usedEvents[e.id] && rnd() < 0.75) continue;
+    for (var j = 0; j < e.weight; j++) pool.push(e);
+  }
+  if (!pool.length) return null;
+  return pool[Math.floor(rnd() * pool.length)];
+}
+
+function applyEffect(eff, c) {
+  var mods = { sci: 1, dl: 1 };
+  if (!eff) return mods;
+  if (eff.cost) { S.budgetLeft -= eff.cost; }
+  if (eff.scienceMult != null) mods.sci *= eff.scienceMult;
+  if (eff.dlMult != null) mods.dl *= eff.dlMult;
+  if (eff.permScienceMult) S.permScience *= eff.permScienceMult;
+  if (eff.permDlMult) S.permDl *= eff.permDlMult;
+  if (eff.permPowerMult) S.permPower *= eff.permPowerMult;
+  if (eff.permImagingMult) S.permImaging *= eff.permImagingMult;
+  if (eff.permAnomalyMult) S.permAnomaly *= eff.permAnomalyMult;
+  if (eff.arrayDamage) S.arrayHealth *= (1 - eff.arrayDamage);
+  if (eff.bonusScience) S.bonusScience += eff.bonusScience;
+  if (eff.propLoss) S.propLeft *= (1 - eff.propLoss);
+  if (eff.storageLoss) for (var k in S.storage) S.storage[k] *= (1 - eff.storageLoss);
+  if (eff.riskInstrument && rnd() < eff.riskInstrument) killInstrument(c);
+  if (eff.gamble) {
+    if (rnd() < eff.gamble.p) {
+      if (eff.gamble.killInstrument) killInstrument(c);
+      if (eff.gamble.propLoss) S.propLeft *= (1 - eff.gamble.propLoss);
+      if (eff.gamble.arrayDamage) S.arrayHealth *= (1 - eff.gamble.arrayDamage);
+    } else if (eff.elseArrayHeal) {
+      S.arrayHealth = Math.min(1, S.arrayHealth + eff.elseArrayHeal);
+      logit({ es: 'Un evento de limpieza recuperó parte de la potencia de los paneles.', en: 'A cleaning event recovered some array power.' }, 'good');
+    }
+  }
+  return mods;
+}
+
+function killInstrument(c) {
+  var alive = [];
+  for (var i = 0; i < c.instr.length; i++) if (!S.dead[c.instr[i].id]) alive.push(c.instr[i]);
+  if (!alive.length) return;
+  var victim = alive[Math.floor(rnd() * alive.length)];
+  S.dead[victim.id] = true;
+  S.active[victim.id] = false;
+  S.strip[S.turn] = 'bad';
+  logit({ es: L(victim.name) + ' quedó fuera de servicio de forma permanente.', en: L(victim.name) + ' was permanently lost.' }, 'bad');
+}
+
+/* ----- execute one turn ----- */
+function nextTurn() {
+  var c = comp();
+  if (!S.alive || S.turn >= c.opsTurns) { S.phase = 7; render(); return; }
+
+  var ev = rollEvent(c);
+  if (ev) { S.usedEvents[ev.id] = true; showEvent(ev, c); return; }
+  execTurn(c, { sci: 1, dl: 1 });
+}
+
+function execTurn(c, mods) {
+  var dest = c.dest, bus = c.bus;
+  var avail = powerAvailable(c);
+  var draw = 0, actives = [];
+  for (var i = 0; i < c.instr.length; i++) {
+    var it = c.instr[i];
+    if (S.active[it.id] && !S.dead[it.id]) { draw += it.powerW; actives.push(it); }
+  }
+  var duty = draw > 0 ? Math.min(1, avail / draw) : 0;
+  if (draw > avail && draw > 0)
+    logit({ es: 'Potencia insuficiente: los instrumentos operaron al ' + n0(duty * 100) + '% del ciclo previsto.',
+            en: 'Insufficient power: instruments ran at ' + n0(duty * 100) + '% of the planned duty cycle.' }, 'bad');
+
+  /* Cumulative radiation damage: total dose beyond what the shielding was
+     qualified for kills parts outright, not just through anomaly events. */
+  var over = dest.radKrad / Math.max(1, c.shd.krad);
+  if (over > 1.5 && rnd() < ENG.clamp((over - 1) * 0.02, 0, 0.35)) {
+    logit({ es: 'Dosis acumulada de radiación por encima de la calificación del blindaje: daño permanente en la electrónica.',
+            en: 'Cumulative radiation dose above the shielding qualification: permanent electronics damage.' }, 'bad');
+    killInstrument(c);
+  }
+
+  /* science collection */
+  var sciFrac = (S.alloc.sci / 100) * S.permScience * duty * mods.sci;
+  var collectedNow = 0;
+  for (i = 0; i < actives.length; i++) {
+    it = actives[i];
+    var mult = 1;
+    if (it.tags.indexOf('cam') >= 0) mult *= S.permImaging;
+    if (it.id === 'mag' && c.prop.emiPenalty) mult *= 0.5;
+    var g = it.dataGb * sciFrac * mult;
+    S.storage[it.id] = (S.storage[it.id] || 0) + g;
+    S.collected[it.id] = (S.collected[it.id] || 0) + g;
+    collectedNow += g;
+  }
+
+  /* memory overflow */
+  var stored = storedTotal();
+  if (stored > bus.storeGb) {
+    var keep = bus.storeGb / stored, lost = stored - bus.storeGb;
+    for (var k in S.storage) S.storage[k] *= keep;
+    logit({ es: 'Memoria saturada: se perdieron ' + gb(lost) + ' de datos sin transmitir.',
+            en: 'Memory saturated: ' + gb(lost) + ' of untransmitted data was lost.' }, 'bad');
+    S.strip[S.turn] = 'bad';
+  }
+
+  /* downlink */
+  var cap = c.link.gbPerTurn * (S.alloc.dl / 100) * S.permDl * mods.dl;
+  stored = storedTotal();
+  var sent = Math.min(cap, stored);
+  if (stored > 0) {
+    var frac = sent / stored;
+    for (k in S.storage) {
+      var moved = S.storage[k] * frac;
+      S.storage[k] -= moved;
+      S.downlinked[k] = (S.downlinked[k] || 0) + moved;
+    }
+  }
+
+  /* station keeping */
+  if (dest.skDvPerTurn > 0) {
+    var mNow = c.mass.dry + S.propLeft;
+    var burn = mNow * (1 - Math.exp(-dest.skDvPerTurn / (c.prop.isp * G0)));
+    S.propLeft -= burn;
+  }
+
+  /* strip colour */
+  if (!S.strip[S.turn]) S.strip[S.turn] = (S.alloc.dl > S.alloc.sci) ? 'dl' : (collectedNow > 0 ? 'sci' : '');
+
+  S.turn++;
+
+  logit({ es: 'Recolectados ' + gb(collectedNow) + ', transmitidos ' + gb(sent) + '.',
+          en: 'Collected ' + gb(collectedNow) + ', transmitted ' + gb(sent) + '.' }, '');
+
+  /* end conditions */
+  if (S.propLeft <= 0 && dest.skDvPerTurn > 0) {
+    S.alive = false;
+    S.failReason = { es: 'Sin propelente para mantener la órbita: la nave se perdió.', en: 'Out of propellant for station keeping: the spacecraft was lost.' };
+    logit(S.failReason, 'bad');
+  }
+  if (S.budgetLeft < 0) {
+    S.alive = false;
+    S.failReason = { es: 'Las reservas de presupuesto se agotaron y el programa fue cancelado.', en: 'Budget reserves ran out and the program was cancelled.' };
+    logit(S.failReason, 'bad');
+  }
+  var anyAlive = false;
+  for (i = 0; i < c.instr.length; i++) if (!S.dead[c.instr[i].id]) anyAlive = true;
+  if (!anyAlive) {
+    S.alive = false;
+    S.failReason = { es: 'Todos los instrumentos quedaron fuera de servicio.', en: 'All instruments are out of service.' };
+    logit(S.failReason, 'bad');
+  }
+
+  if (!S.alive || S.turn >= c.opsTurns) S.phase = 7;
+  render();
+}
+
+/* ----- event modal ----- */
+function showEvent(ev, c) {
+  S.strip[S.turn] = 'ev';
+  var h = '<div class="ev-kind">' + esc(L(ev.kind)) + ' · ' + esc(t('turn')) + ' ' + (S.turn + 1) + '</div>' +
+    '<h2>' + esc(L(ev.title)) + '</h2><p>' + esc(L(ev.text)) + '</p>' +
+    '<div class="ev-kind" style="color:var(--txt-faint)">' + esc(t('ev_choose')) + '</div>';
+  for (var i = 0; i < ev.choices.length; i++) {
+    h += '<button class="choice" data-act="evchoice" data-v="' + i + '">' + esc(L(ev.choices[i].label)) +
+      '<small>' + esc(L(ev.choices[i].note)) + '</small></button>';
+  }
+  S.pendingEvent = ev;
+  $('modal').innerHTML = h;
+  $('modal-back').hidden = false;
+}
+
+function resolveEvent(idx) {
+  var ev = S.pendingEvent, c = comp();
+  $('modal-back').hidden = true;
+  S.pendingEvent = null;
+  logit({ es: L(ev.title) + ' → ' + L(ev.choices[idx].label), en: L(ev.title) + ' → ' + L(ev.choices[idx].label) }, 'bad');
+  var mods = applyEffect(ev.choices[idx].effect, c);
+  execTurn(comp(), mods);
+}
+
+/* ---------------------------------------------------------------- *
+ * phase 7 — report                                                  *
+ * ---------------------------------------------------------------- */
+function viewReport(c) {
+  var sc = ENG.score(S, c);
+  var crit = ENG.critique(S, c, sc);
+  var gradeColor = { S: 'var(--accent)', A: 'var(--ok)', B: 'var(--accent-2)', C: 'var(--gold)', D: 'var(--warn)', F: 'var(--bad)' }[sc.grade];
+
+  var h = '<div class="phase-head"><div class="phase-kicker">' + esc(t('rep_kick')) + '</div>' +
+    '<h1>' + esc(t('rep_title')) + '</h1><p>' + esc(L(c.dest.name)) + ' · ' + esc(L(c.prog.name)) +
+    ' · ' + S.turn + '/' + c.opsTurns + ' ' + esc(LANG === 'es' ? 'turnos operados' : 'turns operated') + '</p></div>';
+
+  if (!S.launchSuccess || !S.alive) {
+    h += '<div class="alert bad" style="margin-bottom:16px"><span class="alert-icon">✕</span><span><b>' +
+      esc(!S.launchSuccess ? t('launch_fail') : (LANG === 'es' ? 'MISIÓN TERMINADA ANTES DE LO PREVISTO' : 'MISSION ENDED EARLY')) +
+      '</b> — ' + esc(S.failReason ? L(S.failReason) : '') + '</span></div>';
+  }
+
+  h += '<div class="panel"><div class="score-hero">' +
+    '<div class="grade" style="color:' + gradeColor + '">' + sc.grade + '</div>' +
+    '<div><div class="lbl">' + esc(t('total_score')) + '</div><div class="big">' + sc.total + ' <span style="color:var(--txt-faint);font-size:18px">/ ' + sc.max + '</span></div></div>' +
+    '<div class="score-rows">';
+  var bars = [
+    [t('sc_science'), sc.science, sc.scienceMax],
+    [t('sc_eng'), sc.eng, 150],
+    [t('sc_cost'), sc.cost, 150],
+    [t('sc_surv'), sc.surv, 100]
+  ];
+  for (var i = 0; i < bars.length; i++) {
+    h += '<div class="sb"><span class="sb-n">' + esc(bars[i][0]) + '</span>' +
+      '<span class="sb-bar"><i style="width:' + ENG.clamp(bars[i][1] / bars[i][2] * 100, 0, 100) + '%"></i></span>' +
+      '<span class="sb-v">' + n0(bars[i][1]) + '/' + n0(bars[i][2]) + '</span></div>';
+  }
+  h += '</div></div></div>';
+
+  /* KPIs */
+  var collected = 0, down = 0;
+  for (var k in S.collected) collected += S.collected[k];
+  for (k in S.downlinked) down += S.downlinked[k];
+  h += '<div class="panel"><h2>' + esc(t('summary')) + '</h2><div class="kv">' +
+    kv(LANG === 'es' ? 'Datos recolectados' : 'Data collected', gb(collected)) +
+    kv(LANG === 'es' ? 'Datos bajados' : 'Data downlinked', gb(down)) +
+    kv(LANG === 'es' ? 'Eficiencia de enlace' : 'Link efficiency', collected > 0 ? n0(down / collected * 100) + '%' : '—') +
+    kv(LANG === 'es' ? 'Costo total' : 'Total cost', money(c.cost.total)) +
+    kv(LANG === 'es' ? 'Reserva final' : 'Final reserve', money(S.budgetLeft)) +
+    kv(LANG === 'es' ? 'Masa de lanzamiento' : 'Launch mass', n0(c.mass.launch) + ' kg') +
+    kv(LANG === 'es' ? 'Instrumentos perdidos' : 'Instruments lost', n0(Object.keys(S.dead).length) + '/' + c.instr.length) +
+    kv(LANG === 'es' ? 'Duración' : 'Duration', n1(c.years) + (LANG === 'es' ? ' años' : ' yr')) +
+    '</div></div>';
+
+  /* objectives table */
+  h += '<div class="panel"><h2>' + esc(t('final_obj')) + '</h2><table class="tbl"><tr><th>' +
+    esc(LANG === 'es' ? 'Objetivo' : 'Objective') + '</th><th class="num">' + esc(LANG === 'es' ? 'Datos' : 'Data') +
+    '</th><th class="num">' + esc(LANG === 'es' ? 'Requerido' : 'Required') + '</th><th class="num">%</th><th class="num">' +
+    esc(LANG === 'es' ? 'Puntos' : 'Points') + '</th></tr>';
+  for (i = 0; i < sc.objectives.length; i++) {
+    var o = sc.objectives[i];
+    h += '<tr><td>' + esc(L(o.obj.name)) + '</td><td class="num">' + gb(o.gb) + '</td><td class="num">' + gb(o.obj.dataGb) +
+      '</td><td class="num">' + n0(o.frac * 100) + '%</td><td class="num">' + n0(o.obj.value * o.frac) + '/' + o.obj.value + '</td></tr>';
+  }
+  h += '</table></div>';
+
+  /* critique */
+  h += '<div class="panel"><h2>' + esc(t('critique')) + '</h2>';
+  for (i = 0; i < crit.length; i++) h += '<div class="lesson">' + esc(L(crit[i])) + '</div>';
+  h += '</div>';
+
+  /* analogue */
+  h += '<div class="panel"><h2>' + esc(t('analog')) + '</h2><div class="analog"><div>' +
+    '<div class="nasa">NASA</div><strong style="font-size:16px">' + esc(c.dest.analog.name) + '</strong>' +
+    '<p style="color:var(--txt-dim);font-size:13px;margin:6px 0 0">' + esc(L(c.dest.analog.note)) + '</p></div></div>' +
+    '<button class="btn wide" data-act="copy">' + esc(LANG === 'es' ? 'Copiar informe como texto' : 'Copy report as text') + '</button>' +
+    '<button class="btn primary wide" data-act="restart">' + esc(t('restart')) + '</button></div>';
+
+  return h;
+}
+
+function kv(k, v) { return '<div><div class="k">' + esc(k) + '</div><div class="v">' + v + '</div></div>'; }
+
+function reportText(c, sc) {
+  var lines = [];
+  lines.push('ORBITAL NEXUS — ' + L(c.dest.name));
+  lines.push(L(c.prog.name) + ' · ' + L(c.bus.name) + ' · ' + L(c.lv.name));
+  lines.push('');
+  lines.push((LANG === 'es' ? 'Puntaje' : 'Score') + ': ' + sc.total + '/' + sc.max + '  (' + sc.grade + ')');
+  lines.push((LANG === 'es' ? 'Ciencia' : 'Science') + ': ' + n0(sc.science) + '/' + n0(sc.scienceMax) +
+    ' · ' + (LANG === 'es' ? 'Ingeniería' : 'Engineering') + ': ' + n0(sc.eng) + '/150' +
+    ' · ' + (LANG === 'es' ? 'Costo' : 'Cost') + ': ' + n0(sc.cost) + '/150' +
+    ' · ' + (LANG === 'es' ? 'Supervivencia' : 'Survival') + ': ' + n0(sc.surv) + '/100');
+  lines.push('');
+  lines.push((LANG === 'es' ? 'Masa de lanzamiento' : 'Launch mass') + ': ' + n0(c.mass.launch) + ' kg / ' + n0(c.lvCap) + ' kg');
+  lines.push((LANG === 'es' ? 'Potencia EOL' : 'EOL power') + ': ' + n0(c.power.genEOL) + ' W · ' + (LANG === 'es' ? 'margen' : 'margin') + ' ' + n0(c.power.marginPct * 100) + '%');
+  lines.push('Delta-v: ' + n2(c.dv.available) + ' / ' + n2(c.dv.required) + ' km/s');
+  lines.push((LANG === 'es' ? 'Enlace' : 'Link') + ': ' + bps(c.link.bps) + ' · ' + gb(c.link.gbPerTurn) + '/turn');
+  lines.push((LANG === 'es' ? 'Costo' : 'Cost') + ': ' + money(c.cost.total) + ' / ' + money(c.cost.budget));
+  lines.push('');
+  for (var i = 0; i < sc.objectives.length; i++)
+    lines.push('- ' + L(sc.objectives[i].obj.name) + ': ' + n0(sc.objectives[i].frac * 100) + '%');
+  lines.push('');
+  var crit = ENG.critique(S, c, sc);
+  for (i = 0; i < crit.length; i++) lines.push('* ' + L(crit[i]));
+  return lines.join('\n');
+}
+
+/* ---------------------------------------------------------------- *
+ * render                                                           *
+ * ---------------------------------------------------------------- */
+function render() {
+  var c = comp();
+  var h = '';
+  if (S.phase === 0) h = viewSplash();
+  else if (S.phase === 1) h = viewMission(c);
+  else if (S.phase === 2) h = viewPlatform(c);
+  else if (S.phase === 3) h = viewScience(c);
+  else if (S.phase === 4) h = viewLink(c);
+  else if (S.phase === 5) h = viewLaunch(c);
+  else if (S.phase === 6) h = viewOps(c);
+  else h = viewReport(c);
+  $('stage').innerHTML = h;
+  $('brand-sub').textContent = t('sub');
+  renderStepper();
+  renderHUD();
+  renderNav();
+  var lt = $('lang-toggle').querySelectorAll('.lang-opt');
+  for (var i = 0; i < lt.length; i++) lt[i].className = 'lang-opt' + (lt[i].getAttribute('data-l') === LANG ? ' on' : '');
+  window.scrollTo(0, 0);
+}
+
+/* ---------------------------------------------------------------- *
+ * defaults applied when entering a phase                            *
+ * ---------------------------------------------------------------- */
+function enterPhase(p) {
+  S.phase = p;
+  S.seen = Math.max(S.seen, p);
+  var c = comp();
+  if (p === 2 && S.busId && !S.propId) {
+    /* sensible starting point so the sliders mean something immediately */
+    S.propId = c.bus.rank === 0 ? 'coldgas' : (c.bus.rank === 1 ? 'mono' : 'biprop');
+  }
+  if (p === 4 && !S.groundId) S.groundId = c.dest.commAu > 0.05 ? 'dsn34' : 'comm13';
+  if (p === 5 && S.devMonths == null) S.devMonths = comp().devNeed;
+  render();
+}
+
+/* ---------------------------------------------------------------- *
+ * events / wiring                                                  *
+ * ---------------------------------------------------------------- */
+function onPick(k, v) {
+  if (k === 'antennaD' || k === 'twtaW') v = parseFloat(v);
+  S[k] = v;
+  if (k === 'busId') {
+    var b = DATA.find(DATA.buses, v);
+    if (S.arrayArea > b.arrayMax) S.arrayArea = b.arrayMax;
+    if (S.propellantKg > b.propMax) S.propellantKg = b.propMax;
+    if (S.batteryWh > b.batteryMax) S.batteryWh = b.batteryMax;
+    if (!b.allowsRTG && S.powerType === 'rtg') S.powerType = 'solar';
+    if (S.propId) { var p = DATA.find(DATA.propulsion, S.propId); if (p.minRank > b.rank) S.propId = null; }
+    /* clear instruments that no longer fit */
+    var keep = [];
+    for (var i = 0; i < S.instruments.length; i++) {
+      var it = DATA.find(DATA.instruments, S.instruments[i]);
+      if (it.minBusRank == null || b.rank >= it.minBusRank) keep.push(it.id);
+    }
+    S.instruments = keep;
+  }
+  if (k === 'programId') {
+    var pr = DATA.find(DATA.programs, v);
+    if (S.destId) { var d = DATA.find(DATA.destinations, S.destId); if (d.minProgram > pr.rank) S.destId = null; }
+  }
+  if (k === 'destId') { S.devMonths = null; S.instruments = []; S.edlId = null; }
+  render();
+}
+
+function applyRange(k, v) {
+  v = parseFloat(v);
+  if (k === 'allocSci') {
+    S.alloc.sci = v;
+    if (S.alloc.sci + S.alloc.dl > 100) S.alloc.dl = 100 - S.alloc.sci;
+  } else if (k === 'allocDl') {
+    S.alloc.dl = v;
+    if (S.alloc.sci + S.alloc.dl > 100) S.alloc.sci = 100 - S.alloc.dl;
+  } else S[k] = v;
+}
+
+function wire() {
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest ? e.target.closest('[data-act]') : null;
+    if (!el) return;
+    var act = el.getAttribute('data-act');
+    if (act === 'start') { enterPhase(1); return; }
+    if (act === 'pick') { onPick(el.getAttribute('data-k'), el.getAttribute('data-v')); return; }
+    if (act === 'instr') {
+      var id = el.getAttribute('data-v'), i = S.instruments.indexOf(id);
+      if (i >= 0) S.instruments.splice(i, 1); else S.instruments.push(id);
+      render(); return;
+    }
+    if (act === 'toggle') {
+      var tid = el.getAttribute('data-v');
+      if (S.dead[tid]) return;
+      S.active[tid] = !S.active[tid];
+      render(); return;
+    }
+    if (act === 'evchoice') { resolveEvent(parseInt(el.getAttribute('data-v'), 10)); return; }
+    if (act === 'restart') { S = freshState(); render(); return; }
+    if (act === 'copy') {
+      var c = comp(), txt = reportText(c, ENG.score(S, c));
+      try {
+        navigator.clipboard.writeText(txt);
+        el.textContent = LANG === 'es' ? '✓ Copiado al portapapeles' : '✓ Copied to clipboard';
+      } catch (err) {
+        el.textContent = LANG === 'es' ? 'No se pudo copiar' : 'Could not copy';
+      }
+      return;
+    }
+  });
+
+  /* While dragging we only refresh the readout and the HUD, so the slider
+     keeps the pointer. The full phase re-render happens on release. */
+  document.addEventListener('input', function (e) {
+    if (!e.target.getAttribute || e.target.type !== 'range') return;
+    var k = e.target.getAttribute('data-k');
+    if (!k) return;
+    applyRange(k, e.target.value);
+    var box = e.target.parentNode, out = box ? box.querySelector('output') : null;
+    if (out) out.textContent = (Math.round(parseFloat(e.target.value) * 100) / 100) + ' ' + (e.target.getAttribute('data-unit') || '');
+    comp(); renderHUD(); renderNav();
+  });
+  document.addEventListener('change', function (e) {
+    if (e.target.getAttribute && e.target.type === 'range' && e.target.getAttribute('data-k')) render();
+  });
+
+  $('btn-next').addEventListener('click', function () {
+    if (S.phase === 5) { doLaunch(); return; }
+    if (S.phase === 6) {
+      var c = comp();
+      if (S.alive && S.turn < c.opsTurns) nextTurn();
+      else { S.phase = 7; render(); }
+      return;
+    }
+    enterPhase(S.phase + 1);
+  });
+  $('btn-back').addEventListener('click', function () { if (S.phase > 1) enterPhase(S.phase - 1); });
+
+  $('lang-toggle').addEventListener('click', function () {
+    LANG = LANG === 'es' ? 'en' : 'es';
+    try { localStorage.setItem('on_lang', LANG); } catch (err) { }
+    document.documentElement.lang = LANG;
+    if (S.pendingEvent) showEvent(S.pendingEvent, comp());
+    render();
+  });
+}
+
+/* ---------------------------------------------------------------- *
+ * boot                                                             *
+ * ---------------------------------------------------------------- */
+S = freshState();
+starfield();
+wire();
+document.documentElement.lang = LANG;
+render();

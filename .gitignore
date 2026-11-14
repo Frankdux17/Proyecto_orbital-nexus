@@ -1,0 +1,11 @@
+# editor / OS noise
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# nothing is built here, but just in case
+node_modules/
+dist/
+*.log
