@@ -140,6 +140,9 @@ var PRESETS = [
   { id: 'mars', prog: 'discovery', dest: 'mars-orbit', ic: 'orbit3d',
     es: ['Misión clásica', 'Orbitador de Marte', 'Siete meses de crucero, inserción orbital y radar de hielo.'],
     en: ['Classic mission', 'Mars orbiter', 'Seven months of cruise, orbit insertion and an ice radar.'] },
+  { id: 'titan', prog: 'newfrontiers', dest: 'titan', ic: 'rtg',
+    es: ['Nuevo · Dragonfly', 'Volar en Titán', 'Un dron con RTG en una luna con lagos de metano y química de la vida.'],
+    en: ['New · Dragonfly', 'Fly on Titan', 'An RTG-powered drone on a moon with methane lakes and the chemistry of life.'] },
   { id: 'europa', prog: 'flagship', dest: 'europa', ic: 'rtg',
     es: ['Gran desafío', 'Europa, luna de Júpiter', 'Radiación extrema, poca luz y seis años de viaje.'],
     en: ['Grand challenge', 'Europa, Jupiter’s moon', 'Extreme radiation, little light and six years of travel.'] }
@@ -173,6 +176,23 @@ function applyPreset(id) {
 /* ---------------------------------------------------------------- *
  * phase 2: design kits                                              *
  * ---------------------------------------------------------------- */
+/* when arrays cannot close the power budget, move to the smallest bus that
+   carries an RTG and size it; keep the change only if it actually helps */
+function usePowerFallback(st, prog, margins) {
+  if (!prog || prog.rank < DATA.power.rtg.minProgram) return false;
+  var rb = null, cur = DATA.find(DATA.buses, st.busId), rank = cur ? cur.rank : 0;
+  for (var i = 0; i < DATA.buses.length && !rb; i++) if (DATA.buses[i].allowsRTG && DATA.buses[i].rank >= rank) rb = DATA.buses[i];
+  if (!rb) return false;
+  var trial = cloneState(st);
+  if (trial.busId !== rb.id) pickInto(trial, 'busId', rb.id);
+  trial.powerType = 'rtg';
+  if (!trial.propId) trial.propId = 'mono';
+  autoSizeInto(trial, margins);
+  if (ENG.compute(trial).power.margin < ENG.compute(st).power.margin) return false;
+  for (var k in trial) st[k] = trial[k];
+  return true;
+}
+
 function kitState(kind) {
   var st = cloneState(S);
   var c = ENG.compute(st);
@@ -185,18 +205,28 @@ function kitState(kind) {
   pickInto(st, 'busId', buses[bi].id);
   st.powerType = (c.dest.solarAu > 3 && buses[bi].allowsRTG && c.prog && c.prog.rank >= DATA.power.rtg.minProgram) ? 'rtg' : 'solar';
   var dvReq = c.dest.dv + c.dest.skDvPerTurn * c.dest.opsTurns / 1000;
-  var best = null;
-  for (i = 0; i < DATA.propulsion.length; i++) {
-    var p = DATA.propulsion[i];
-    if (p.minRank > buses[bi].rank) continue;
-    var frac = 1 - Math.exp(-dvReq * 1000 / (p.isp * G0));
-    var limit = kind === 'robust' ? 0.35 : (kind === 'lean' ? 0.55 : 0.45);
-    if (p.id === 'electric' && kind !== 'robust') continue;
-    if (frac < limit) { best = p; break; }
+  var best = null, limit = kind === 'robust' ? 0.35 : (kind === 'lean' ? 0.55 : 0.45);
+  function engineFor(bus, allowElectric) {
+    for (var q = 0; q < DATA.propulsion.length; q++) {
+      var pr = DATA.propulsion[q];
+      if (pr.minRank > bus.rank || (pr.id === 'electric' && !allowElectric)) continue;
+      if (1 - Math.exp(-dvReq * 1000 / (pr.isp * G0)) < limit) return pr;
+    }
+    return null;
+  }
+  best = engineFor(buses[bi], kind === 'robust');
+  /* chemistry cannot make this Δv: climb to a bus that carries electric propulsion */
+  for (var bj = bi; !best && bj < buses.length; bj++) {
+    best = engineFor(buses[bj], true);
+    if (best && bj !== bi) { bi = bj; pickInto(st, 'busId', buses[bi].id); }
   }
   if (!best) for (i = DATA.propulsion.length - 1; i >= 0; i--) if (DATA.propulsion[i].minRank <= buses[bi].rank) { best = DATA.propulsion[i]; break; }
   st.propId = best ? best.id : null;
-  autoSizeInto(st, kind === 'lean' ? { dv: 1.05, pw: 1.15, bat: 1.05 } : (kind === 'robust' ? { dv: 1.25, pw: 1.5, bat: 1.4 } : null));
+  if (c.dest.lander && !st.edlId) st.edlId = kind === 'lean' ? 'basic' : (kind === 'robust' ? 'skycrane' : 'retro');
+  var margins = kind === 'lean' ? { dv: 1.05, pw: 1.15, bat: 1.05 } : (kind === 'robust' ? { dv: 1.25, pw: 1.5, bat: 1.4 } : null);
+  autoSizeInto(st, margins);
+  /* too far from the Sun for arrays on this bus: go nuclear if the program may */
+  if (ENG.compute(st).power.margin < 0) usePowerFallback(st, c.prog, margins);
   st.auto = true;
   return st;
 }
@@ -231,7 +261,8 @@ function kitPanel(c) {
     if (!s.c) continue;
     var tx = es ? k.es : k.en, ck = checks(s.c);
     var ok = ck.dv && ck.power && ck.budget && ck.payload;
-    var on = S.busId === s.st.busId && S.propId === s.st.propId && S.powerType === s.st.powerType && S.auto !== false;
+    var on = S.busId === s.st.busId && S.propId === s.st.propId && S.powerType === s.st.powerType && S.auto !== false &&
+      Math.abs(S.propellantKg - s.st.propellantKg) < 1 && Math.abs(S.arrayArea - s.st.arrayArea) < 0.01 && S.rtgUnits === s.st.rtgUnits;
     h += '<button class="kit' + (on ? ' on' : '') + (k.id === 'bal' ? ' star' : '') + '" data-act="kit" data-v="' + k.id + '">' +
       (k.id === 'bal' ? '<span class="rec">★ ' + esc(es ? 'Recomendado' : 'Recommended') + '</span>' : '') +
       '<b class="kit-name">' + esc(tx[0]) + '</b><span class="kit-desc">' + esc(tx[1]) + '</span>' +

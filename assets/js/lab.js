@@ -88,6 +88,8 @@ function labLoadMission(quiet) {
     if (id === 'mars-orbit' || id === 'mars-surface') v.hohmann = { body: 'sun', r1: 1, r2: 1.524, from: 'earth', to: 'mars' };
     else if (id === 'venus-orbit') v.hohmann = { body: 'sun', r1: 1, r2: 0.723, from: 'earth', to: 'venus' };
     else if (id === 'europa') v.hohmann = { body: 'sun', r1: 1, r2: 5.203, from: 'earth', to: 'jupiter' };
+    else if (id === 'psyche') v.hohmann = { body: 'sun', r1: 1, r2: 2.92, from: 'earth', to: '' };
+    else if (id === 'titan') v.hohmann = { body: 'sun', r1: 1, r2: 9.54, from: 'earth', to: 'saturn' };
     else if (id === 'neo') v.hohmann = { body: 'sun', r1: 1, r2: 1.3, from: 'earth', to: '' };
     else if (id === 'geo-relay') v.hohmann = { body: 'earth', r1: 6371 + 400, r2: 42164, from: '', to: '' };
     else if (id === 'llo' || id === 'sel2') v.hohmann = { body: 'earth', r1: 6371 + 400, r2: 384400, from: '', to: '' };
@@ -226,7 +228,7 @@ function labHohmann() {
   var h = hohmannCalc(), v = LAB.v.hohmann, sun = v.body === 'sun';
   var bodyOpts = [['sun', lx('Sol (interplanetario)', 'Sun (interplanetary)')], ['earth', lx('Tierra', 'Earth')], ['mars', lx('Marte', 'Mars')], ['jupiter', lx('Júpiter', 'Jupiter')], ['moon', lx('Luna', 'Moon')]];
   var presets = sun
-    ? [['earth', 'mars', 'Tierra → Marte', 'Earth → Mars'], ['earth', 'venus', 'Tierra → Venus', 'Earth → Venus'], ['earth', 'jupiter', 'Tierra → Júpiter', 'Earth → Jupiter'], ['earth', 'ceres', 'Tierra → Ceres', 'Earth → Ceres'], ['earth', 'mercury', 'Tierra → Mercurio', 'Earth → Mercury']]
+    ? [['earth', 'mars', 'Tierra → Marte', 'Earth → Mars'], ['earth', 'venus', 'Tierra → Venus', 'Earth → Venus'], ['earth', 'jupiter', 'Tierra → Júpiter', 'Earth → Jupiter'], ['earth', 'saturn', 'Tierra → Saturno', 'Earth → Saturn'], ['earth', 'ceres', 'Tierra → Ceres', 'Earth → Ceres'], ['earth', 'mercury', 'Tierra → Mercurio', 'Earth → Mercury']]
     : [];
   var inputs = selectF('hohmann', 'body', lx('Cuerpo central', 'Central body'), bodyOpts) +
     (sun ? '<div class="presets-mini">' + presets.map(function (p) {

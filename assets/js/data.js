@@ -189,6 +189,38 @@ DATA.destinations = [
       { id: 'surf', instr: ['spec_vnir'], dataGb: 620, value: 160, name: { es: 'Química de la superficie y sales', en: 'Surface chemistry and salts' } },
       { id: 'jmag', instr: ['plasma'], dataGb: 140, value: 120, name: { es: 'Magnetósfera joviana', en: 'Jovian magnetosphere' } }
     ]
+  },
+  {
+    id: 'psyche', c3: 'highc3', dv: 3.4, cruiseDays: 1300, opsTurns: 22, minProgram: 2,
+    commAu: 3.3, solarAu: 2.92, eclipse: 0, thermal: 'cold', radKrad: 20,
+    skDvPerTurn: 10, lander: false,
+    name: { es: 'Asteroide metálico Psyche', en: 'Metal asteroid Psyche' },
+    tag: { es: 'Núcleo de un planeta', en: 'A planet’s core' },
+    blurb: { es: 'Un mundo de hierro y níquel que podría ser el núcleo desnudo de un planeta que nunca terminó de formarse. Está a 3 UA: la luz es 1/9 de la de la Tierra y llegar exige tanto Δv que la propulsión química casi no alcanza.',
+             en: 'A world of iron and nickel that may be the bare core of a planet that never finished forming. It sits at 3 AU: sunlight is 1/9th of Earth’s, and reaching it takes so much Δv that chemical propulsion barely makes it.' },
+    analog: { name: 'Psyche (NASA, 2023)', note: { es: 'Primera misión de la NASA más allá de la Luna con propulsión eléctrica Hall, y un experimento de comunicación láser con la Tierra.', en: 'NASA’s first mission beyond the Moon on Hall-effect electric propulsion, with a laser communications experiment to Earth.' } },
+    objectives: [
+      { id: 'core', instr: ['mag'], dataGb: 90, value: 220, name: { es: 'Magnetismo fósil de un núcleo antiguo', en: 'Fossil magnetism of an ancient core' } },
+      { id: 'metal', instr: ['spec_vnir'], dataGb: 700, value: 190, name: { es: 'Composición: ¿hierro, níquel o roca?', en: 'Composition: iron, nickel or rock?' } },
+      { id: 'shape2', instr: ['cam', 'alt'], dataGb: 650, value: 150, name: { es: 'Forma, cráteres y topografía', en: 'Shape, craters and topography' } },
+      { id: 'grav', instr: ['rs'], dataGb: 60, value: 160, name: { es: 'Campo de gravedad e interior', en: 'Gravity field and interior' } }
+    ]
+  },
+  {
+    id: 'titan', c3: 'jupiter', dv: 0.6, cruiseDays: 2400, opsTurns: 18, minProgram: 3,
+    commAu: 9.6, solarAu: 9.54, eclipse: 0, thermal: 'cold', radKrad: 30,
+    skDvPerTurn: 0, lander: true,
+    name: { es: 'Titán: aterrizador volador', en: 'Titan: rotorcraft lander' },
+    tag: { es: 'Química de la vida', en: 'Chemistry of life' },
+    blurb: { es: 'Una luna con atmósfera más densa que la de la Tierra, lagos de metano y dunas de moléculas orgánicas. A 9,5 UA la luz solar es 1/90: solo un RTG da energía. La gravedad baja y el aire denso permiten volar con rotores de duna en duna.',
+             en: 'A moon with an atmosphere thicker than Earth’s, methane lakes and dunes of organic molecules. At 9.5 AU sunlight is 1/90th: only an RTG gives power. Low gravity and dense air let a rotorcraft hop from dune to dune.' },
+    analog: { name: 'Dragonfly (NASA, 2028)', note: { es: 'Un octocóptero del tamaño de un auto con un MMRTG que volará decenas de kilómetros por Titán buscando química prebiótica.', en: 'A car-sized octocopter powered by an MMRTG that will fly tens of kilometres across Titan looking for prebiotic chemistry.' } },
+    objectives: [
+      { id: 'prebio', instr: ['msp', 'sampler'], dataGb: 160, value: 250, name: { es: 'Química prebiótica en las dunas', en: 'Prebiotic chemistry in the dunes' } },
+      { id: 'tquake', instr: ['seis'], dataGb: 80, value: 180, name: { es: 'Océano interno por sismología', en: 'Internal ocean by seismology' } },
+      { id: 'twx', instr: ['met'], dataGb: 60, value: 140, name: { es: 'Meteorología del ciclo del metano', en: 'Weather of the methane cycle' } },
+      { id: 'aerial', instr: ['cam'], dataGb: 420, value: 150, name: { es: 'Reconocimiento aéreo de sitios', en: 'Aerial reconnaissance of sites' } }
+    ]
   }
 ];
 
@@ -207,10 +239,10 @@ DATA.buses = [
     desc: { es: 'El punto dulce moderno: suficiente para dos o tres instrumentos serios sin el costo de un bus grande.',
             en: 'The modern sweet spot: enough for two or three serious instruments without the cost of a large bus.' } },
   { id: 'med600', rank: 2, dryMass: 520, payloadMax: 165, overheadW: 130, cost: 155,
-    arrayMax: 24, antennaMax: 2.5, propMax: 1600, storeGb: 300, reliability: 0.955, batteryMax: 9000,
+    arrayMax: 40, antennaMax: 2.5, propMax: 1600, storeGb: 300, reliability: 0.955, batteryMax: 9000, allowsRTG: true,
     name: { es: 'Bus medio 600 kg', en: '600 kg medium bus' },
-    desc: { es: 'Plataforma de clase Discovery: puntería fina, memoria amplia y espacio para una antena de verdad.',
-            en: 'Discovery-class platform: fine pointing, ample memory and room for a real antenna.' } },
+    desc: { es: 'Plataforma de clase Discovery: puntería fina, memoria amplia y espacio para una antena de verdad. Puede integrar un RTG, como Dragonfly.',
+            en: 'Discovery-class platform: fine pointing, ample memory and room for a real antenna. Can integrate an RTG, like Dragonfly.' } },
   { id: 'flag2200', rank: 3, dryMass: 1950, payloadMax: 680, overheadW: 320, cost: 680,
     arrayMax: 100, antennaMax: 4.0, propMax: 4200, storeGb: 1200, reliability: 0.97, batteryMax: 30000, allowsRTG: true,
     name: { es: 'Bus Flagship 2,2 t', en: '2.2 t Flagship bus' },

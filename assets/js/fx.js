@@ -112,6 +112,8 @@ var BADGES = [
   { id: 'nogo', icon: '🎲', name: { es: 'Temerario', en: 'Daredevil' }, desc: { es: 'Lanza con el clima en NO-GO.', en: 'Launch with a weather NO-GO.' } },
   { id: 'teamwork', icon: '🤝', name: { es: 'Trabajo en equipo', en: 'Teamwork' }, desc: { es: 'Resuelve una falla con la solución de tu centro de control.', en: 'Fix a failure with your mission control team\'s solution.' } },
   { id: 'engineer', icon: '🧮', name: { es: 'Ingeniero de cálculo', en: 'Number cruncher' }, desc: { es: 'Abre el Laboratorio de ingeniería y haz tus propios cálculos.', en: 'Open the Engineering lab and run your own numbers.' } },
+  { id: 'titan', icon: '🚁', name: { es: 'Volar en otro mundo', en: 'Flying on another world' }, desc: { es: 'Completa la misión a Titán.', en: 'Complete the Titan mission.' } },
+  { id: 'psyche', icon: '🔩', name: { es: 'Corazón de metal', en: 'Heart of metal' }, desc: { es: 'Completa la misión al asteroide Psyche.', en: 'Complete the Psyche mission.' } },
   { id: 'navigator', icon: '🪐', name: { es: 'Navegante 3D', en: '3D navigator' }, desc: { es: 'Recorre la trayectoria de una misión en el Explorador 3D.', en: 'Fly through a mission trajectory in the 3D Explorer.' } }
 ];
 
@@ -157,6 +159,8 @@ function checkEndBadges(c, sc) {
   if (full && c.cost.budget > 0 && S.budgetLeft / c.cost.budget >= 0.15) award('frugal');
   if (sc.grade === 'S') award('gradeS');
   if (full && c.dest.id === 'europa') award('europa');
+  if (full && c.dest.id === 'titan') award('titan');
+  if (full && c.dest.id === 'psyche') award('psyche');
   if (full && S.diff === 'dir') award('director');
   if (full) {
     var seen = [];

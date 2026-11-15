@@ -24,7 +24,8 @@ ENG.CONTACT = { 'leo-sso': 0.06, 'geo-relay': 1.0, 'llo': 0.75, 'sel2': 0.25 };
 /* Eclipse duration per orbit (hours) — sizes the battery. */
 ENG.ECLIPSE_H = {
   'leo-sso': 0.58, 'geo-relay': 1.2, 'llo': 0.78, 'sel2': 0,
-  'mars-orbit': 0.7, 'mars-surface': 12, 'venus-orbit': 0.9, 'neo': 0, 'europa': 1.5
+  'mars-orbit': 0.7, 'mars-surface': 12, 'venus-orbit': 0.9, 'neo': 0, 'europa': 1.5,
+  'psyche': 0, 'titan': 0  /* Titan nights last 8 Earth days, but an RTG does not need the Sun */
 };
 
 ENG.clamp = function (v, a, b) { return v < a ? a : (v > b ? b : v); };
@@ -254,7 +255,7 @@ ENG.compute = function (S) {
       'Array area above the bus maximum (' + bus.arrayMax + ' m²).');
 
   if (S.powerType === 'rtg' && (!bus || !bus.allowsRTG))
-    bad('Solo el bus Flagship puede integrar un RTG.', 'Only the Flagship bus can integrate an RTG.');
+    bad('Este bus no puede integrar un RTG: usa el bus medio o el Flagship.', 'This bus cannot integrate an RTG: use the medium or Flagship bus.');
 
   if (S.powerType === 'rtg' && prog && prog.rank < DATA.power.rtg.minProgram)
     bad('El combustible de RTG solo se asigna a programas de clase New Frontiers o superior.',

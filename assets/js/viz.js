@@ -157,6 +157,8 @@ function vizScene(id, w, h) {
     'mars-surface': { surface: true, body: { x: w / 2, y: h + h * 1.55, r: h * 1.95, c1: '#d0703f', c2: '#5e200d' }, earth: { orbitSky: true, r: 5 } },
     'venus-orbit': { body: { x: w * 0.42, y: h / 2, r: h * 0.29, c1: '#f1d790', c2: '#8a6a22', clouds: true }, orbit: { r: h * 0.39, sp: 0.55 }, earth: { x: w * 0.9, y: h * 0.18, r: 6 } },
     'neo': { body: { x: w * 0.45, y: h / 2, r: h * 0.15, c1: '#a49a8a', c2: '#4a4238', rock: true }, orbit: { r: h * 0.32, sp: 0.25 }, earth: { x: w * 0.92, y: h * 0.16, r: 5 } },
+    'psyche': { body: { x: w * 0.45, y: h / 2, r: h * 0.2, c1: '#d8d4cc', c2: '#3d3a35', rock: true }, orbit: { r: h * 0.36, sp: 0.3 }, earth: { x: w * 0.93, y: h * 0.15, r: 4 } },
+    'titan': { surface: true, body: { x: w / 2, y: h + h * 1.55, r: h * 1.95, c1: '#c98a3a', c2: '#4a2a08' }, earth: { orbitSky: true, r: 3 } },
     'europa': { jupiter: { x: -h * 0.05, y: h / 2, r: h * 0.62 }, body: { x: w * 0.6, y: h / 2, r: h * 0.14, c1: '#f3efe6', c2: '#a28a6c', ice: true }, orbit: { r: h * 0.25, sp: 0.8 }, earth: { x: w * 0.94, y: h * 0.14, r: 4 } }
   };
   return S0[id] || S0['leo-sso'];

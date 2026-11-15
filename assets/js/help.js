@@ -125,9 +125,13 @@ function statusItems(c) {
     add(c.bus && c.mass.payload <= c.bus.payloadMax, 'Los instrumentos caben en el bus', 'Instruments fit the bus',
       'Elige un bus más grande o quita un instrumento.', 'Pick a larger bus or drop an instrument.', 'kit');
     add(c.prop && c.dv.margin >= 0, 'Combustible suficiente (Δv)', 'Enough fuel (Δv)',
-      'Activa el dimensionado automático o elige un motor con más Isp.', 'Turn on automatic sizing or pick an engine with more Isp.', 'size');
+      S.auto !== false ? 'Este motor no alcanza ni con los tanques llenos: el paquete «Equilibrada» elige uno con más Isp.' : 'Activa el dimensionado automático o elige un motor con más Isp.',
+      S.auto !== false ? 'This engine falls short even with full tanks: the “Balanced” package picks one with more Isp.' : 'Turn on automatic sizing or pick an engine with more Isp.', S.auto !== false ? 'kit' : 'size');
     add(c.power.genEOL > 0 && c.power.margin >= 0, 'Energía suficiente hasta el final', 'Enough power to the end',
-      'Activa el dimensionado automático o agrega paneles.', 'Turn on automatic sizing or add arrays.', 'size');
+      c.dest && c.dest.solarAu > 4 ? 'Tan lejos del Sol los paneles casi no sirven: usa un RTG (bus Flagship).' : 'Activa el dimensionado automático o agrega paneles.',
+      c.dest && c.dest.solarAu > 4 ? 'This far from the Sun arrays barely work: use an RTG (Flagship bus).' : 'Turn on automatic sizing or add arrays.', 'power');
+    if (c.dest && c.dest.lander) add(!!S.edlId, 'Sistema de aterrizaje elegido', 'Landing system chosen',
+      'Elige cómo frenar y aterrizar: más fiable = más masa.', 'Pick how to brake and land: more reliable = more mass.', 'edl');
     if (c.battery.eclipseH > 0) add(c.battery.have >= c.battery.need, 'Batería para los eclipses', 'Battery for the eclipses',
       'Activa el dimensionado automático o sube la batería.', 'Turn on automatic sizing or raise the battery.', 'size');
   }
@@ -174,6 +178,12 @@ function applyFix(act) {
   if (act === 'kit') { applyKit('bal'); return; }
   if (act === 'lean') { applyKit('lean'); return; }
   if (act === 'size') { S.auto = true; autoSizeIfOn(); render(); return; }
+  if (act === 'power') {
+    S.auto = true; autoSizeIfOn();
+    if (comp().power.margin < 0) usePowerFallback(S, comp().prog);
+    render(); return;
+  }
+  if (act === 'edl') { onPick('edlId', 'retro'); return; }
   if (act === 'sci') { S.instruments = autoInstruments(S); autoSizeIfOn(); render(); return; }
   if (act === 'link') {
     var sol = solveLink(S);

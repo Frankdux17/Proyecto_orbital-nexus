@@ -14,6 +14,9 @@ var ART_SPRITE = '' +
   '<radialGradient id="g-venus" cx="35%" cy="32%" r="75%"><stop offset="0" stop-color="#fff2c2"/><stop offset=".55" stop-color="#e6bf62"/><stop offset="1" stop-color="#7d5b16"/></radialGradient>' +
   '<radialGradient id="g-jup" cx="35%" cy="32%" r="75%"><stop offset="0" stop-color="#fde3c0"/><stop offset=".6" stop-color="#d19a62"/><stop offset="1" stop-color="#6b3f1c"/></radialGradient>' +
   '<radialGradient id="g-europa" cx="35%" cy="32%" r="75%"><stop offset="0" stop-color="#ffffff"/><stop offset=".6" stop-color="#e5dccb"/><stop offset="1" stop-color="#8c7658"/></radialGradient>' +
+  '<radialGradient id="g-titan" cx="35%" cy="32%" r="75%"><stop offset="0" stop-color="#ffd98a"/><stop offset=".55" stop-color="#d8913a"/><stop offset="1" stop-color="#6b3a10"/></radialGradient>' +
+  '<radialGradient id="g-metal" cx="35%" cy="32%" r="75%"><stop offset="0" stop-color="#f2f0ea"/><stop offset=".5" stop-color="#a8a39a"/><stop offset="1" stop-color="#3d3a35"/></radialGradient>' +
+  '<linearGradient id="g-haze" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a3a12"/><stop offset=".6" stop-color="#c98a3a"/><stop offset="1" stop-color="#e8b265"/></linearGradient>' +
   '<radialGradient id="g-rock" cx="35%" cy="32%" r="75%"><stop offset="0" stop-color="#cfc6b6"/><stop offset=".6" stop-color="#8a7f6e"/><stop offset="1" stop-color="#3a342b"/></radialGradient>' +
   '<radialGradient id="g-sun" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff7d1"/><stop offset=".5" stop-color="#ffc94a"/><stop offset="1" stop-color="#ff8a1f" stop-opacity="0"/></radialGradient>' +
   '<linearGradient id="g-space" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a1230"/><stop offset="1" stop-color="#1b1446"/></linearGradient>' +
@@ -85,6 +88,27 @@ var ART_SPRITE = '' +
     '<circle cx="45" cy="24" r="11" fill="url(#g-europa)"/>' +
     '<path d="M36 20c5 2 10 0 17 3M38 28c4-1 8 2 14 0M41 16l6 15" stroke="#a5633e" stroke-width="1" fill="none" opacity=".75"/>' +
     '<path d="M45 13c0-3 1-6 0-9" stroke="#bfe8ff" stroke-width="1.6" stroke-linecap="round" opacity=".7"/>') +
+
+  sym('d-psyche', '0 0 64 64',
+    tile() + stars(9) +
+    '<path d="M14 34c0-9 7-16 17-17 8-1 14 3 18 9 4 7 1 15-5 19-7 4-17 5-23 1-5-3-7-7-7-12z" fill="url(#g-metal)"/>' +
+    '<circle cx="26" cy="30" r="3.2" fill="#6f6a62" opacity=".6"/><circle cx="38" cy="38" r="4.4" fill="#6f6a62" opacity=".55"/><circle cx="41" cy="27" r="1.8" fill="#6f6a62" opacity=".6"/>' +
+    '<path d="M20 26c4-4 10-5 15-3" stroke="#ffffff" stroke-width="1.4" fill="none" opacity=".55" stroke-linecap="round"/>' +
+    /* spacecraft with the blue glow of a Hall thruster */
+    '<g transform="translate(49 12)"><path d="M-3 2l-9 7" stroke="#7ad7ff" stroke-width="2.4" stroke-linecap="round" opacity=".75"/>' +
+    '<rect x="-3" y="-3" width="7" height="6" rx="1" fill="#e6eaf2"/><rect x="-11" y="-2" width="8" height="4" fill="url(#g-panel)"/><rect x="4" y="-2" width="8" height="4" fill="url(#g-panel)"/></g>') +
+  sym('d-titan', '0 0 64 64',
+    '<rect width="64" height="64" rx="14" fill="url(#g-haze)"/>' +
+    '<circle cx="50" cy="13" r="9" fill="#f4dfb0" opacity=".35"/>' +
+    '<path d="M0 46c8-5 16-5 24-2s14 4 22 0 12-3 18 0V64H0z" fill="#8a4f16"/>' +
+    '<path d="M0 54c10-3 20-1 30-3s22-2 34 1V64H0z" fill="#5e3209"/>' +
+    '<ellipse cx="46" cy="58" rx="12" ry="2.6" fill="#2a1a2e" opacity=".75"/>' +
+    /* the rotorcraft */
+    '<g transform="translate(24 26)"><rect x="-7" y="-2" width="14" height="6" rx="2" fill="#e6eaf2"/>' +
+    '<path d="M-7 0h-6M7 0h6M-7 3l-4 3M7 3l4 3" stroke="#e6eaf2" stroke-width="1.2"/>' +
+    '<ellipse cx="-13" cy="-1.5" rx="5" ry="1.1" fill="#9ee7f2" opacity=".85"/><ellipse cx="13" cy="-1.5" rx="5" ry="1.1" fill="#9ee7f2" opacity=".85"/>' +
+    '<rect x="-2" y="-5" width="4" height="3" rx="1" fill="#f0c24b"/></g>' +
+    '<path d="M24 34v8" stroke="#ffe7b0" stroke-width="1" stroke-dasharray="2 2" opacity=".7"/>') +
 
   /* ---- line icons, 24×24, stroke = currentColor ---- */
   ico('i-cubesat', '<rect x="7" y="6" width="10" height="12" rx="1.5"/><path d="M7 10h10M7 14h10M12 6v12M3 9h4M17 9h4"/>') +

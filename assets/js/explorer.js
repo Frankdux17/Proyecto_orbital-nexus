@@ -88,6 +88,7 @@ function expPhaseText(ph, cfg) {
         d.ops + ' turns (months) of observing, storing and transmitting. Every ground station pass is a window to downlink data.')];
     default: return [T('Fin de misión', 'End of mission'), d.destId === 'europa'
       ? T('Impacto controlado contra Júpiter para no contaminar Europa: protección planetaria.', 'A controlled plunge into Jupiter so Europa is never contaminated: planetary protection.')
+      : d.destId === 'titan' ? T('El aterrizador hace su último vuelo y queda como estación meteorológica mientras el RTG le dé calor.', 'The lander makes its last flight and stays on as a weather station for as long as the RTG keeps it warm.')
       : (geo ? T('Desorbitado o reórbita «cementerio». Las reglas de basura espacial exigen que un CubeSat en órbita baja reingrese pronto a la atmósfera.', 'Deorbit or a "graveyard" orbit. Space debris rules require a CubeSat in low orbit to re-enter the atmosphere soon.')
         : T('Pasivación: se vacían tanques y baterías y se apaga el transmisor. La nave queda como un monumento en el espacio.', 'Passivation: tanks and batteries are emptied and the transmitter goes silent. The spacecraft becomes a monument in space.'))];
   }
@@ -103,7 +104,14 @@ var PLANETS = {
   earth: { au: 1, P: 365.25, r: 4.4, c: ['#9fd4ff', '#1f4e9a'], n: { es: 'Tierra', en: 'Earth' } },
   mars: { au: 1.524, P: 687, r: 3.6, c: ['#ffb07a', '#7a2a10'], n: { es: 'Marte', en: 'Mars' } },
   neo: { au: 1.12, P: 433, r: 2.2, c: ['#cfc6b6', '#4a4238'], inc: 0.18, n: { es: 'Asteroide', en: 'Asteroid' } },
-  jupiter: { au: 5.2, P: 4333, r: 9, c: ['#fde3c0', '#8a5a2c'], n: { es: 'Júpiter', en: 'Jupiter' } }
+  jupiter: { au: 5.2, P: 4333, r: 9, c: ['#fde3c0', '#8a5a2c'], n: { es: 'Júpiter', en: 'Jupiter' } },
+  psyche: { au: 2.92, P: 1828, r: 2.6, c: ['#f2f0ea', '#3d3a35'], inc: 0.054, n: { es: 'Psyche', en: 'Psyche' } },
+  saturn: { au: 9.54, P: 10759, r: 8, c: ['#f6e7c1', '#9b7a3c'], n: { es: 'Saturno', en: 'Saturn' } }
+};
+/* moons the spacecraft actually goes to */
+var MOONS = {
+  europa: { of: 'jupiter', n: 'Europa', r: 1.6, c: ['#ffffff', '#8c7658'], d: 15, w: 0.7 },
+  titan: { of: 'saturn', n: { es: 'Titán', en: 'Titan' }, r: 1.9, c: ['#ffd98a', '#6b3a10'], d: 16, w: 0.5 }
 };
 
 function kepler(M, e) {
@@ -115,7 +123,8 @@ function kepler(M, e) {
 function expBuild(cfg) {
   var id = cfg.destId, sc = { mode: 'helio', bodies: [], rings: [], phases: expPhases(cfg) };
   var cr = Math.max(1, cfg.cruise);
-  var helioTarget = { 'mars-orbit': 'mars', 'mars-surface': 'mars', 'venus-orbit': 'venus', 'neo': 'neo', 'europa': 'jupiter' }[id];
+  var helioTarget = { 'mars-orbit': 'mars', 'mars-surface': 'mars', 'venus-orbit': 'venus', 'neo': 'neo', 'europa': 'jupiter', 'psyche': 'psyche', 'titan': 'saturn' }[id];
+  var moon = MOONS[id], outer = helioTarget && PLANETS[helioTarget].au > 4;
 
   if (helioTarget) {
     var tg = PLANETS[helioTarget], E0 = PLANETS.earth;
@@ -125,19 +134,20 @@ function expBuild(cfg) {
       var ang = (phase0 || 0) + TAU * d / p.P, rr = sq(p.au);
       return [rr * Math.cos(ang), rr * Math.sin(ang), p.inc ? rr * Math.sin(p.inc) * Math.sin(ang - 0.6) : 0];
     }
-    sc.extent = helioTarget === 'jupiter' ? sq(5.2) * 1.1 : sq(1.6) * 1.15;
+    sc.extent = outer ? sq(tg.au) * 1.1 : sq(Math.max(1.6, tg.au)) * 1.15;
     sc.sun = [0, 0, 0];
-    var list = helioTarget === 'jupiter' ? ['venus', 'earth', 'mars', 'jupiter'] : ['venus', 'earth', 'mars'];
-    if (helioTarget === 'neo') list.push('neo');
+    var list = ['venus', 'earth', 'mars'];
+    if (tg.au >= 5) list.push('jupiter');
+    if (helioTarget !== 'jupiter' && list.indexOf(helioTarget) < 0) list.push(helioTarget);
     for (var i = 0; i < list.length; i++) (function (k) {
       var p = PLANETS[k], ph0 = k === helioTarget ? th0 : (k === 'earth' ? 0 : (i * 1.7));
       sc.rings.push({ pts: ringPts(function (ang) { var rr = sq(p.au); return [rr * Math.cos(ang), rr * Math.sin(ang), p.inc ? rr * Math.sin(p.inc) * Math.sin(ang - 0.6) : 0]; }), col: 'rgba(140,170,230,.28)' });
       sc.bodies.push({ name: L(p.n), r: p.r, c: p.c, key: k, pos: function (d) { return planetPos(p, d, ph0); } });
     })(list[i]);
-    if (helioTarget === 'jupiter') {
-      sc.bodies.push({ name: 'Europa', r: 1.6, c: ['#ffffff', '#8c7658'], moonOf: 'jupiter', pos: function (d) {
-        var j = planetPos(tg, d, th0), ang = EXP.spin * 0.7;
-        return [j[0] + 15 * Math.cos(ang), j[1] + 15 * Math.sin(ang), j[2]];
+    if (moon) {
+      sc.bodies.push({ name: typeof moon.n === 'string' ? moon.n : L(moon.n), r: moon.r, c: moon.c, moonOf: moon.of, pos: function (d) {
+        var j = planetPos(tg, d, th0), ang = EXP.spin * moon.w;
+        return [j[0] + moon.d * Math.cos(ang), j[1] + moon.d * Math.sin(ang), j[2]];
       } });
     }
     var tz = tg.inc ? planetPos(tg, cr, th0)[2] : 0;
@@ -153,15 +163,15 @@ function expBuild(cfg) {
     sc.craft = function (d) {
       if (d <= 0) return planetPos(E0, d, 0);
       if (d < cr) return transfer(d / cr);
-      var tgt = helioTarget === 'jupiter' ? sc.bodies[sc.bodies.length - 1].pos(d) : planetPos(tg, d, th0);
-      if (cfg.lander) return [tgt[0], tgt[1], tgt[2] + tg.r * 0.9];
-      var ang = EXP.spin * (helioTarget === 'jupiter' ? 1.6 : 1.2);
-      var rr = helioTarget === 'jupiter' ? 3 : tg.r * 1.9;
+      var tgt = moon ? sc.bodies[sc.bodies.length - 1].pos(d) : planetPos(tg, d, th0);
+      if (cfg.lander) return [tgt[0], tgt[1], tgt[2] + (moon ? moon.r : tg.r) * 0.9];
+      var ang = EXP.spin * (moon ? 1.6 : 1.2);
+      var rr = moon ? 3 : tg.r * 1.9;
       return [tgt[0] + rr * Math.cos(ang), tgt[1] + rr * Math.sin(ang) * 0.4, tgt[2] + rr * Math.sin(ang) * 0.9];
     };
     sc.earth = function (d) { return planetPos(E0, d, 0); };
     sc.note = LANG === 'es' ? 'Escala comprimida (√distancia) · trayectoria de transferencia tipo Hohmann' : 'Compressed scale (√distance) · Hohmann-type transfer';
-    if (helioTarget === 'jupiter') sc.note += LANG === 'es' ? ' · la misión real usa asistencias gravitatorias' : ' · the real mission uses gravity assists';
+    if (outer || helioTarget === 'psyche') sc.note += LANG === 'es' ? ' · la misión real usa asistencias gravitatorias' : ' · the real mission uses gravity assists';
     return sc;
   }
 
@@ -379,7 +389,11 @@ function expDraw(ctx, w, h, ox, eyeYaw, ts) {
       }
       ctx.restore();
     }
-    if (bb.key === 'jupiter') {
+    if (bb.key === 'saturn') {
+      ctx.strokeStyle = 'rgba(240,220,170,.75)'; ctx.lineWidth = Math.max(1.2, r * 0.22);
+      ctx.beginPath(); ctx.ellipse(p[0], p[1], r * 2.1, r * 0.55, -0.35, 0, TAU); ctx.stroke();
+    }
+    if (bb.key === 'jupiter' || bb.key === 'saturn') {
       ctx.save(); ctx.beginPath(); ctx.arc(p[0], p[1], r, 0, TAU); ctx.clip();
       ctx.strokeStyle = 'rgba(140,80,40,.45)'; ctx.lineWidth = Math.max(1, r * 0.14);
       for (var bnd = -2; bnd <= 2; bnd++) { ctx.beginPath(); ctx.moveTo(p[0] - r, p[1] + bnd * r * 0.32); ctx.lineTo(p[0] + r, p[1] + bnd * r * 0.32); ctx.stroke(); }

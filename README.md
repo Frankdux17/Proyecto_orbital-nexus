@@ -123,11 +123,13 @@ A spectrometer that fills the memory and never transmits scores exactly zero.
   themselves when tapped; a three-step welcome tour on the first game; and a celebration
   the first time each phase closes with every margin green.
 
-## Nine destinations
+## Eleven destinations
 
 Sun-synchronous LEO · geostationary orbit · low lunar orbit · Sun-Earth L2 ·
 Mars orbit · Mars surface (with entry, descent and landing) · Venus orbit ·
-near-Earth asteroid rendezvous · the Jupiter / Europa system.
+near-Earth asteroid rendezvous · the Jupiter / Europa system · **new:** the metal asteroid
+Psyche (electric propulsion at 3 AU) · **new:** a Dragonfly-style rotorcraft lander on Titan
+(RTG power at 9.5 AU, landing through a thick atmosphere).
 
 They are not reskins of each other. At Europa you get 1/30th of the sunlight, a six-year
 cruise and 2800 krad of radiation — fly it without an electronics vault and you will lose
@@ -315,11 +317,13 @@ Tierra.** Un espectrómetro que llena la memoria y nunca transmite vale exactame
   krad, DSN…) se explican al tocarlas; una guía de bienvenida de tres pasos y una
   celebración la primera vez que cada fase cierra con todos los márgenes en verde.
 
-## Nueve destinos
+## Once destinos
 
 Órbita baja heliosíncrona · órbita geoestacionaria · órbita lunar baja · punto Sol-Tierra L2 ·
 órbita de Marte · superficie de Marte (con entrada, descenso y aterrizaje) · órbita de Venus ·
-rendezvous con asteroide cercano · sistema de Júpiter / Europa.
+rendezvous con asteroide cercano · sistema de Júpiter / Europa · **nuevo:** el asteroide
+metálico Psyche (propulsión eléctrica a 3 UA) · **nuevo:** un aterrizador volador tipo
+Dragonfly en Titán (energía RTG a 9,5 UA y aterrizaje en una atmósfera densa).
 
 No son el mismo destino repintado. En Europa recibes 1/30 de la luz solar, un crucero de
 seis años y 2800 krad de radiación: vuela sin bóveda de electrónica y perderás todos los
