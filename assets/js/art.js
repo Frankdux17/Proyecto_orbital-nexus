@@ -230,7 +230,7 @@ function instrIcon(it) { return icon(it.tags[0]); }
    engineering rooms (Team X), where every console owns one subsystem */
 var TEAM = {
   pi: { av: 'a-pi', name: 'Dra. Lucía Vega', role: { es: 'Investigadora principal', en: 'Principal investigator' } },
-  sys: { av: 'a-sys', name: 'Ing. Mateo Ríos', role: { es: 'Ingeniero de sistemas', en: 'Systems engineer' } },
+  sys: { av: 'a-sys', name: 'Ing. Frank Edelin Piña Irarica', role: { es: 'Ingeniero de sistemas', en: 'Systems engineer' } },
   com: { av: 'a-com', name: 'Ing. Sofía Mamani', role: { es: 'Ingeniera de telecomunicaciones', en: 'Telecom engineer' } },
   lv: { av: 'a-lv', name: 'Ing. Valeria Cruz', role: { es: 'Directora de lanzamiento', en: 'Launch director' } },
   capcom: { av: 'a-capcom', name: 'Cap. Diego Torres', role: { es: 'Astronauta · CAPCOM', en: 'Astronaut · CAPCOM' } },
