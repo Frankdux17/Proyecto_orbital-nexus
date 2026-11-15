@@ -12,3 +12,6 @@ dist/
 
 # deliverables sent by link (slides PDF, video), not published on the site
 entregables/
+
+# original poster: it carries the NASA and Space Apps logos, so it stays local
+Desaf*Orbital*Tierra.png
