@@ -218,6 +218,7 @@ function viewSplash() {
     '<div class="cta"><button class="btn primary big" data-act="start">' + icon('rocket', 'ico') + esc(t('splash_start')) + '</button>' + resume +
     '<button class="btn big ghost" data-act="demo" data-v="mars-orbit">' + icon('orbit3d', 'ico') + esc(es ? 'Ver una misión en 3D' : 'See a mission in 3D') + '</button>' +
     '<button class="btn big ghost" data-act="practice">' + icon('rocket', 'ico') + esc(es ? 'Simulador de despegue' : 'Launch simulator') + '</button>' +
+    '<button class="btn big ghost crew-cta" data-act="crew">👩‍🚀 ' + esc(es ? 'Tu tripulación y voces' : 'Your crew and voices') + '</button>' +
     '<button class="btn big ghost lab-cta" data-act="lab">' + FLASK + esc(es ? 'Laboratorio de ingeniería' : 'Engineering lab') + '</button></div>' +
     '</div><div class="hero-poster"><img src="assets/img/hero.jpg" width="1136" height="884" alt="' +
     esc(es ? 'ORBITAL NEXUS · Ingeniería más allá de la Tierra: un cohete deja la Tierra rumbo a Marte' : 'ORBITAL NEXUS · Engineering Beyond Earth: a rocket leaves Earth for Mars') + '"></div></div>' +
@@ -369,7 +370,7 @@ function viewMission(c) {
       lock: locked ? t('min_class') + ': ' + L(DATA.programs[d.minProgram].name) : null
     });
   }
-  h += '</div></div></div><div class="side">' + statusPanel(c);
+  h += '</div></div></div><div class="side">' + statusPanel(c) + crewPanel();
 
   if (c.dest) {
     h += '<div class="panel dest-hero">' + destArt(c.dest.id, 'art hero-art') + '<div><span class="card-tag">' + esc(L(c.dest.tag)) + '</span><b>' + esc(L(c.dest.name)) + '</b></div>' + explorerBtn(c, 'wide') + '</div>';
@@ -689,7 +690,7 @@ function viewLaunch(c) {
     [LANG === 'es' ? 'Probabilidad total de operar' : 'Overall chance of operating', n1(od.total * 100) + '%', true]
   ].filter(function (x) { return x; }));
   h += readinessPreview(c);
-  h += '</div></div><div class="side">' + statusPanel(c) + shipPanel(c) + '<div class="panel">' + explorerBtn(c, 'wide') + practiceBtn('wide') + shareBtn('wide') + '</div><div class="panel"><h2>' + esc(LANG === 'es' ? 'Hoja de datos final' : 'Final data sheet') + '</h2>';
+  h += '</div></div><div class="side">' + statusPanel(c) + crewPanel() + shipPanel(c) + '<div class="panel">' + explorerBtn(c, 'wide') + practiceBtn('wide') + shareBtn('wide') + '</div><div class="panel"><h2>' + esc(LANG === 'es' ? 'Hoja de datos final' : 'Final data sheet') + '</h2>';
   h += rows([
     [LANG === 'es' ? 'Masa de lanzamiento' : 'Launch mass', n0(c.mass.launch) + ' kg'],
     [LANG === 'es' ? 'Capacidad del cohete' : 'Rocket capability', n0(c.lvCap) + ' kg'],
@@ -904,7 +905,7 @@ function viewOps(c) {
     (draw > avail ? ' <b style="color:var(--bad)">' + esc(LANG === 'es' ? 'Sobredemanda: los instrumentos operarán a ciclo reducido.' : 'Over-demand: instruments will run at reduced duty cycle.') + '</b>' : '') +
     '</div></div>';
 
-  h += '</div><div class="side"><div class="panel"><h2>' + esc(LANG === 'es' ? 'Estado de la nave' : 'Spacecraft status') + '</h2>';
+  h += '</div><div class="side">' + crewPanel() + '<div class="panel"><h2>' + esc(LANG === 'es' ? 'Estado de la nave' : 'Spacecraft status') + '</h2>';
   h += rows([
     [t('storage'), gb(stored) + ' / ' + gb(c.bus.storeGb)],
     [t('downlinked'), gb(dlTotal())],
@@ -1014,6 +1015,7 @@ function nextTurn() {
   var ev = rollEvent(c);
   if (ev) { S.usedEvents[ev.id] = true; showEvent(ev, c); return; }
   execTurn(c, { sci: 1, dl: 1 });
+  try { if (S.log[0]) voiceSay('capcom', (LANG === 'es' ? 'Turno ' : 'Turn ') + S.turn + '. ' + L(S.log[0].msg)); } catch (e) { }
 }
 
 function execTurn(c, mods) {
@@ -1129,6 +1131,7 @@ function evChoices(ev) {
 }
 function showEvent(ev, c) {
   S.strip[S.turn] = 'ev';
+  try { voiceSay('nexus', (LANG === 'es' ? 'Alerta, ' : 'Alert, ') + crewCall('cmd') + '. ' + L(ev.title) + '. ' + L(ev.text)); } catch (e) { }
   var h = '<div class="ev-kind">' + esc(L(ev.kind)) + ' · ' + esc(t('turn')) + ' ' + (S.turn + 1) + '</div>' +
     '<h2>' + esc(L(ev.title)) + '</h2><p>' + esc(L(ev.text)) + '</p>' +
     '<div class="ev-kind" style="color:var(--txt-faint)">' + esc(t('ev_choose')) + '</div>';
@@ -1338,6 +1341,7 @@ function render() {
   LAST_PHASE = S.phase;
   saveGame();
   if (S.phase === 6) vizStart();
+  try { voiceAfterRender(c); } catch (e) { }
   celebrateCheck();
 }
 
@@ -1381,6 +1385,7 @@ function applyRange(k, v) {
 var SIZING_KEYS = ['arrayArea', 'rtgUnits', 'batteryWh', 'propellantKg'];
 function wire() {
   document.addEventListener('click', function (e) {
+    VOICE.started = true;
     var el = e.target.closest ? e.target.closest('[data-act]') : null;
     if (!el) return;
     var act = el.getAttribute('data-act');
@@ -1397,6 +1402,8 @@ function wire() {
     if (act === 'drone') { droneFromGame(); return; }
     if (act === 'scan') { scanFromGame(); return; }
     if (act === 'portal') { portalOpen(); return; }
+    if (act === 'crew') { crewOpen(); return; }
+    if (act === 'nexus') { voiceSay('nexus', nexusReport()); return; }
     if (act === 'fix') { applyFix(el.getAttribute('data-v')); return; }
     if (act === 'diff') { S.diff = el.getAttribute('data-v'); setPref('on_diff', S.diff); render(); return; }
     if (act === 'resume') { resumeGame(); return; }

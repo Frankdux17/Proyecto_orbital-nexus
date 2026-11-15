@@ -1729,3 +1729,36 @@ body{background:
 .po-big{font:800 48px ui-monospace,monospace;color:#f0c24b;margin:6px 0}
 .po-card-end p{color:#cfc6ef;margin:0 0 14px}
 .po-btns{display:flex;gap:10px;justify-content:center;margin-bottom:16px}
+
+/* ---------------------------------------------------------------- *
+ * voices: captions, crew dialog and crew card                       *
+ * ---------------------------------------------------------------- */
+.vcap{position:fixed;left:16px;bottom:96px;z-index:140;display:flex;gap:12px;align-items:flex-start;max-width:min(560px,calc(100% - 32px));
+  padding:12px 40px 12px 12px;border-radius:16px;background:rgba(6,10,28,.92);color:#e8eefc;border:1px solid rgba(79,209,224,.55);
+  box-shadow:0 20px 50px -18px rgba(0,0,0,.9),0 0 30px -12px #4fd1e0;opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .25s,transform .25s}
+.vcap.show{opacity:1;transform:none;pointer-events:auto}
+.vcap-team{border-color:rgba(240,194,75,.6);box-shadow:0 20px 50px -18px rgba(0,0,0,.9),0 0 30px -12px #f0c24b}
+.vcap b{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#4fd1e0;margin-bottom:3px}
+.vcap-team b{color:#f0c24b}
+.vcap span{font-size:14px;line-height:1.45}
+.vcap-av{width:46px;height:46px;flex:0 0 auto;border-radius:50%}
+.vcap-x{position:absolute;top:6px;right:8px;border:0;background:none;color:#9fb0d0;font-size:20px;cursor:pointer}
+.vcap-orb{position:relative;width:46px;height:46px;flex:0 0 auto;border-radius:50%;background:radial-gradient(circle,#bff6ff 0,#4fd1e0 35%,#1a3a8a 75%);box-shadow:0 0 22px #4fd1e0}
+.vcap-orb i{position:absolute;inset:-6px;border-radius:50%;border:2px solid rgba(79,209,224,.6);animation:orbPulse 1.6s ease-out infinite}
+.vcap-orb i:nth-child(2){animation-delay:.5s}.vcap-orb i:nth-child(3){animation-delay:1s}
+@keyframes orbPulse{from{transform:scale(.8);opacity:.9}to{transform:scale(1.5);opacity:0}}
+@media (prefers-reduced-motion:reduce){.vcap-orb i{animation:none}}
+.crew .tour-ic{font-size:40px;background:linear-gradient(135deg,#f0c24b,#4fd1e0)}
+.crew-rows{display:grid;gap:8px;text-align:left;margin:4px 0 14px}
+.crew-row{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px;align-items:center}
+.crew-row span{font-size:12.5px;color:var(--txt-dim);font-weight:600}
+.crew-row input{width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--line-strong);background:var(--panel-2);color:var(--txt);font:inherit}
+.crew-row input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent)}
+@media (max-width:480px){.crew-row{grid-template-columns:1fr;gap:4px}}
+.crew-voice{display:flex;gap:10px;align-items:center;text-align:left;font-size:12.5px;color:var(--txt-dim);margin-bottom:14px}
+.crew-list{list-style:none;margin:0 0 10px;padding:0;display:grid;gap:6px}
+.crew-list li{display:flex;justify-content:space-between;gap:10px;font-size:13px}
+.crew-list span{color:var(--txt-dim)}
+.crew-btns{display:flex;gap:8px;flex-wrap:wrap}
+.crew-btn{font-size:16px}
+.crew-cta{border-color:color-mix(in srgb,var(--gold) 60%,transparent)}

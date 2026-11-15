@@ -142,6 +142,7 @@ function ascentRun(o, done) {
     if (said[k]) return; said[k] = true;
     var cap = document.getElementById('as-cap');
     cap.textContent = txt; cap.className = 'as-cap ' + (cls || '');
+    if (typeof voiceSay === 'function') voiceSay('nexus', txt, { queue: k !== 'cd', fast: true });
   }
   function help() {
     paused = true;
@@ -154,6 +155,7 @@ function ascentRun(o, done) {
     var el = document.getElementById('as-end');
     el.hidden = false;
     el.innerHTML = '<div class="as-card ' + (cls || '') + '"><h2>' + esc(title) + '</h2><div class="as-body">' + html + '</div><button class="btn primary" id="as-ok">' + esc(btn) + '</button></div>';
+    if (typeof voiceSay === 'function' && cls) voiceSay('nexus', title + (/[.!?]$/.test(title) ? ' ' : '. ') + (el.querySelector('.as-body p') ? el.querySelector('.as-body p').textContent : ''));
     var b = document.getElementById('as-ok');
     b.onclick = cb; b.focus();
   }
@@ -332,9 +334,12 @@ function ascentRun(o, done) {
     if (!s.lit) {
       count -= dt * 2.2;
       document.getElementById('as-met').textContent = 'T−' + Math.max(0, Math.ceil(count));
+      if (typeof crewCall === 'function') say('cd', es ? crewCall('pil').replace(/^./, function (m) { return m.toUpperCase(); }) + ', todos los sistemas listos. T menos diez.' : crewCall('pil').replace(/^./, function (m) { return m.toUpperCase(); }) + ', all systems go. T minus ten.');
       if (count <= 3) say('ign', es ? 'Encendido de motores' : 'Engine start');
       if (count <= 0) { s.lit = true; SFX.beep(true); SFX.rumble(4); say('lift', (es ? '¡Despegue! ' : 'Liftoff! ') + (o.lv || '')); }
     } else if (!s.done) {
+      if (s.q > ASC.QWARN) say('mq', es ? 'Max-Q: presión dinámica alta. Reduce el empuje.' : 'Max-Q: high dynamic pressure. Throttle down.', 'warn');
+      if (s.h > 100e3) say('space', es ? 'Superamos los cien kilómetros: estamos en el espacio.' : 'Passing one hundred kilometres: we are in space.');
       var auto = document.getElementById('as-ap').checked;
       if (auto) {
         var gp = ASC.guide(s);

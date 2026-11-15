@@ -213,6 +213,7 @@ function celebrateCheck() {
   S.celebrated[S.phase] = true;
   confetti();
   SFX.chime && SFX.chime();
+  if (typeof voiceSay === 'function') voiceSay('nexus', LANG === 'es' ? 'Todos los sistemas en verde. Fase lista.' : 'All systems green. Phase ready.', { queue: true });
   toast('<span class="toast-ic">🚀</span><span><b>' + esc(LANG === 'es' ? '¡Fase lista!' : 'Phase ready!') + '</b>' +
     esc(LANG === 'es' ? 'El diseño cierra: todos los márgenes en verde.' : 'The design closes: every margin is green.') + '</span>', 'gold');
 }
