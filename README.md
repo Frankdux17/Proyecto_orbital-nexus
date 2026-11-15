@@ -160,6 +160,13 @@ A spectrometer that fills the memory and never transmits scores exactly zero.
   physics (wormholes need negative energy; quantum teleportation is real but moves information,
   as the Micius satellite showed in 2017) and a rocket comparison: trip time and roughly
   300–400 t of CO₂ per kerosene launch.
+- **Voices, crew and NEXUS, an AI that learns.** Enter the names of the crew flying the
+  simulation; the team speaks to them by name and NEXUS, the onboard assistant, greets the
+  crew, reads the status of thrusters, power, link and time, counts down the launch and calls
+  out the flight. Ask NEXUS by typing or by voice: it answers with rules over the live mission,
+  the catalogue and the glossary, says when it is not sure, and lets a scientist teach it —
+  learned knowledge is reused, can be corrected, and exports to JSON for a notebook. Voices and
+  speech recognition follow the chosen language (Spanish or English); everything is captioned.
 - **Share and play.** “Share my design” creates a link with the whole spacecraft for a classmate
   to open and improve; a new mini game flies a Dragonfly-style drone over Titan's dunes
   (1.35 m/s² gravity, air four times denser than Earth's, a methane lake and an RTG-charged
@@ -216,6 +223,8 @@ assets/js/lab.js        engineering lab: calculators, charts and the trade-space
 assets/js/help.js       status ring, glossary, welcome tour, celebrations, share links, vision panel
 assets/js/titan.js      Titan rotorcraft flight mini game
 assets/js/space-bg.js   interactive space background (parallax stars, nebulae, constellation, comets)
+assets/js/voice.js      crew names, team voices and NEXUS callouts (Web Speech API, captioned)
+assets/js/nexus-ai.js   NEXUS chat: a rule-based expert system that learns from scientists
 assets/js/portal.js     future mode: the quantum portal rescue game (labelled science fiction)
 assets/js/scanner.js    orbital scanner: four instruments, geolocated signs of life on Earth, Mars, Europa
 assets/img/             project logo, poster, favicon and social preview
@@ -380,6 +389,13 @@ Tierra.** Un espectrómetro que llena la memoria y nunca transmite vale exactame
   la física real (los agujeros de gusano necesitan energía negativa; la teletransportación
   cuántica existe pero mueve información, como mostró el satélite Micius en 2017) y una
   comparación con el cohete: tiempo de viaje y unas 300–400 t de CO₂ por lanzamiento.
+- **Voces, tripulación y NEXUS, una IA que aprende.** Escribe los nombres de la tripulación;
+  el equipo les habla por su nombre y NEXUS, el asistente de a bordo, saluda, informa el estado
+  de propulsores, energía, enlace y tiempo, cuenta el despegue y narra el vuelo. Pregúntale
+  escribiendo o con la voz: responde con reglas sobre la misión en vivo, el catálogo y el
+  glosario, dice cuando no está seguro y deja que un científico le enseñe; lo aprendido se
+  reutiliza, se puede corregir y se exporta a JSON para un cuaderno. Las voces siguen el idioma
+  elegido y todo lleva subtítulos.
 - **Comparte y juega.** «Compartir mi diseño» crea un enlace con la nave completa para que un
   compañero la abra y la mejore; un minijuego nuevo vuela un dron tipo Dragonfly sobre las
   dunas de Titán (gravedad de 1,35 m/s², aire cuatro veces más denso, un lago de metano y una

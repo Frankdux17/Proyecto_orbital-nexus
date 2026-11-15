@@ -1762,3 +1762,50 @@ body{background:
 .crew-btns{display:flex;gap:8px;flex-wrap:wrap}
 .crew-btn{font-size:16px}
 .crew-cta{border-color:color-mix(in srgb,var(--gold) 60%,transparent)}
+
+/* ---------------------------------------------------------------- *
+ * NEXUS chat: the expert system that learns                         *
+ * ---------------------------------------------------------------- */
+.nx{position:fixed;right:16px;bottom:16px;top:72px;z-index:135;width:min(420px,calc(100% - 32px));display:flex;flex-direction:column;
+  border-radius:18px;overflow:hidden;background:rgba(6,10,28,.96);color:#e8eefc;border:1px solid rgba(79,209,224,.55);
+  box-shadow:0 30px 80px -24px rgba(0,0,0,.9),0 0 40px -14px #4fd1e0;backdrop-filter:blur(10px)}
+.nx[hidden]{display:none}
+.nx-head{display:flex;gap:12px;align-items:center;padding:12px 14px;border-bottom:1px solid rgba(79,209,224,.25);background:linear-gradient(120deg,rgba(79,209,224,.14),transparent)}
+.nx-head .vcap-orb{width:38px;height:38px}
+.nx-head b{display:block;font-size:16px;letter-spacing:.12em}
+.nx-head span{display:block;font-size:11.5px;color:#9fb0d0}
+.nx-x{margin-left:auto;color:#e8eefc;border-color:rgba(140,170,230,.3)}
+.nx-log{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.nx-msg{max-width:88%;padding:9px 12px;border-radius:14px;font-size:13.5px;line-height:1.5}
+.nx-msg p{margin:0}
+.nx-bot{align-self:flex-start;background:rgba(79,209,224,.1);border:1px solid rgba(79,209,224,.3);border-bottom-left-radius:4px}
+.nx-me{align-self:flex-end;background:linear-gradient(135deg,#4fd1e0,#7aa2ff);color:#04161c;font-weight:600;border-bottom-right-radius:4px}
+.nx-src{display:inline-block;margin-top:6px;font-size:11px;font-weight:700;color:#f0c24b}
+.nx-fix{display:block;margin-top:6px;border:0;background:none;color:#9fb0d0;font:600 11.5px inherit;cursor:pointer;padding:0;text-decoration:underline}
+.nx-chips{display:flex;gap:6px;flex-wrap:wrap;padding:0 12px 8px}
+.nx-chip{font:600 11.5px inherit;padding:5px 10px;border-radius:999px;border:1px solid rgba(79,209,224,.4);background:rgba(79,209,224,.08);color:#c9f3f8;cursor:pointer}
+.nx-teach{margin:0 12px 8px;padding:10px;border-radius:12px;background:rgba(240,194,75,.1);border:1px solid rgba(240,194,75,.5);display:flex;flex-direction:column;gap:6px}
+.nx-teach[hidden]{display:none}
+.nx-teach b{color:#f0c24b;font-size:13px}
+.nx-teach span{font-size:12px;color:#dbe5f7}
+.nx-teach textarea{width:100%;border-radius:10px;border:1px solid rgba(240,194,75,.5);background:rgba(0,0,0,.3);color:#fff;font:inherit;font-size:13px;padding:8px;resize:vertical}
+.nx-tbtn{display:flex;gap:8px;justify-content:flex-end}
+.nx .btn{color:#e8eefc;border-color:rgba(140,170,230,.3);background:rgba(255,255,255,.03)}
+.nx .btn.primary{background:linear-gradient(135deg,#f0c24b,#4fd1e0);color:#04161c;border-color:transparent}
+.nx-form{display:flex;gap:6px;padding:10px 12px;border-top:1px solid rgba(79,209,224,.2)}
+.nx-form input{flex:1;min-width:0;padding:10px 12px;border-radius:12px;border:1px solid rgba(140,170,230,.3);background:rgba(0,0,0,.3);color:#fff;font:inherit;font-size:14px}
+.nx-form input:focus{outline:none;border-color:#4fd1e0}
+.nx-mic,.nx-send{width:42px;border-radius:12px;border:1px solid rgba(79,209,224,.45);background:rgba(79,209,224,.12);color:#fff;font-size:17px;cursor:pointer}
+.nx-send{background:linear-gradient(135deg,#4fd1e0,#7aa2ff);color:#04161c;border:0}
+.nx-mic.on{background:#f0655f;border-color:#f0655f;animation:readyPulse 1.2s infinite}
+.nx-foot{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:8px 12px;font-size:12px;color:#9fb0d0;border-top:1px solid rgba(79,209,224,.15)}
+.nx-foot span{flex:1}
+.nx-foot button,.nx-imp{border:0;background:none;color:#4fd1e0;font:600 12px inherit;cursor:pointer;padding:0}
+.nx-kb{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:8px}
+.nx-kb li{padding:8px;border-radius:10px;background:rgba(0,0,0,.25);display:grid;gap:3px}
+.nx-kb b{font-size:12.5px}
+.nx-kb span{font-size:12.5px;color:#dbe5f7}
+.nx-kb small{font-size:11px;color:#9fb0d0}
+.nx-kb button{justify-self:end;border:0;background:none;color:#f0655f;font:600 11.5px inherit;cursor:pointer}
+.nx-btn{font-size:16px}
+@media (max-width:560px){.nx{right:8px;left:8px;width:auto;top:64px;bottom:8px}}

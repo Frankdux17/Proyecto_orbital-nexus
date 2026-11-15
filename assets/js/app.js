@@ -1403,7 +1403,7 @@ function wire() {
     if (act === 'scan') { scanFromGame(); return; }
     if (act === 'portal') { portalOpen(); return; }
     if (act === 'crew') { crewOpen(); return; }
-    if (act === 'nexus') { voiceSay('nexus', nexusReport()); return; }
+    if (act === 'nexus') { if (NX.open) nxClose(); else nxOpen(); return; }
     if (act === 'fix') { applyFix(el.getAttribute('data-v')); return; }
     if (act === 'diff') { S.diff = el.getAttribute('data-v'); setPref('on_diff', S.diff); render(); return; }
     if (act === 'resume') { resumeGame(); return; }

@@ -112,6 +112,7 @@ var BADGES = [
   { id: 'nogo', icon: '🎲', name: { es: 'Temerario', en: 'Daredevil' }, desc: { es: 'Lanza con el clima en NO-GO.', en: 'Launch with a weather NO-GO.' } },
   { id: 'teamwork', icon: '🤝', name: { es: 'Trabajo en equipo', en: 'Teamwork' }, desc: { es: 'Resuelve una falla con la solución de tu centro de control.', en: 'Fix a failure with your mission control team\'s solution.' } },
   { id: 'engineer', icon: '🧮', name: { es: 'Ingeniero de cálculo', en: 'Number cruncher' }, desc: { es: 'Abre el Laboratorio de ingeniería y haz tus propios cálculos.', en: 'Open the Engineering lab and run your own numbers.' } },
+  { id: 'teacher', icon: '🧠', name: { es: 'Mentor de NEXUS', en: 'NEXUS mentor' }, desc: { es: 'Enseña a NEXUS algo que no sabía.', en: 'Teach NEXUS something it did not know.' } },
   { id: 'portal', icon: '🌀', name: { es: 'Rescatista del futuro', en: 'Rescuer of the future' }, desc: { es: 'Completa las cuatro misiones del portal cuántico.', en: 'Complete all four quantum portal missions.' } },
   { id: 'hunter', icon: '🔭', name: { es: 'Cazador de biofirmas', en: 'Biosignature hunter' }, desc: { es: 'Confirma todas las señales de un mundo con el escáner orbital.', en: 'Confirm every signal on one world with the orbital scanner.' } },
   { id: 'titan', icon: '🚁', name: { es: 'Volar en otro mundo', en: 'Flying on another world' }, desc: { es: 'Completa la misión a Titán.', en: 'Complete the Titan mission.' } },
