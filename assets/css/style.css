@@ -74,6 +74,8 @@
 }
 
 *{box-sizing:border-box}
+/* author display rules (.modal-back, .navbar, .hud) would otherwise beat the hidden attribute */
+[hidden]{display:none!important}
 html,body{margin:0;padding:0}
 body{
   background:var(--bg);
@@ -384,4 +386,146 @@ input[type=range]::-moz-range-thumb{
   .nav-btns{width:100%}
   .btn{flex:1 1 0}
 }
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* =================================================================
+   Interactive layer: spacecraft preview, mission view, launch,
+   mini game, badges, difficulty, toasts
+   ================================================================= */
+.side{max-height:calc(100vh - 124px);overflow-y:auto;scrollbar-width:thin}
+@media (max-width:980px){.side{max-height:none;overflow:visible}}
+
+.icon-btn{
+  width:32px;height:32px;display:grid;place-items:center;border-radius:50%;
+  background:var(--panel-2);border:1px solid var(--line-strong);color:var(--accent);cursor:pointer;padding:0;
+}
+.icon-btn:hover{border-color:var(--accent)}
+.icon-btn svg{width:17px;height:17px}
+.icon-btn .snd-off{display:none}
+.icon-btn.muted{color:var(--txt-faint)}
+.icon-btn.muted .snd-on{display:none}
+.icon-btn.muted .snd-off{display:inline}
+
+.kbd{
+  display:inline-block;font-family:var(--mono);font-size:10px;line-height:1;
+  padding:3px 5px;border-radius:4px;border:1px solid currentColor;opacity:.7;margin-right:8px;vertical-align:1px;
+}
+.btn .kbd{margin:0 0 0 8px}
+
+/* phase meta: segment, CML, MDL study, difficulty */
+.phase-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.pm{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;
+  padding:4px 9px;border-radius:999px;border:1px solid var(--line-strong);color:var(--txt-dim);background:var(--panel-2);
+}
+.pm.seg-user,.segc.seg-user{--seg:var(--sci)}
+.pm.seg-space,.segc.seg-space{--seg:var(--accent)}
+.pm.seg-ground,.segc.seg-ground{--seg:var(--ok)}
+.pm.seg-launch,.segc.seg-launch{--seg:var(--warn)}
+.pm.seg-ops{--seg:var(--accent-2)}
+.pm[class*="seg-"]{color:var(--seg);border-color:color-mix(in srgb,var(--seg) 55%,transparent);background:color-mix(in srgb,var(--seg) 10%,transparent)}
+.pm.diff-cadet{color:var(--ok)} .pm.diff-dir{color:var(--bad)}
+
+/* spacecraft preview */
+.ship-panel{padding-bottom:12px}
+.ship{display:block;width:100%;height:auto;max-height:190px}
+.ship-float{animation:shipFloat 6s ease-in-out infinite;transform-origin:50% 50%;transform-box:fill-box}
+@keyframes shipFloat{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-4px) rotate(-1.2deg)}}
+.ship-wing{fill:color-mix(in srgb,var(--accent-2) 30%,transparent);stroke:var(--accent-2);stroke-width:1}
+.ship-cell{stroke:color-mix(in srgb,var(--accent-2) 55%,transparent);stroke-width:.6}
+.ship-bus{fill:color-mix(in srgb,var(--gold) 26%,var(--panel-solid));stroke:var(--line-strong);stroke-width:1}
+.ship-bus.vault{stroke:var(--gold)}
+.ship-dish{fill:var(--panel-solid);stroke:var(--txt-dim);stroke-width:1.2}
+.ship-lens{fill:var(--sci);stroke:var(--panel-solid);stroke-width:1}
+.ship-rtg{fill:color-mix(in srgb,var(--warn) 70%,transparent);stroke:var(--warn)}
+.ship-ion{fill:color-mix(in srgb,var(--accent) 45%,transparent);animation:ionPulse 1.4s ease-in-out infinite}
+@keyframes ionPulse{50%{opacity:.35}}
+.ship-t{font-family:var(--mono);font-size:10px;fill:var(--txt-faint)}
+.ship-tags{font-family:var(--mono);font-size:10.5px;color:var(--txt-faint);text-align:center;margin-top:4px}
+
+/* live mission view */
+.viz{display:block;width:100%;height:240px;border-radius:var(--radius-sm);border:1px solid var(--line)}
+.viz-legend{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:8px;font-size:11px;color:var(--txt-faint)}
+.viz-legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;vertical-align:0}
+@media (max-width:620px){.viz{height:200px}}
+
+/* launch overlay: always a night sky */
+.launch{position:fixed;inset:0;z-index:60;background:#03050c;color:#e8eefc}
+.launch canvas{position:absolute;inset:0;width:100%;height:100%}
+.l-hud{position:absolute;left:0;right:0;top:7vh;text-align:center;pointer-events:none;padding:0 16px}
+.l-met{font-family:var(--mono);font-size:clamp(28px,6vw,54px);font-weight:700;letter-spacing:.06em;color:#4fd1e0;text-shadow:0 0 24px rgba(79,209,224,.35)}
+.l-cap{font-size:clamp(14px,2.2vw,19px);margin-top:6px;color:#c9d6ef;min-height:1.6em}
+.l-cap.bad{color:#f0655f;font-weight:700}
+.l-skip{position:absolute;right:16px;bottom:16px;color:#9fb0d0;border-color:rgba(159,176,208,.4)}
+.l-game{position:absolute;inset:0;display:grid;place-items:center;padding:16px;background:rgba(3,5,12,.55);backdrop-filter:blur(3px)}
+.lg-card{
+  width:100%;max-width:560px;background:#0f1729;border:1px solid rgba(120,150,210,.38);border-radius:var(--radius);
+  padding:22px;box-shadow:0 24px 60px -20px rgba(0,0,0,.9);animation:pop .28s ease-out;
+}
+.lg-kick{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#4fd1e0}
+.lg-card h2{margin:4px 0 6px;font-size:22px;color:#e8eefc}
+.lg-card p{color:#9fb0d0;font-size:13.5px;margin:0 0 16px}
+.lg-bar{position:relative;height:30px;border-radius:8px;background:#1a2440;border:1px solid rgba(120,150,210,.3);overflow:hidden}
+.lg-zone{position:absolute;top:0;bottom:0;background:rgba(62,207,154,.35);border-left:2px solid #3ecf9a;border-right:2px solid #3ecf9a}
+.lg-needle{position:absolute;top:-2px;bottom:-2px;width:4px;margin-left:-2px;background:#f0c24b;box-shadow:0 0 12px #f0c24b;border-radius:2px}
+.lg-scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:#6b7d9e;margin:5px 0 16px}
+.lg-btn{width:100%;padding:14px;font-size:15px;letter-spacing:.06em;background:#4fd1e0;border-color:#4fd1e0;color:#04161c}
+.lg-res{margin-top:12px;font-size:13.5px;min-height:2.6em;color:#c9d6ef}
+.lg-res.ok b{color:#3ecf9a} .lg-res.warn b{color:#f0a93b} .lg-res.bad b{color:#f0655f}
+
+/* splash: difficulty, resume, badges */
+.diffs{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:9px;margin:26px 0 0;text-align:left}
+.diff{
+  font-family:inherit;color:var(--txt);text-align:left;cursor:pointer;
+  background:var(--panel-2);border:1px solid var(--line);border-radius:var(--radius-sm);padding:11px 13px;
+  transition:border-color .15s,background .15s;
+}
+.diff b{display:block;font-size:13.5px}
+.diff span{display:block;font-size:11.5px;color:var(--txt-dim);margin-top:3px}
+.diff:hover{border-color:var(--line-strong)}
+.diff.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 11%,transparent)}
+.splash .cta{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+.btn.big{padding:14px 28px;font-size:15px}
+.cta .btn small{display:block;font-weight:400;font-size:11px;color:var(--txt-faint);margin-top:2px}
+.splash .splash-note{font-size:12px;color:var(--txt-faint)}
+.shelf{margin-top:30px;text-align:left}
+.shelf h2{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--txt-dim);margin:0 0 10px}
+.shelf h2 span{font-family:var(--mono);color:var(--gold)}
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.badge{
+  display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:10px;
+  border:1px dashed var(--line-strong);border-radius:var(--radius-sm);background:var(--panel-2);opacity:.6;
+}
+.badge.got{opacity:1;border-style:solid;border-color:color-mix(in srgb,var(--gold) 60%,transparent);background:color-mix(in srgb,var(--gold) 9%,transparent)}
+.badge-ic{font-size:22px;line-height:1}
+.badge-n{font-size:12.5px;font-weight:650}
+.badge-d{font-size:11px;color:var(--txt-faint)}
+
+/* report: four mission segments */
+.segs-wrap{display:grid;grid-template-columns:220px minmax(0,1fr);gap:14px;align-items:center}
+@media (max-width:700px){.segs-wrap{grid-template-columns:1fr}}
+.segs{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:9px}
+.segc{border:1px solid var(--line);border-left:3px solid var(--seg);border-radius:var(--radius-sm);padding:10px;background:var(--panel-2)}
+.segc .k{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--seg)}
+.segc .v{font-weight:650;font-size:13.5px;margin-top:3px}
+.segc .s{font-family:var(--mono);font-size:10.5px;color:var(--txt-faint);margin-top:2px}
+
+/* toasts */
+.toasts{position:fixed;right:16px;bottom:78px;z-index:70;display:flex;flex-direction:column;gap:8px;max-width:min(320px,calc(100vw - 32px))}
+.toast{
+  display:flex;gap:10px;align-items:center;padding:11px 13px;border-radius:var(--radius-sm);
+  background:var(--panel-solid);border:1px solid var(--line-strong);box-shadow:var(--shadow);font-size:12.5px;
+  animation:toastIn .3s ease-out;transition:opacity .4s,transform .4s;
+}
+.toast b{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+.toast.gold{border-color:color-mix(in srgb,var(--gold) 60%,transparent)}
+.toast-ic{font-size:24px}
+.toast.out{opacity:0;transform:translateX(20px)}
+@keyframes toastIn{from{opacity:0;transform:translateY(10px)}}
+
+/* event modal: a little drama */
+.modal{animation:pop .25s ease-out;border-top:3px solid var(--warn)}
+@keyframes pop{from{opacity:0;transform:scale(.96)}}
+.choice .kbd{color:var(--accent)}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}

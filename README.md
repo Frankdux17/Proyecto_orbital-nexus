@@ -40,6 +40,16 @@ Then a **final report** scores science, engineering discipline, cost and surviva
 a technical critique of your specific design, and names the real NASA mission yours most
 resembles.
 
+### Built to be played, not just studied
+
+- **Three difficulty levels** (Cadet, Engineer, Flight director), as in NASA's telescope design game.
+- **Your spacecraft, drawn live**: arrays, RTGs, dish, instruments, booms and lander legs change as you design.
+- **Animated launch**: countdown, Max-Q, staging, fairing separation and spacecraft deploy — or the failure, if the odds say so.
+- **Arrival mini game**: time the orbit insertion burn (or the parachute on Mars). Accuracy saves propellant or improves the landing odds.
+- **Live mission view** during operations: the orbit, the science cone, data packets flowing to Earth and loss of line of sight behind the planet, all driven by your sliders.
+- **Every phase is tagged** with its mission segment (launch, space, ground, user), JPL Concept Maturity Level and Mission Design Lab study type.
+- **11 badges**, sound effects (mutable), keyboard shortcuts and **autosave**, so a mission can be paused on a short break and resumed later.
+
 **The central lesson is deliberately brutal: only data you successfully downlink counts.**
 A spectrometer that fills the memory and never transmits scores exactly zero.
 
@@ -76,6 +86,8 @@ assets/css/style.css    design system, light and dark
 assets/js/i18n.js       ES / EN string table
 assets/js/data.js       mission catalogue: destinations, buses, instruments, launchers, events
 assets/js/engine.js     the engineering model — rocket equation, power, link budget, scoring
+assets/js/fx.js         sound, badges, difficulty levels, autosave, keyboard shortcuts
+assets/js/viz.js        live spacecraft preview, mission view, launch sequence, arrival mini game
 assets/js/app.js        state machine, interface, operations simulator
 docs/MODEL.md           every equation and where its numbers come from
 ```

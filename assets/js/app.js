@@ -20,6 +20,8 @@ function freshState() {
     arrayHealth: 1, permScience: 1, permDl: 1, permPower: 1, permImaging: 1, permAnomaly: 1,
     alloc: { sci: 60, dl: 30 }, active: {},
     log: [], strip: [], pendingEvent: null, usedEvents: {},
+    diff: DIFF[pref('on_diff', 'eng')] ? pref('on_diff', 'eng') : 'eng',
+    burnAcc: null, overflow: false, badgesChecked: false, newBadges: [],
     rng: (Math.random() * 4294967296) >>> 0
   };
 }
@@ -197,22 +199,59 @@ function renderNav() {
  * phase 0 — splash                                                 *
  * ---------------------------------------------------------------- */
 function viewSplash() {
+  var es = LANG === 'es', sv = loadSave(), dh = '';
+  for (var k in DIFF) dh += '<button class="diff' + (S.diff === k ? ' on' : '') + '" data-act="diff" data-v="' + k + '">' +
+    '<b>' + esc(L(DIFF[k].name)) + '</b><span>' + esc(L(DIFF[k].desc)) + '</span></button>';
+  var shelf = badgeShelf();
+  var resume = '';
+  if (sv) {
+    var sd = DATA.find(DATA.destinations, sv.destId);
+    resume = '<button class="btn" data-act="resume">' + esc(es ? 'Continuar misión guardada' : 'Resume saved mission') +
+      '<small>' + esc(t(STEPS[Math.min(sv.phase, 7) - 1]) + (sd ? ' · ' + L(sd.name) : '') + (sv.phase === 6 ? ' · ' + t('turn') + ' ' + sv.turn : '')) + '</small></button>';
+  }
   return '<div class="splash">' +
     '<div class="tag">' + esc(t('splash_tag')) + '</div>' +
     '<h1>' + esc(t('splash_title')) + '</h1>' +
     '<p>' + esc(t('splash_body')) + '</p>' +
-    '<div class="cta"><button class="btn primary" data-act="start">' + esc(t('splash_start')) + '</button></div>' +
+    '<div class="diffs" role="group" aria-label="' + esc(es ? 'Dificultad' : 'Difficulty') + '">' + dh + '</div>' +
+    '<div class="cta"><button class="btn primary big" data-act="start">' + esc(t('splash_start')) + '</button>' + resume + '</div>' +
+    '<p class="splash-note">' + esc(es ? 'Tu progreso se guarda solo: puedes dejar la misión en un descanso y retomarla después. Atajos: Enter avanza, 1–4 responde a una anomalía.'
+      : 'Progress saves itself: leave the mission during a break and pick it up later. Shortcuts: Enter advances, 1–4 answers an anomaly.') + '</p>' +
     '<div class="feat">' +
     '<div><strong>' + esc(t('splash_f1t')) + '</strong><span>' + esc(t('splash_f1b')) + '</span></div>' +
     '<div><strong>' + esc(t('splash_f2t')) + '</strong><span>' + esc(t('splash_f2b')) + '</span></div>' +
     '<div><strong>' + esc(t('splash_f3t')) + '</strong><span>' + esc(t('splash_f3b')) + '</span></div>' +
     '<div><strong>' + esc(t('splash_f4t')) + '</strong><span>' + esc(t('splash_f4b')) + '</span></div>' +
-    '</div></div>';
+    '</div>' +
+    '<div class="shelf"><h2>' + esc(es ? 'Insignias' : 'Badges') + ' <span>' + shelf.count + '/' + shelf.total + '</span></h2>' +
+    '<div class="badges">' + shelf.html + '</div></div></div>';
 }
 
+/* where each phase sits in the NASA picture: mission segment, JPL Concept
+   Maturity Level and the matching Mission Design Lab study type */
+var PHASE_META = {
+  1: { seg: 'user', cml: { es: 'CML 1–2 · Idea y viabilidad', en: 'CML 1–2 · Idea and feasibility' }, mdl: { es: 'MDL · Lluvia de ideas', en: 'MDL · Office hours' } },
+  2: { seg: 'space', cml: { es: 'CML 3 · Espacio de compensaciones', en: 'CML 3 · Trade space' }, mdl: { es: 'MDL · Estudio de compensaciones', en: 'MDL · Trade study' } },
+  3: { seg: 'space', cml: { es: 'CML 3 · Espacio de compensaciones', en: 'CML 3 · Trade space' }, mdl: { es: 'MDL · Estudio de compensaciones', en: 'MDL · Trade study' } },
+  4: { seg: 'ground', cml: { es: 'CML 3 · Espacio de compensaciones', en: 'CML 3 · Trade space' }, mdl: { es: 'MDL · Estudio de compensaciones', en: 'MDL · Trade study' } },
+  5: { seg: 'launch', cml: { es: 'CML 4 · Diseño de punto', en: 'CML 4 · Point design' }, mdl: { es: 'MDL · Diseño por puntos', en: 'MDL · Point design' } },
+  6: { seg: 'ops', cml: { es: 'Implementación · operaciones', en: 'Implementation · operations' }, mdl: null }
+};
+var SEG_NAME = {
+  user: { es: 'Segmento de usuarios', en: 'User segment' },
+  space: { es: 'Segmento espacial', en: 'Space segment' },
+  ground: { es: 'Segmento terrestre', en: 'Ground segment' },
+  launch: { es: 'Segmento de lanzamiento', en: 'Launch segment' },
+  ops: { es: 'Segmentos terrestre + usuarios', en: 'Ground + user segments' }
+};
+
 function head(kick, title, lead) {
+  var m = PHASE_META[S.phase], meta = '';
+  if (m) meta = '<div class="phase-meta"><span class="pm seg-' + m.seg + '">' + esc(L(SEG_NAME[m.seg])) + '</span>' +
+    '<span class="pm">' + esc(L(m.cml)) + '</span>' + (m.mdl ? '<span class="pm">' + esc(L(m.mdl)) + '</span>' : '') +
+    '<span class="pm diff-' + S.diff + '">' + esc(L(DIFF[S.diff].name)) + '</span></div>';
   return '<div class="phase-head"><div class="phase-kicker">' + esc(t(kick)) + '</div>' +
-    '<h1>' + esc(t(title)) + '</h1><p>' + esc(t(lead)) + '</p></div>';
+    '<h1>' + esc(t(title)) + '</h1><p>' + esc(t(lead)) + '</p>' + meta + '</div>';
 }
 
 function specs(arr) {
@@ -414,7 +453,7 @@ function viewPlatform(c) {
     h += '</div></div>';
   }
 
-  h += '</div><div class="side"><div class="panel"><h2>' + esc(LANG === 'es' ? 'Presupuestos' : 'Budgets') + '</h2>';
+  h += '</div><div class="side">' + shipPanel(c) + '<div class="panel"><h2>' + esc(LANG === 'es' ? 'Presupuestos' : 'Budgets') + '</h2>';
   h += rows([
     [LANG === 'es' ? 'Masa seca' : 'Dry mass', n0(c.mass.dry) + ' kg'],
     [LANG === 'es' ? '· bus' : '· bus', n0(c.mass.bus) + ' kg'],
@@ -460,7 +499,7 @@ function viewScience(c) {
       lock: lockMsg
     });
   }
-  h += '</div></div></div><div class="side"><div class="panel"><h2>' + esc(t('obj_coverage')) + '</h2>';
+  h += '</div></div></div><div class="side">' + shipPanel(c) + '<div class="panel"><h2>' + esc(t('obj_coverage')) + '</h2>';
   for (i = 0; i < c.coverage.length; i++) {
     var cv = c.coverage[i];
     var cls = cv.full ? 'met' : (cv.have > 0 ? 'partial' : 'unmet');
@@ -540,7 +579,7 @@ function viewLink(c) {
   }
   h += '</div></div>';
 
-  h += '</div><div class="side"><div class="panel"><h2>' + esc(t('link_calc')) + '</h2>' + rows([
+  h += '</div><div class="side">' + shipPanel(c) + '<div class="panel"><h2>' + esc(t('link_calc')) + '</h2>' + rows([
     [LANG === 'es' ? 'Distancia de diseño' : 'Design distance', c.dest ? (c.dest.commAu < 0.02 ? n0(c.dest.commAu * AU_M / 1000) + ' km' : n2(c.dest.commAu) + ' UA') : '—'],
     [LANG === 'es' ? 'Tasa de bajada' : 'Downlink rate', bps(c.link.bps)],
     [LANG === 'es' ? 'Horas de contacto' : 'Contact hours', n0(c.link.hours) + ' h/' + (LANG === 'es' ? 'turno' : 'turn')],
@@ -596,7 +635,7 @@ function viewLaunch(c) {
     (c.dest && c.dest.lander ? [LANG === 'es' ? 'Aterrizaje' : 'Landing', n1(od.edl * 100) + '%'] : null),
     [LANG === 'es' ? 'Probabilidad total de operar' : 'Overall chance of operating', n1(od.total * 100) + '%', true]
   ].filter(function (x) { return x; }));
-  h += '</div></div><div class="side"><div class="panel"><h2>' + esc(LANG === 'es' ? 'Hoja de datos final' : 'Final data sheet') + '</h2>';
+  h += '</div></div><div class="side">' + shipPanel(c) + '<div class="panel"><h2>' + esc(LANG === 'es' ? 'Hoja de datos final' : 'Final data sheet') + '</h2>';
   h += rows([
     [LANG === 'es' ? 'Masa de lanzamiento' : 'Launch mass', n0(c.mass.launch) + ' kg'],
     [LANG === 'es' ? 'Capacidad del cohete' : 'Rocket capability', n0(c.lvCap) + ' kg'],
@@ -628,31 +667,77 @@ function viewLaunch(c) {
 function doLaunch() {
   var c = comp();
   var od = ENG.successOdds(c);
-  var ok = true, reason = null;
-  if (rnd() > od.launch) { ok = false; reason = { es: 'El vehículo de lanzamiento falló durante el ascenso.', en: 'The launch vehicle failed during ascent.' }; }
+  var fail = null, reason = null, es = LANG === 'es';
+  if (rnd() > od.launch) { fail = 'launch'; reason = { es: 'El vehículo de lanzamiento falló durante el ascenso.', en: 'The launch vehicle failed during ascent.' }; }
   else if (rnd() > od.commission) {
-    ok = false;
+    fail = 'commission';
     reason = c.readiness < 0.9
       ? { es: 'La nave nunca completó la puesta en servicio: un defecto que una campaña de pruebas más larga habría encontrado.', en: 'The spacecraft never completed commissioning: a defect a longer test campaign would have caught.' }
       : { es: 'Una falla de la plataforma durante la puesta en servicio dejó la nave sin control.', en: 'A platform failure during commissioning left the spacecraft uncontrolled.' };
-  } else if (c.dest.lander && rnd() > od.edl) {
-    ok = false; reason = { es: 'La nave se perdió durante la entrada, el descenso y el aterrizaje.', en: 'The spacecraft was lost during entry, descent and landing.' };
   }
 
+  launchSequence({ fail: fail, lv: L(c.lv.name), dest: L(c.dest.name), cruise: c.cruiseDays }, function () {
+    if (fail) { launchClose(); endLaunch(false, reason); return; }
+    award('liftoff');
+
+    /* arrival: an orbit insertion burn, or the parachute call on a lander.
+       Timing changes the propellant bill or the odds of touching down. */
+    var lander = c.dest.lander, factor = 1, edlLost = false;
+    var nominal = c.mass.launch * (1 - Math.exp(-c.dest.dv * 1000 / (c.prop.isp * G0)));
+    burnGame({
+      kick: lander ? (es ? 'Entrada, descenso y aterrizaje' : 'Entry, descent and landing') : (es ? 'Llegada · ' : 'Arrival · ') + L(c.dest.name),
+      title: lander ? (es ? 'Despliega el paracaídas' : 'Deploy the parachute') : (es ? 'Quemado de inserción orbital' : 'Orbit insertion burn'),
+      body: lander
+        ? (es ? 'La nave cae a 1,6 km/s por la atmósfera marciana. Abre el paracaídas dentro de la ventana: muy pronto se rompe, muy tarde no frena a tiempo.'
+          : 'The spacecraft falls through the Martian atmosphere at 1.6 km/s. Open the chute inside the window: too early it tears, too late it cannot slow you down.')
+        : (es ? 'Enciende el motor cuando la aguja cruce la ventana verde. Un quemado fuera de la ventana exige maniobras de corrección y gasta propelente que necesitarás para mantener la órbita.'
+          : 'Fire the engine when the needle crosses the green window. A burn outside the window needs correction manoeuvres and spends propellant you will need for station keeping.'),
+      btn: lander ? (es ? 'ABRIR PARACAÍDAS' : 'DEPLOY CHUTE') : (es ? 'ENCENDER MOTOR' : 'FIRE ENGINE'),
+      zone: DIFF[S.diff].zone
+    }, function (acc) {
+      S.burnAcc = acc;
+      if (acc >= 0.9) award('burn');
+      if (lander) {
+        var pEdl = ENG.clamp(od.edl + (acc - 0.6) * 0.12, 0.05, 0.99);
+        if (rnd() > pEdl) { edlLost = true; SFX.fail(); return { text: es ? 'Se perdió la señal durante el descenso.' : 'Signal lost during descent.', cls: 'bad' }; }
+        award('landed');
+        return { text: es ? '¡Contacto con la superficie confirmado!' : 'Touchdown confirmed!', cls: 'ok' };
+      }
+      factor = 1.12 - 0.15 * acc;
+      var delta = nominal * (1 - factor);
+      return {
+        text: delta >= 0
+          ? (es ? 'Ahorraste ' + n0(delta) + ' kg de propelente para mantener la órbita.' : 'You saved ' + n0(delta) + ' kg of propellant for station keeping.')
+          : (es ? 'Las correcciones costaron ' + n0(-delta) + ' kg extra de propelente.' : 'Corrections cost an extra ' + n0(-delta) + ' kg of propellant.'),
+        cls: delta >= 0 ? 'ok' : 'warn'
+      };
+    }, function () {
+      launchClose();
+      if (edlLost) { endLaunch(false, { es: 'La nave se perdió durante la entrada, el descenso y el aterrizaje.', en: 'The spacecraft was lost during entry, descent and landing.' }); return; }
+      finishLaunch(c, nominal * factor);
+    });
+  });
+}
+
+function endLaunch(ok, reason) {
   S.launchSuccess = ok;
   S.failReason = reason;
+  S.alive = false; S.phase = 7;
+  render();
+}
 
-  if (!ok) { S.alive = false; S.phase = 7; render(); return; }
-
+function finishLaunch(c, used) {
+  S.launchSuccess = true;
+  S.failReason = null;
   /* insertion burn, then whatever propellant is left funds station keeping */
-  var m0 = c.mass.launch;
-  var used = m0 * (1 - Math.exp(-c.dest.dv * 1000 / (c.prop.isp * G0)));
   S.propLeft = Math.max(0, c.mass.propellant - used);
-  S.budgetLeft = c.cost.margin;
+  S.budgetLeft = c.cost.margin + DIFF[S.diff].bonus * c.cost.budget;
   for (var i = 0; i < c.instr.length; i++) S.active[c.instr[i].id] = true;
   S.phase = 6;
-  logit({ es: 'Lanzamiento nominal. Crucero de ' + c.cruiseDays + ' días completado; inserción consumió ' + n0(used) + ' kg de propelente.',
-          en: 'Nominal launch. ' + c.cruiseDays + ' day cruise completed; insertion consumed ' + n0(used) + ' kg of propellant.' }, 'good');
+  logit({ es: 'Lanzamiento nominal. Crucero de ' + c.cruiseDays + ' días completado; la llegada consumió ' + n0(used) + ' kg de propelente.',
+          en: 'Nominal launch. ' + c.cruiseDays + ' day cruise completed; arrival consumed ' + n0(used) + ' kg of propellant.' }, 'good');
+  if (S.burnAcc != null) logit({ es: 'Precisión de la maniobra de llegada: ' + n0(S.burnAcc * 100) + '%.', en: 'Arrival manoeuvre accuracy: ' + n0(S.burnAcc * 100) + '%.' }, S.burnAcc >= 0.7 ? 'good' : '');
+  if (DIFF[S.diff].bonus > 0) logit({ es: 'Modo cadete: reserva adicional de ' + money(DIFF[S.diff].bonus * c.cost.budget) + '.', en: 'Cadet mode: extra reserve of ' + money(DIFF[S.diff].bonus * c.cost.budget) + '.' }, 'good');
   render();
 }
 
@@ -668,7 +753,7 @@ function viewOps(c) {
   var h = head('p6_kick', 'p6_title', 'p6_lead');
   var stored = storedTotal();
 
-  h += '<div class="cols"><div>';
+  h += '<div class="cols"><div>' + vizPanel();
 
   /* turn strip */
   h += '<div class="panel"><h2>' + esc(t('turn')) + ' ' + S.turn + ' ' + esc(t('of')) + ' ' + c.opsTurns + '</h2><div class="turnstrip">';
@@ -753,7 +838,7 @@ function powerAvailable(c) {
 function rollEvent(c) {
   var hk = (100 - S.alloc.sci - S.alloc.dl) / 100;
   var radFactor = ENG.clamp(c.dest.radKrad / Math.max(1, c.shd.krad), 0.25, 3);
-  var p = 0.16 * (1.25 - hk * 1.1) * S.permAnomaly * radFactor * (1 + Math.max(0, 1 - c.readiness) * 1.5);
+  var p = 0.16 * (1.25 - hk * 1.1) * S.permAnomaly * radFactor * (1 + Math.max(0, 1 - c.readiness) * 1.5) * DIFF[S.diff].ev;
   if (rnd() > ENG.clamp(p, 0.02, 0.8)) return null;
 
   var pool = [];
@@ -862,6 +947,7 @@ function execTurn(c, mods) {
     logit({ es: 'Memoria saturada: se perdieron ' + gb(lost) + ' de datos sin transmitir.',
             en: 'Memory saturated: ' + gb(lost) + ' of untransmitted data was lost.' }, 'bad');
     S.strip[S.turn] = 'bad';
+    S.overflow = true;
   }
 
   /* downlink */
@@ -876,6 +962,9 @@ function execTurn(c, mods) {
       S.downlinked[k] = (S.downlinked[k] || 0) + moved;
     }
   }
+
+  vizBoost(sent);
+  if (sent > 0) SFX.data();
 
   /* station keeping */
   if (dest.skDvPerTurn > 0) {
@@ -922,9 +1011,10 @@ function showEvent(ev, c) {
     '<h2>' + esc(L(ev.title)) + '</h2><p>' + esc(L(ev.text)) + '</p>' +
     '<div class="ev-kind" style="color:var(--txt-faint)">' + esc(t('ev_choose')) + '</div>';
   for (var i = 0; i < ev.choices.length; i++) {
-    h += '<button class="choice" data-act="evchoice" data-v="' + i + '">' + esc(L(ev.choices[i].label)) +
+    h += '<button class="choice" data-act="evchoice" data-v="' + i + '"><span class="kbd">' + (i + 1) + '</span>' + esc(L(ev.choices[i].label)) +
       '<small>' + esc(L(ev.choices[i].note)) + '</small></button>';
   }
+  if (!S.pendingEvent) SFX.alarm();
   S.pendingEvent = ev;
   $('modal').innerHTML = h;
   $('modal-back').hidden = false;
@@ -944,6 +1034,7 @@ function resolveEvent(idx) {
  * ---------------------------------------------------------------- */
 function viewReport(c) {
   var sc = ENG.score(S, c);
+  checkEndBadges(c, sc);
   var crit = ENG.critique(S, c, sc);
   var gradeColor = { S: 'var(--accent)', A: 'var(--ok)', B: 'var(--accent-2)', C: 'var(--gold)', D: 'var(--warn)', F: 'var(--bad)' }[sc.grade];
 
@@ -1006,6 +1097,22 @@ function viewReport(c) {
   for (i = 0; i < crit.length; i++) h += '<div class="lesson">' + esc(L(crit[i])) + '</div>';
   h += '</div>';
 
+  /* the four mission segments, as NASA breaks a mission down */
+  var objMet = 0;
+  for (i = 0; i < sc.objectives.length; i++) if (sc.objectives[i].frac >= 1) objMet++;
+  var es = LANG === 'es';
+  h += '<div class="panel"><h2>' + esc(es ? 'Arquitectura de tu misión' : 'Your mission architecture') + '</h2><div class="segs-wrap">' +
+    '<div class="segs-ship">' + shipSVG(c) + '</div><div class="segs">' +
+    seg('launch', L(c.lv.name), (es ? 'fiabilidad ' : 'reliability ') + n1(c.lv.reliability * 100) + '% · ' + n0(c.mass.launch) + ' / ' + n0(c.lvCap) + ' kg') +
+    seg('space', L(c.bus.name), c.instr.length + (es ? ' instrumentos · ' : ' instruments · ') + n0(c.power.genEOL) + ' W') +
+    seg('ground', c.grd ? L(c.grd.name) : '—', bps(c.link.bps) + ' · ' + (c.band ? L(c.band.name) : '')) +
+    seg('user', gb(down) + (es ? ' entregados' : ' delivered'), objMet + '/' + sc.objectives.length + (es ? ' objetivos cumplidos' : ' objectives met')) +
+    '</div></div></div>';
+
+  if (S.newBadges && S.newBadges.length) {
+    h += '<div class="panel"><h2>' + esc(es ? 'Insignias de esta misión' : 'Badges from this mission') + '</h2><div class="badges">' + badgeShelf(S.newBadges).html + '</div></div>';
+  }
+
   /* analogue */
   h += '<div class="panel"><h2>' + esc(t('analog')) + '</h2><div class="analog"><div>' +
     '<div class="nasa">NASA</div><strong style="font-size:16px">' + esc(c.dest.analog.name) + '</strong>' +
@@ -1014,6 +1121,10 @@ function viewReport(c) {
     '<button class="btn primary wide" data-act="restart">' + esc(t('restart')) + '</button></div>';
 
   return h;
+}
+
+function seg(kind, main, sub) {
+  return '<div class="segc seg-' + kind + '"><div class="k">' + esc(L(SEG_NAME[kind])) + '</div><div class="v">' + esc(main) + '</div><div class="s">' + esc(sub) + '</div></div>';
 }
 
 function kv(k, v) { return '<div><div class="k">' + esc(k) + '</div><div class="v">' + v + '</div></div>'; }
@@ -1065,6 +1176,8 @@ function render() {
   var lt = $('lang-toggle').querySelectorAll('.lang-opt');
   for (var i = 0; i < lt.length; i++) lt[i].className = 'lang-opt' + (lt[i].getAttribute('data-l') === LANG ? ' on' : '');
   window.scrollTo(0, 0);
+  saveGame();
+  if (S.phase === 6) vizStart();
 }
 
 /* ---------------------------------------------------------------- *
@@ -1128,7 +1241,9 @@ function wire() {
     var el = e.target.closest ? e.target.closest('[data-act]') : null;
     if (!el) return;
     var act = el.getAttribute('data-act');
-    if (act === 'start') { enterPhase(1); return; }
+    if (act === 'start') { var d0 = S.diff; clearSave(); S = freshState(); S.diff = d0; enterPhase(1); return; }
+    if (act === 'diff') { S.diff = el.getAttribute('data-v'); setPref('on_diff', S.diff); render(); return; }
+    if (act === 'resume') { resumeGame(); return; }
     if (act === 'pick') { onPick(el.getAttribute('data-k'), el.getAttribute('data-v')); return; }
     if (act === 'instr') {
       var id = el.getAttribute('data-v'), i = S.instruments.indexOf(id);
@@ -1142,7 +1257,7 @@ function wire() {
       render(); return;
     }
     if (act === 'evchoice') { resolveEvent(parseInt(el.getAttribute('data-v'), 10)); return; }
-    if (act === 'restart') { S = freshState(); render(); return; }
+    if (act === 'restart') { clearSave(); S = freshState(); render(); return; }
     if (act === 'copy') {
       var c = comp(), txt = reportText(c, ENG.score(S, c));
       try {
@@ -1171,6 +1286,7 @@ function wire() {
   });
 
   $('btn-next').addEventListener('click', function () {
+    if (OVERLAY_OPEN) return;
     if (S.phase === 5) { doLaunch(); return; }
     if (S.phase === 6) {
       var c = comp();
@@ -1191,11 +1307,25 @@ function wire() {
   });
 }
 
+function resumeGame() {
+  var sv = loadSave();
+  if (!sv) return;
+  var base = freshState();
+  for (var k in sv) base[k] = sv[k];
+  S = base;
+  /* the event object was serialised as a copy; point back at the catalogue */
+  var ev = S.pendingEvent ? DATA.find(DATA.events, S.pendingEvent.id) : null;
+  S.pendingEvent = null;
+  render();
+  if (ev) showEvent(ev, comp());
+}
+
 /* ---------------------------------------------------------------- *
  * boot                                                             *
  * ---------------------------------------------------------------- */
 S = freshState();
 starfield();
 wire();
+wireFx();
 document.documentElement.lang = LANG;
 render();
