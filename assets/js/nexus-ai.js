@@ -70,9 +70,14 @@ function nxGuide() {
   var es = LANG === 'es';
   function T(a, b) { return es ? a : b; }
   return [
-    { w: 0.8, k: ['juegos', 'minijuegos', 'que juegos', 'que puedo jugar', 'modos', 'como se juega', 'games', 'mini games', 'what games', 'what can i play', 'modes', 'how to play'],
+    { w: 0.8, k: ['juegos', 'minijuegos', 'que juegos', 'cuantos juegos', 'how many games', 'que puedo jugar', 'modos', 'como se juega', 'games', 'mini games', 'what games', 'what can i play', 'modes', 'how to play'],
       a: function () { return T('Hay seis formas de jugar: diseñar una misión completa en 6 fases, el simulador de despegue, el explorador 3D con modo RV, el dron en Titán, el escáner orbital con 5 niveles y el modo futuro del portal cuántico, que es ficción. Además está el laboratorio de ingeniería para hacer cálculos. Pregúntame cómo se juega cualquiera y te lo abro.',
         'There are six ways to play: design a full mission in 6 phases, the launch simulator, the 3D explorer with VR mode, the drone on Titan, the orbital scanner with 5 levels and the quantum portal future mode, which is fiction. There is also the engineering lab for calculations. Ask me how to play any of them and I will open it.'); } },
+    { w: 1.4, k: ['proyecto', 'como funciona el proyecto', 'que hace', 'que no hace', 'de que trata', 'para que sirve', 'orbital nexus', 'the project', 'how does the project work', 'what does it do', 'what doesn t it do', 'what is this', 'what is it for'],
+      a: function () { return T('ORBITAL NEXUS es un simulador web para explorar una idea de misión espacial en minutos. Qué hace: diseñas la misión en 6 fases con física real, ves el efecto de cada decisión antes de tomarla, armas el centro de control, votas GO o NO-GO, despegas, navegas y operas la misión mientras ocurren fallas, y al final recibes un informe con la misión real de la NASA más parecida. Además tiene seis formas de jugar, un laboratorio de cálculos y a mí, NEXUS. Si te pierdes, pregúntame «¿dónde estoy?». Qué no hace: no es software oficial de la NASA, no se conecta a datos en vivo, los mapas del escáner son simulados, los costos son aproximados y el portal cuántico es ficción. Funciona en el navegador, sin instalar, en español e inglés.',
+        'ORBITAL NEXUS is a web simulator to explore a space mission idea in minutes. What it does: you design the mission in 6 phases with real physics, see the effect of each decision before making it, staff mission control, poll GO or NO-GO, launch, navigate and operate the mission while failures happen, and finish with a report naming the closest real NASA mission. It also has six ways to play, a calculation lab and me, NEXUS. If you get lost, ask me “where am I?”. What it does not do: it is not official NASA software, it does not connect to live data, the scanner maps are simulated, costs are approximate and the quantum portal is fiction. It runs in the browser, nothing to install, in English and Spanish.'); } },
+    { w: 1.6, k: ['me perdi', 'estoy perdido', 'perdida', 'donde estoy', 'que hago ahora', 'que hago', 'no entiendo', 'como sigo', 'como vuelvo', 'i m lost', 'im lost', 'lost', 'where am i', 'what do i do now', 'what now', 'i don t understand', 'how do i continue', 'how do i go back'],
+      a: function (c) { return nxWhere(c); } },
     { w: 1.2, k: ['disenar', 'diseno', 'disenar una mision', 'fases', 'empezar', 'iniciar', 'mision completa', 'design', 'design a mission', 'phases', 'start', 'begin'], act: 'quickdemo',
       a: function () { return T('Pulsa «Iniciar diseño de misión». Pasas 6 fases: misión, plataforma, ciencia, enlace, lanzamiento y operaciones. En cada fase el asistente te propone un paquete, cada opción muestra su efecto antes de elegirla y el anillo de estado dice qué falta; «Arréglalo por mí» lo resuelve. Luego votas GO o NO-GO, despegas y operas turno a turno. Si quieres, te abro una misión lista para lanzar.',
         'Press “Start mission design”. You go through 6 phases: mission, platform, science, link, launch and operations. In each phase the assistant proposes a package, every option shows its effect before you pick it and the status ring says what is missing; “Fix it for me” solves it. Then you poll GO or NO-GO, launch and operate turn by turn. If you like, I will open a mission ready to launch.'); } },
@@ -176,8 +181,8 @@ function nxClose() { var r = document.getElementById('nexus'); if (r) r.hidden =
 
 function nxPaint() {
   var root = document.getElementById('nexus'), es = LANG === 'es', keep = root.querySelector('.nx-log');
-  var chips = es ? ['¿Qué juegos hay?', '¿Cómo se juega el escáner?', '¿Cómo están los propulsores?', '¿Qué falta?', '¿Qué puedes hacer?']
-    : ['What games are there?', 'How do I play the scanner?', 'How are the thrusters?', 'What is missing?', 'What can you do?'];
+  var chips = es ? ['¿Cómo funciona el proyecto?', 'Me perdí, ¿dónde estoy?', '¿Qué juegos hay?', '¿Cómo se juega el escáner?', '¿Cómo están los propulsores?', '¿Qué falta?', '¿Qué puedes hacer?']
+    : ['How does the project work?', 'I’m lost, where am I?', 'What games are there?', 'How do I play the scanner?', 'How are the thrusters?', 'What is missing?', 'What can you do?'];
   var n = nxLearned().length, hasMic = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
   root.innerHTML = '<header class="nx-head"><span class="vcap-orb"><i></i><i></i><i></i></span><div><b>NEXUS</b><span>' + esc(es ? 'IA de a bordo · sistema experto que aprende' : 'Onboard AI · an expert system that learns') + '</span></div>' +
     '<button class="icon-btn nx-hb" data-nx="side" title="' + esc(es ? 'Cambiar de lado' : 'Switch side') + '" aria-label="' + esc(es ? 'Cambiar de lado' : 'Switch side') + '">⇄</button>' +
@@ -328,4 +333,27 @@ function nxMini(on) {
   var r = document.getElementById('nexus'); if (!r) return;
   if (on == null) on = !r.classList.contains('mini');
   r.classList.toggle('mini', !!on);
+}
+
+/* where the player is and what to do next, so nobody gets lost */
+function nxWhere(c) {
+  var es = LANG === 'es';
+  function T(a, b) { return es ? a : b; }
+  function open(id) { var e = document.getElementById(id); return e && !e.hidden; }
+  var back = T(' Para volver, toca una fase anterior en la barra de arriba, usa «Atrás» o el logo para ir al inicio.', ' To go back, tap an earlier phase in the top bar, use “Back”, or the logo to go home.');
+  if (open('scanner')) return T('Estás en el escáner orbital. Mueve la lupa sobre el mapa, cambia de instrumento con las teclas 1 a 4 y espera a que la señal llegue al 100%. Ciérralo con la X de arriba a la derecha.', 'You are in the orbital scanner. Move the lens over the map, switch instrument with keys 1 to 4 and wait for the signal to reach 100%. Close it with the X at the top right.');
+  if (open('portal')) return T('Estás en el modo futuro. Mantén pulsado INYECTAR para dejar la estabilidad en la franja verde. Ciérralo con la X de arriba.', 'You are in future mode. Hold INJECT to keep stability in the green band. Close it with the X at the top.');
+  if (open('drone')) return T('Estás en el dron de Titán. Mantén ▲ para subir, ◀ ▶ para moverte y aterriza suave en las banderas. Sal con la X.', 'You are flying the Titan drone. Hold ▲ to climb, ◀ ▶ to move and land gently on the flags. Leave with the X.');
+  if (open('lab')) return T('Estás en el laboratorio de ingeniería. Elige una pestaña arriba y cambia cualquier número. Ciérralo con la X.', 'You are in the engineering lab. Pick a tab at the top and change any number. Close it with the X.');
+  if (typeof EXP !== 'undefined' && EXP.open) return T('Estás en el explorador 3D. Pulsa reproducir o arrastra la línea de tiempo. Ciérralo con la X.', 'You are in the 3D explorer. Press play or drag the timeline. Close it with the X.');
+  if (S.phase === 0) return T('Estás en la portada. Para empezar pulsa «Iniciar diseño de misión», o usa «Explora en 3 minutos» para abrir una misión lista o cualquier juego.', 'You are on the home screen. To start press “Start mission design”, or use “Explore in 3 minutes” to open a ready mission or any game.');
+  var names = es ? ['', 'misión', 'plataforma', 'ciencia', 'enlace', 'lanzamiento', 'operaciones', 'informe'] : ['', 'mission', 'platform', 'science', 'link', 'launch', 'operations', 'report'];
+  var msg = T('Estás en la fase ' + S.phase + ' de 6, ' + names[S.phase] + '. ', 'You are in phase ' + S.phase + ' of 6, ' + names[S.phase] + '. ');
+  if (S.phase >= 1 && S.phase <= 5) {
+    var miss = statusItems(c).filter(function (x) { return !x.ok; });
+    msg += miss.length ? T('Siguiente paso: ' + miss[0].t + '. ' + miss[0].fix + ' También puedes pulsar «Arréglalo por mí» en el anillo de estado.', 'Next step: ' + miss[0].t + '. ' + miss[0].fix + ' You can also press “Fix it for me” on the status ring.')
+      : T('Todo está listo: pulsa ' + (S.phase === 5 ? '«Lanzar misión»' : '«Continuar»') + ' abajo a la derecha.', 'Everything is ready: press ' + (S.phase === 5 ? '“Launch mission”' : '“Continue”') + ' at the bottom right.');
+  } else if (S.phase === 6) msg += T('Ajusta cuánto tiempo dedicas a ciencia y a transmitir, enciende los instrumentos y pulsa «Siguiente turno» abajo a la derecha.', 'Set how much time goes to science and downlink, switch the instruments on and press “Next turn” at the bottom right.');
+  else msg += T('Revisa tu nota y la crítica técnica; puedes compartir el diseño o volver al inicio.', 'Review your grade and the technical critique; you can share the design or go home.');
+  return msg + back;
 }
