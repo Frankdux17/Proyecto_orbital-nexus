@@ -15,13 +15,11 @@ space tries to break it.
 NASA Space Apps Challenge — *Space Mission Design Game*.
 Bilingual interface (Spanish / English), no build step, no dependencies.
 
-> **Our goal / Nuestra meta.** Any student thinks like a NASA mission design team in a single
-> game, and an engineer can check every number. · Que cualquier estudiante piense como un
-> equipo de diseño de misiones de la NASA en una sola partida, y que un ingeniero pueda
-> comprobar cada número.
+> **Our goal / Nuestra meta.** Scientists, engineers and astronauts explore a mission idea in minutes: see the consequence of every decision and check every number. ·
+> Que científicos, ingenieros y astronautas exploren una idea de misión en minutos: ver las consecuencias de cada decisión y comprobar cada número.
 
-**What we saw that is missing:** students don't lack information about missions; they can't
-*see the consequences*. In class each topic is studied alone, but in a real mission one extra
+**What we saw that is missing:** information about missions isn't missing; what is hard is
+*seeing the consequences*. Each subsystem is usually analysed on its own, but in a real mission one extra
 instrument changes the mass, the power, the propellant, the rocket and the budget at once.
 ORBITAL NEXUS makes that chain visible:
 

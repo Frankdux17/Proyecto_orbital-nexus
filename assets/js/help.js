@@ -391,8 +391,8 @@ function visionPanel() {
       es ? 'Asistentes para aprender; laboratorio con ecuaciones reales para comprobar cada número.' : 'Assistants to learn; a lab with real equations to check every number.']
   ];
   var h = '<div class="vision"><div class="vision-head"><span class="vision-k">' + esc(es ? 'Nuestra meta' : 'Our goal') + '</span><p class="vision-goal">' +
-    esc(es ? 'Que cualquier estudiante piense como un equipo de diseño de misiones de la NASA en una sola partida, y que un ingeniero pueda comprobar cada número.'
-      : 'Any student thinks like a NASA mission design team in a single game, and an engineer can check every number.') + '</p></div><div class="vision-grid">';
+    esc(es ? 'Que científicos, ingenieros y astronautas exploren una idea de misión en minutos: ver las consecuencias de cada decisión y comprobar cada número.'
+      : 'Scientists, engineers and astronauts explore a mission idea in minutes: see the consequence of every decision and check every number.') + '</p></div><div class="vision-grid">';
   for (var i = 0; i < P.length; i++) h += '<div class="vp"><span class="vp-ic">' + icon(P[i][0], 'ico') + '</span><b>' + esc(P[i][1]) + '</b><span>' + esc(P[i][2]) + '</span></div>';
   return h + '</div></div>';
 }
