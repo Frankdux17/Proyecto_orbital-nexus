@@ -9,3 +9,6 @@ desktop.ini
 node_modules/
 dist/
 *.log
+
+# deliverables sent by link (slides PDF, video), not published on the site
+entregables/

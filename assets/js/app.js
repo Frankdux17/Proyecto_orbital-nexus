@@ -1508,6 +1508,6 @@ wireHelp();
 document.documentElement.lang = LANG;
 if (!loadShared()) {
   render();
-  /* presentacion.html links here: open the ready-made mission */
+  /* index.html#demo opens the ready-made mission */
   if (location.hash === '#demo') { history.replaceState(null, '', location.href.split('#')[0]); quickDemo(); }
 }

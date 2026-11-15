@@ -437,10 +437,9 @@ function quickBar() {
   var es = LANG === 'es';
   return '<div class="quick"><span class="quick-k">' + esc(es ? 'Explora en 3 minutos' : 'Explore in 3 minutes') + '</span>' +
     '<div class="quick-links">' +
-    '<a class="quick-a" href="presentacion.html"><b>1</b><span>' + esc(es ? 'Presentación (7 diapositivas)' : 'Presentation (7 slides)') + '</span></a>' +
-    '<button class="quick-a" type="button" data-act="quickdemo"><b>2</b><span>' + esc(es ? 'Misión lista para lanzar' : 'A mission ready to launch') + '</span></button>' +
-    '<button class="quick-a" type="button" data-act="lab" data-v="trade"><b>3</b><span>' + esc(es ? 'Laboratorio de ingeniería' : 'Engineering lab') + '</span></button>' +
-    '<button class="quick-a" type="button" data-act="drone"><b>4</b><span>' + esc(es ? 'Minijuego: dron en Titán' : 'Mini game: drone on Titan') + '</span></button>' +
+    '<button class="quick-a" type="button" data-act="quickdemo"><b>1</b><span>' + esc(es ? 'Misión lista para lanzar' : 'A mission ready to launch') + '</span></button>' +
+    '<button class="quick-a" type="button" data-act="lab" data-v="trade"><b>2</b><span>' + esc(es ? 'Laboratorio de ingeniería' : 'Engineering lab') + '</span></button>' +
+    '<button class="quick-a" type="button" data-act="drone"><b>3</b><span>' + esc(es ? 'Minijuego: dron en Titán' : 'Mini game: drone on Titan') + '</span></button>' +
     '</div></div>';
 }
 
