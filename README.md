@@ -2,6 +2,13 @@
 
 ![ORBITAL NEXUS — Engineering Beyond Earth](assets/img/og.jpg)
 
+**▶ Play / Jugar:** https://frankdux17.github.io/Proyecto_orbital-nexus/ ·
+**Presentation / Presentación (7 slides):** https://frankdux17.github.io/Proyecto_orbital-nexus/presentacion.html ·
+**One-click demo / Demo rápida:** https://frankdux17.github.io/Proyecto_orbital-nexus/#demo
+
+Everything runs on the website: no install, no sign-in, Spanish and English, phone and PC.
+Todo funciona en la web: sin instalar, sin registrarse, en español e inglés, en celular y PC.
+
 **An interactive space mission design game.** Pick a destination, build the spacecraft,
 fight for every watt and every gigabit, then operate the mission turn by turn while
 space tries to break it.
@@ -194,6 +201,8 @@ assets/js/design.js     easy choices: impact preview, automatic sizing, presets 
 assets/js/lab.js        engineering lab: calculators, charts and the trade-space map
 assets/js/help.js       status ring, glossary, welcome tour, celebrations, share links, vision panel
 assets/js/titan.js      Titan rotorcraft flight mini game
+presentacion.html       the 7-slide demo (ES/EN), public on the site for the jury
+assets/img/demo/        screenshots used by the presentation
 assets/img/             project logo, poster, favicon and social preview
 assets/js/app.js        state machine, interface, operations simulator
 docs/MODEL.md           every equation and where its numbers come from

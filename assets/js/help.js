@@ -396,3 +396,50 @@ function visionPanel() {
   for (var i = 0; i < P.length; i++) h += '<div class="vp"><span class="vp-ic">' + icon(P[i][0], 'ico') + '</span><b>' + esc(P[i][1]) + '</b><span>' + esc(P[i][2]) + '</span></div>';
   return h + '</div></div>';
 }
+
+/* ---------------------------------------------------------------- *
+ * for the jury: a complete mission in one click                     *
+ * ---------------------------------------------------------------- */
+/* A Discovery-class Mars orbiter built by the same assistants a player
+   uses, dropped on the launch phase so the whole game can be seen in a
+   few minutes: review the design, launch, navigate, operate. */
+function quickDemo() {
+  var d0 = S.diff;
+  clearSave();
+  S = freshState(); S.diff = d0;
+  S.celebrated = { 2: true, 3: true, 4: true, 5: true };
+  setPref('on_tour', '1');
+  pickInto(S, 'programId', 'discovery');
+  pickInto(S, 'destId', 'mars-orbit');
+  var st = kitState('bal');
+  ['busId', 'propId', 'powerType', 'arrayArea', 'rtgUnits', 'batteryWh', 'propellantKg', 'edlId'].forEach(function (k) { S[k] = st[k]; });
+  S.auto = true;
+  S.instruments = autoInstruments(S);
+  autoSizeIfOn();
+  var sol = solveLink(S);
+  if (sol) ['antennaD', 'twtaW', 'bandId', 'groundId', 'arrayArea', 'rtgUnits', 'batteryWh', 'propellantKg'].forEach(function (k) { S[k] = sol.st[k]; });
+  var c = ENG.compute(S), best = null;
+  for (var i = 0; i < DATA.shielding.length; i++) {
+    var sh = DATA.shielding[i];
+    if (sh.krad >= c.dest.radKrad && (!best || sh.cost < best.cost)) best = sh;
+  }
+  if (best) S.shieldingId = best.id;
+  S.launcherId = recommend(ENG.compute(S)).lv;
+  S.seen = 5;
+  enterPhase(5);
+  var es = LANG === 'es';
+  toast('<span class="toast-ic">🚀</span><span><b>' + esc(es ? 'Demo lista: misión a Marte completa' : 'Demo ready: a complete Mars mission') + '</b>' +
+    esc(es ? 'Revisa el diseño y pulsa «Lanzar misión». Puedes volver a cualquier fase.' : 'Review the design and press “Launch mission”. You can go back to any phase.') + '</span>', 'gold');
+}
+
+/* the strip at the top of the splash that sends the jury straight to the point */
+function juryBar() {
+  var es = LANG === 'es';
+  return '<div class="jury"><span class="jury-k">' + esc(es ? 'Para el jurado · 3 minutos' : 'For the jury · 3 minutes') + '</span>' +
+    '<div class="jury-links">' +
+    '<a class="jury-a" href="presentacion.html"><b>1</b><span>' + esc(es ? 'Presentación (7 diapositivas)' : 'Presentation (7 slides)') + '</span></a>' +
+    '<button class="jury-a" type="button" data-act="quickdemo"><b>2</b><span>' + esc(es ? 'Demo rápida: misión lista para lanzar' : 'Quick demo: a mission ready to launch') + '</span></button>' +
+    '<button class="jury-a" type="button" data-act="lab" data-v="trade"><b>3</b><span>' + esc(es ? 'Laboratorio de ingeniería' : 'Engineering lab') + '</span></button>' +
+    '<button class="jury-a" type="button" data-act="drone"><b>4</b><span>' + esc(es ? 'Minijuego: dron en Titán' : 'Mini game: drone on Titan') + '</span></button>' +
+    '</div></div>';
+}

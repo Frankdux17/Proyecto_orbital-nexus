@@ -224,7 +224,7 @@ function viewSplash() {
   var fh = '';
   for (i = 0; i < feats.length; i++)
     fh += '<div><span class="feat-ic">' + icon(feats[i][0], 'ico') + '</span><strong>' + esc(t(feats[i][1])) + '</strong><span>' + esc(t(feats[i][2])) + '</span></div>';
-  return '<div class="splash">' +
+  return '<div class="splash">' + juryBar() +
     '<div class="hero"><div class="hero-copy">' +
     '<div class="tag">' + esc(t('splash_tag')) + '</div>' +
     '<h1>' + esc(t('splash_title')) + '</h1>' +
@@ -1403,6 +1403,7 @@ function wire() {
     }
     if (act === 'tour') { tourOpen(); return; }
     if (act === 'share') { shareDesign(el); return; }
+    if (act === 'quickdemo') { quickDemo(); return; }
     if (act === 'drone') { droneFromGame(); return; }
     if (act === 'fix') { applyFix(el.getAttribute('data-v')); return; }
     if (act === 'diff') { S.diff = el.getAttribute('data-v'); setPref('on_diff', S.diff); render(); return; }
@@ -1511,4 +1512,8 @@ wire();
 wireFx();
 wireHelp();
 document.documentElement.lang = LANG;
-if (!loadShared()) render();
+if (!loadShared()) {
+  render();
+  /* presentacion.html links here: open the ready-made mission */
+  if (location.hash === '#demo') { history.replaceState(null, '', location.href.split('#')[0]); quickDemo(); }
+}
