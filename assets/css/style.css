@@ -1484,3 +1484,4 @@ body{background:
   .phase-art,#btn-next.ready,.tour-orbit,.card.on{animation:none}
 }
 .gl{display:inline !important;margin:0 !important;font-size:inherit !important;color:inherit}
+.lab-title .lab-badge{color:#04161c;display:grid}
