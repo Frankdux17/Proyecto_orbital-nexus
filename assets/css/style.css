@@ -386,6 +386,179 @@ input[type=range]::-moz-range-thumb{
   .nav-btns{width:100%}
   .btn{flex:1 1 0}
 }
+/* =================================================================
+   friendly visual layer: icons, illustrated cards, mission team,
+   new splash and the 3D mission explorer
+   ================================================================= */
+.ico{width:1.25em;height:1.25em;flex:0 0 auto;vertical-align:-.25em}
+.art{display:block;width:64px;height:64px;flex:0 0 auto}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn .ico{width:18px;height:18px}
+.pill{display:inline-flex;align-items:center;gap:7px}
+.pill .ico{width:16px;height:16px;color:var(--accent)}
+
+/* stepper icons */
+.step-ic{width:14px;height:14px;opacity:.8}
+.step.active .step-ic{color:var(--accent);opacity:1}
+@media (max-width:760px){.step:not(.active) .step-t{display:none}}
+
+/* phase head with a big phase icon */
+.phase-head{display:flex;gap:16px;align-items:flex-start}
+.phase-ic{flex:0 0 auto;width:54px;height:54px;border-radius:16px;display:grid;place-items:center;color:var(--accent);
+  background:linear-gradient(145deg,color-mix(in srgb,var(--accent) 22%,transparent),color-mix(in srgb,var(--sci) 18%,transparent));
+  border:1px solid color-mix(in srgb,var(--accent) 40%,transparent);box-shadow:0 10px 30px -14px var(--accent)}
+.phase-ic .ico{width:28px;height:28px}
+@media (max-width:560px){.phase-ic{display:none}}
+
+/* mission team coach */
+.coach{display:flex;gap:14px;align-items:flex-start;margin:-4px 0 18px;padding:12px 14px;border-radius:var(--radius);
+  background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--coach,var(--accent));box-shadow:var(--shadow);
+  animation:coachIn .35s ease-out}
+.coach-ok{--coach:var(--ok)} .coach-warn{--coach:var(--warn)} .coach-bad{--coach:var(--bad)} .coach-idea{--coach:var(--accent-2)}
+.coach-av{width:52px;height:52px;flex:0 0 auto;border-radius:50%;box-shadow:0 0 0 3px color-mix(in srgb,var(--coach,var(--accent)) 35%,transparent)}
+.coach-body{min-width:0}
+.coach-who{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
+.coach-who b{font-size:14px}
+.coach-who span{font-size:11.5px;color:var(--txt-faint);letter-spacing:.03em}
+.coach-mood{font-style:normal;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:999px;
+  color:var(--coach);background:color-mix(in srgb,var(--coach) 14%,transparent)}
+.coach p{margin:5px 0 0;font-size:13.5px;line-height:1.5}
+@keyframes coachIn{from{opacity:0;transform:translateY(-6px)}}
+
+/* illustrated option cards */
+.card.has-art{display:flex;gap:12px;align-items:flex-start}
+.card-main{display:block;min-width:0;flex:1}
+.card-art{flex:0 0 auto}
+.card-ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;color:var(--accent);
+  background:color-mix(in srgb,var(--accent) 12%,transparent);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);transition:transform .2s}
+.card-ic .ico{width:24px;height:24px}
+.card-ic.ic-instr{color:var(--sci);background:color-mix(in srgb,var(--sci) 12%,transparent);border-color:color-mix(in srgb,var(--sci) 30%,transparent)}
+.card-ic.ic-launcherId,.card-ic.ic-propId{color:var(--warn);background:color-mix(in srgb,var(--warn) 12%,transparent);border-color:color-mix(in srgb,var(--warn) 30%,transparent)}
+.card-ic.ic-groundId,.card-ic.ic-bandId{color:var(--ok);background:color-mix(in srgb,var(--ok) 12%,transparent);border-color:color-mix(in srgb,var(--ok) 30%,transparent)}
+.card:hover .card-ic,.card:hover .art-big{transform:scale(1.07) rotate(-3deg)}
+.card.locked:hover .card-ic,.card.locked:hover .art-big{transform:none}
+.art-big{width:72px;height:72px;border-radius:16px;transition:transform .25s;box-shadow:0 12px 26px -14px rgba(0,0,0,.8)}
+.card.on .card-ic{background:var(--accent);color:#04161c;border-color:var(--accent)}
+.card.on.has-art .art-big{box-shadow:0 0 0 2px var(--accent),0 12px 26px -12px var(--accent)}
+@media (max-width:420px){.art-big{width:56px;height:56px}}
+
+/* destination hero on the mission side panel */
+.dest-hero{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center}
+.dest-hero .hero-art{width:84px;height:84px;border-radius:18px}
+.dest-hero b{display:block;font-size:15px;margin-top:3px}
+.dest-hero .btn{grid-column:1/-1}
+.x-open{justify-content:flex-start;text-align:left;gap:12px;padding:12px 14px;
+  background:linear-gradient(120deg,color-mix(in srgb,var(--accent) 16%,transparent),color-mix(in srgb,var(--sci) 16%,transparent));
+  border-color:color-mix(in srgb,var(--accent) 55%,transparent)}
+.x-open .ico{width:28px;height:28px;color:var(--accent)}
+.x-open b{display:block;font-size:13.5px}
+.x-open small{display:block;font-size:11px;color:var(--txt-faint);font-weight:400}
+.panel > .x-open.wide:first-child{margin-top:0}
+
+/* splash */
+.splash{max-width:1080px;text-align:left}
+.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:28px;align-items:center;min-height:420px;overflow-x:clip}
+/* the rotating ring wrappers have a bounding box larger than they look; keep it from widening the page */
+.hero-copy p{margin-left:0}
+.splash .cta{justify-content:flex-start}
+@media (max-width:860px){.hero{grid-template-columns:1fr;text-align:center}.splash .hero .cta{justify-content:center}.hero-copy p{margin-left:auto}}
+.hero-art{position:relative;aspect-ratio:1;width:calc(100% - 64px);max-width:420px;margin:0 auto}
+.hero-art .ring{position:absolute;inset:var(--in);border-radius:50%;border:1px dashed color-mix(in srgb,var(--accent) 40%,transparent)}
+.hero-art .r1{--in:28%} .hero-art .r2{--in:14%} .hero-art .r3{--in:2%}
+.hero-sun{position:absolute;inset:41%;border-radius:50%;background:radial-gradient(circle,#fff7d1 0,#ffc94a 40%,rgba(255,138,31,0) 72%);
+  box-shadow:0 0 80px 30px rgba(255,180,60,.35);animation:sunPulse 4s ease-in-out infinite}
+@keyframes sunPulse{50%{transform:scale(1.08)}}
+/* each destination rides its own ring: the wrapper turns, the tile turns back so it stays upright */
+.orb{position:absolute;inset:var(--in);border-radius:50%;animation:orbit var(--T) linear infinite;animation-delay:var(--D)}
+.orb .art{position:absolute;left:50%;top:0;width:58px;height:58px;margin:-29px 0 0 -29px;border-radius:14px;box-shadow:0 10px 24px -10px rgba(0,0,0,.8);
+  animation:orbit var(--T) linear infinite reverse;animation-delay:var(--D)}
+.orb.o0{--in:28%;--T:28s;--D:0s} .orb.o1{--in:28%;--T:28s;--D:-14s}
+.orb.o2{--in:14%;--T:40s;--D:-8s} .orb.o3{--in:14%;--T:40s;--D:-28s}
+.orb.o4{--in:2%;--T:56s;--D:-20s} .orb.o5{--in:2%;--T:56s;--D:-46s}
+@media (max-width:480px){.orb .art{width:44px;height:44px;margin:-22px 0 0 -22px}}
+@keyframes orbit{to{transform:rotate(360deg)}}
+.splash-sec{margin-top:34px}
+.splash-sec h2,.team h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+.splash .splash-sec > p,.splash .team > p{color:var(--txt-dim);margin:0 0 14px;max-width:80ch}
+.splash .diffs{margin-top:10px}
+.splash .splash-sec .splash-note{margin-top:12px}
+.feat-ic{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;margin-bottom:10px;color:var(--accent);background:color-mix(in srgb,var(--accent) 13%,transparent)}
+.feat-ic .ico{width:22px;height:22px}
+.feat > div{transition:transform .2s,border-color .2s}
+.feat > div:hover{transform:translateY(-3px);border-color:var(--line-strong)}
+
+/* team strip */
+.team{margin-top:34px}
+.seats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.seat{display:flex;flex-direction:column;align-items:center;text-align:center;gap:3px;padding:14px 10px;border-radius:var(--radius);
+  background:var(--panel-2);border:1px solid var(--line);transition:transform .2s,border-color .2s}
+.seat:hover{transform:translateY(-4px);border-color:var(--accent)}
+.seat-av{width:64px;height:64px;border-radius:50%;margin-bottom:6px}
+.seat b{font-size:12.5px}
+.seat span{font-size:11.5px;color:var(--txt-dim)}
+.seat small{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--txt-faint);margin-top:4px}
+
+/* destination gallery */
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.gal{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:10px;border-radius:var(--radius);cursor:pointer;text-align:left;
+  background:var(--panel-2);border:1px solid var(--line);color:var(--txt);font-family:inherit;transition:transform .2s,border-color .2s}
+.gal:hover{transform:translateY(-4px);border-color:var(--accent)}
+.gal .art{width:100%;height:auto;aspect-ratio:1;border-radius:12px;margin-bottom:6px;transition:transform .3s}
+.gal:hover .art{transform:scale(1.04)}
+.gal b{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--accent-2)}
+.gal span{font-size:12.5px;line-height:1.3}
+
+/* ---------- 3D mission explorer (always dark: it is a view port) ---------- */
+.explorer{position:fixed;inset:0;z-index:65;background:#03060f;color:#e8eefc;outline:none}
+.x-cv{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab}
+.x-cv:active{cursor:grabbing}
+.x-top{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px;
+  background:linear-gradient(#03060fdd,#03060f00);pointer-events:none}
+.x-top > *{pointer-events:auto}
+.x-title{display:flex;gap:10px;align-items:center;min-width:0;flex:1 1 auto}
+.x-title > div{min-width:0}
+.x-title b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:480px){.x-title > .ico{display:none}.x-btn{padding:8px 10px}}
+.x-title > .ico{width:30px;height:30px;color:#4fd1e0}
+.x-title b{display:block;font-size:15px}
+.x-title span{display:block;font-size:12px;color:#9fb0d0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.x-tools{display:flex;gap:8px;flex:0 0 auto}
+.x-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;cursor:pointer;font:inherit;font-size:12.5px;
+  background:rgba(18,27,48,.8);color:#e8eefc;border:1px solid rgba(120,150,210,.38)}
+.x-btn:hover,.x-btn.on{border-color:#4fd1e0;color:#4fd1e0}
+.x-btn .ico{width:17px;height:17px}
+@media (max-width:620px){.x-btn span{display:none}}
+.x-card{position:absolute;left:16px;top:76px;width:min(340px,calc(100% - 32px));display:flex;gap:12px;padding:13px 14px;border-radius:14px;
+  background:rgba(12,19,36,.86);border:1px solid rgba(120,150,210,.3);backdrop-filter:blur(8px)}
+.x-card-ic{flex:0 0 auto;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:rgba(79,209,224,.15);color:#4fd1e0}
+.x-card-ic .ico{width:22px;height:22px}
+.x-card small{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#f0c24b}
+.x-card b{display:block;font-size:14.5px;margin:2px 0 4px}
+.x-card p{margin:0;font-size:12.5px;line-height:1.5;color:#c4d0ea}
+@media (max-width:620px){.x-card{top:auto;bottom:118px}.x-card p{font-size:12px}}
+.x-note{position:absolute;right:16px;top:70px;max-width:280px;text-align:right;font-size:11px;color:#8193b4}
+@media (max-width:900px){.x-note{display:none}}
+.x-bottom{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:flex-end;gap:12px;padding:14px 16px 18px;
+  background:linear-gradient(#03060f00,#03060fee)}
+.x-play{flex:0 0 auto;width:46px;height:46px;border-radius:50%;border:0;cursor:pointer;background:#4fd1e0;color:#04161c;display:grid;place-items:center}
+.x-play .ico{width:20px;height:20px}
+.x-line{flex:1;min-width:0}
+.x-ticks{position:relative;height:44px;margin-bottom:4px}
+.x-tick{position:absolute;bottom:0;height:44px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;padding:0 2px;
+  background:none;border:0;border-left:1px solid rgba(120,150,210,.25);color:#8193b4;cursor:pointer;font:inherit;overflow:hidden}
+.x-tick .ico{width:16px;height:16px}
+.x-tick span{font-size:9.5px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.x-tick:hover,.x-tick.on{color:#4fd1e0}
+.x-tick.on{background:linear-gradient(rgba(79,209,224,0),rgba(79,209,224,.14))}
+@media (max-width:760px){.x-tick span{display:none}}
+#x-range{width:100%;accent-color:#f0c24b}
+.x-day{flex:0 0 auto;font-family:var(--mono);font-size:13px;color:#f0c24b;min-width:96px;text-align:right;padding-bottom:6px}
+@media (max-width:480px){.x-day{min-width:0;font-size:11px}}
+.x-vr-exit{display:none;position:absolute;left:50%;bottom:14px;transform:translateX(-50%);padding:8px 16px;border-radius:999px;
+  background:rgba(0,0,0,.6);color:#fff;border:1px solid rgba(255,255,255,.3);font:inherit;cursor:pointer}
+.explorer.vr .x-top,.explorer.vr .x-card,.explorer.vr .x-note,.explorer.vr .x-bottom{display:none}
+.explorer.vr .x-vr-exit{display:block}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
 /* =================================================================
@@ -527,5 +700,178 @@ input[type=range]::-moz-range-thumb{
 .modal{animation:pop .25s ease-out;border-top:3px solid var(--warn)}
 @keyframes pop{from{opacity:0;transform:scale(.96)}}
 .choice .kbd{color:var(--accent)}
+
+/* =================================================================
+   friendly visual layer: icons, illustrated cards, mission team,
+   new splash and the 3D mission explorer
+   ================================================================= */
+.ico{width:1.25em;height:1.25em;flex:0 0 auto;vertical-align:-.25em}
+.art{display:block;width:64px;height:64px;flex:0 0 auto}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn .ico{width:18px;height:18px}
+.pill{display:inline-flex;align-items:center;gap:7px}
+.pill .ico{width:16px;height:16px;color:var(--accent)}
+
+/* stepper icons */
+.step-ic{width:14px;height:14px;opacity:.8}
+.step.active .step-ic{color:var(--accent);opacity:1}
+@media (max-width:760px){.step:not(.active) .step-t{display:none}}
+
+/* phase head with a big phase icon */
+.phase-head{display:flex;gap:16px;align-items:flex-start}
+.phase-ic{flex:0 0 auto;width:54px;height:54px;border-radius:16px;display:grid;place-items:center;color:var(--accent);
+  background:linear-gradient(145deg,color-mix(in srgb,var(--accent) 22%,transparent),color-mix(in srgb,var(--sci) 18%,transparent));
+  border:1px solid color-mix(in srgb,var(--accent) 40%,transparent);box-shadow:0 10px 30px -14px var(--accent)}
+.phase-ic .ico{width:28px;height:28px}
+@media (max-width:560px){.phase-ic{display:none}}
+
+/* mission team coach */
+.coach{display:flex;gap:14px;align-items:flex-start;margin:-4px 0 18px;padding:12px 14px;border-radius:var(--radius);
+  background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--coach,var(--accent));box-shadow:var(--shadow);
+  animation:coachIn .35s ease-out}
+.coach-ok{--coach:var(--ok)} .coach-warn{--coach:var(--warn)} .coach-bad{--coach:var(--bad)} .coach-idea{--coach:var(--accent-2)}
+.coach-av{width:52px;height:52px;flex:0 0 auto;border-radius:50%;box-shadow:0 0 0 3px color-mix(in srgb,var(--coach,var(--accent)) 35%,transparent)}
+.coach-body{min-width:0}
+.coach-who{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
+.coach-who b{font-size:14px}
+.coach-who span{font-size:11.5px;color:var(--txt-faint);letter-spacing:.03em}
+.coach-mood{font-style:normal;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:999px;
+  color:var(--coach);background:color-mix(in srgb,var(--coach) 14%,transparent)}
+.coach p{margin:5px 0 0;font-size:13.5px;line-height:1.5}
+@keyframes coachIn{from{opacity:0;transform:translateY(-6px)}}
+
+/* illustrated option cards */
+.card.has-art{display:flex;gap:12px;align-items:flex-start}
+.card-main{display:block;min-width:0;flex:1}
+.card-art{flex:0 0 auto}
+.card-ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;color:var(--accent);
+  background:color-mix(in srgb,var(--accent) 12%,transparent);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);transition:transform .2s}
+.card-ic .ico{width:24px;height:24px}
+.card-ic.ic-instr{color:var(--sci);background:color-mix(in srgb,var(--sci) 12%,transparent);border-color:color-mix(in srgb,var(--sci) 30%,transparent)}
+.card-ic.ic-launcherId,.card-ic.ic-propId{color:var(--warn);background:color-mix(in srgb,var(--warn) 12%,transparent);border-color:color-mix(in srgb,var(--warn) 30%,transparent)}
+.card-ic.ic-groundId,.card-ic.ic-bandId{color:var(--ok);background:color-mix(in srgb,var(--ok) 12%,transparent);border-color:color-mix(in srgb,var(--ok) 30%,transparent)}
+.card:hover .card-ic,.card:hover .art-big{transform:scale(1.07) rotate(-3deg)}
+.card.locked:hover .card-ic,.card.locked:hover .art-big{transform:none}
+.art-big{width:72px;height:72px;border-radius:16px;transition:transform .25s;box-shadow:0 12px 26px -14px rgba(0,0,0,.8)}
+.card.on .card-ic{background:var(--accent);color:#04161c;border-color:var(--accent)}
+.card.on.has-art .art-big{box-shadow:0 0 0 2px var(--accent),0 12px 26px -12px var(--accent)}
+@media (max-width:420px){.art-big{width:56px;height:56px}}
+
+/* destination hero on the mission side panel */
+.dest-hero{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center}
+.dest-hero .hero-art{width:84px;height:84px;border-radius:18px}
+.dest-hero b{display:block;font-size:15px;margin-top:3px}
+.dest-hero .btn{grid-column:1/-1}
+.x-open{justify-content:flex-start;text-align:left;gap:12px;padding:12px 14px;
+  background:linear-gradient(120deg,color-mix(in srgb,var(--accent) 16%,transparent),color-mix(in srgb,var(--sci) 16%,transparent));
+  border-color:color-mix(in srgb,var(--accent) 55%,transparent)}
+.x-open .ico{width:28px;height:28px;color:var(--accent)}
+.x-open b{display:block;font-size:13.5px}
+.x-open small{display:block;font-size:11px;color:var(--txt-faint);font-weight:400}
+.panel > .x-open.wide:first-child{margin-top:0}
+
+/* splash */
+.splash{max-width:1080px;text-align:left}
+.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:28px;align-items:center;min-height:420px;overflow-x:clip}
+/* the rotating ring wrappers have a bounding box larger than they look; keep it from widening the page */
+.hero-copy p{margin-left:0}
+.splash .cta{justify-content:flex-start}
+@media (max-width:860px){.hero{grid-template-columns:1fr;text-align:center}.splash .hero .cta{justify-content:center}.hero-copy p{margin-left:auto}}
+.hero-art{position:relative;aspect-ratio:1;width:calc(100% - 64px);max-width:420px;margin:0 auto}
+.hero-art .ring{position:absolute;inset:var(--in);border-radius:50%;border:1px dashed color-mix(in srgb,var(--accent) 40%,transparent)}
+.hero-art .r1{--in:28%} .hero-art .r2{--in:14%} .hero-art .r3{--in:2%}
+.hero-sun{position:absolute;inset:41%;border-radius:50%;background:radial-gradient(circle,#fff7d1 0,#ffc94a 40%,rgba(255,138,31,0) 72%);
+  box-shadow:0 0 80px 30px rgba(255,180,60,.35);animation:sunPulse 4s ease-in-out infinite}
+@keyframes sunPulse{50%{transform:scale(1.08)}}
+/* each destination rides its own ring: the wrapper turns, the tile turns back so it stays upright */
+.orb{position:absolute;inset:var(--in);border-radius:50%;animation:orbit var(--T) linear infinite;animation-delay:var(--D)}
+.orb .art{position:absolute;left:50%;top:0;width:58px;height:58px;margin:-29px 0 0 -29px;border-radius:14px;box-shadow:0 10px 24px -10px rgba(0,0,0,.8);
+  animation:orbit var(--T) linear infinite reverse;animation-delay:var(--D)}
+.orb.o0{--in:28%;--T:28s;--D:0s} .orb.o1{--in:28%;--T:28s;--D:-14s}
+.orb.o2{--in:14%;--T:40s;--D:-8s} .orb.o3{--in:14%;--T:40s;--D:-28s}
+.orb.o4{--in:2%;--T:56s;--D:-20s} .orb.o5{--in:2%;--T:56s;--D:-46s}
+@media (max-width:480px){.orb .art{width:44px;height:44px;margin:-22px 0 0 -22px}}
+@keyframes orbit{to{transform:rotate(360deg)}}
+.splash-sec{margin-top:34px}
+.splash-sec h2,.team h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+.splash .splash-sec > p,.splash .team > p{color:var(--txt-dim);margin:0 0 14px;max-width:80ch}
+.splash .diffs{margin-top:10px}
+.splash .splash-sec .splash-note{margin-top:12px}
+.feat-ic{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;margin-bottom:10px;color:var(--accent);background:color-mix(in srgb,var(--accent) 13%,transparent)}
+.feat-ic .ico{width:22px;height:22px}
+.feat > div{transition:transform .2s,border-color .2s}
+.feat > div:hover{transform:translateY(-3px);border-color:var(--line-strong)}
+
+/* team strip */
+.team{margin-top:34px}
+.seats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.seat{display:flex;flex-direction:column;align-items:center;text-align:center;gap:3px;padding:14px 10px;border-radius:var(--radius);
+  background:var(--panel-2);border:1px solid var(--line);transition:transform .2s,border-color .2s}
+.seat:hover{transform:translateY(-4px);border-color:var(--accent)}
+.seat-av{width:64px;height:64px;border-radius:50%;margin-bottom:6px}
+.seat b{font-size:12.5px}
+.seat span{font-size:11.5px;color:var(--txt-dim)}
+.seat small{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--txt-faint);margin-top:4px}
+
+/* destination gallery */
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.gal{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:10px;border-radius:var(--radius);cursor:pointer;text-align:left;
+  background:var(--panel-2);border:1px solid var(--line);color:var(--txt);font-family:inherit;transition:transform .2s,border-color .2s}
+.gal:hover{transform:translateY(-4px);border-color:var(--accent)}
+.gal .art{width:100%;height:auto;aspect-ratio:1;border-radius:12px;margin-bottom:6px;transition:transform .3s}
+.gal:hover .art{transform:scale(1.04)}
+.gal b{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--accent-2)}
+.gal span{font-size:12.5px;line-height:1.3}
+
+/* ---------- 3D mission explorer (always dark: it is a view port) ---------- */
+.explorer{position:fixed;inset:0;z-index:65;background:#03060f;color:#e8eefc;outline:none}
+.x-cv{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab}
+.x-cv:active{cursor:grabbing}
+.x-top{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px;
+  background:linear-gradient(#03060fdd,#03060f00);pointer-events:none}
+.x-top > *{pointer-events:auto}
+.x-title{display:flex;gap:10px;align-items:center;min-width:0;flex:1 1 auto}
+.x-title > div{min-width:0}
+.x-title b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:480px){.x-title > .ico{display:none}.x-btn{padding:8px 10px}}
+.x-title > .ico{width:30px;height:30px;color:#4fd1e0}
+.x-title b{display:block;font-size:15px}
+.x-title span{display:block;font-size:12px;color:#9fb0d0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.x-tools{display:flex;gap:8px;flex:0 0 auto}
+.x-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;cursor:pointer;font:inherit;font-size:12.5px;
+  background:rgba(18,27,48,.8);color:#e8eefc;border:1px solid rgba(120,150,210,.38)}
+.x-btn:hover,.x-btn.on{border-color:#4fd1e0;color:#4fd1e0}
+.x-btn .ico{width:17px;height:17px}
+@media (max-width:620px){.x-btn span{display:none}}
+.x-card{position:absolute;left:16px;top:76px;width:min(340px,calc(100% - 32px));display:flex;gap:12px;padding:13px 14px;border-radius:14px;
+  background:rgba(12,19,36,.86);border:1px solid rgba(120,150,210,.3);backdrop-filter:blur(8px)}
+.x-card-ic{flex:0 0 auto;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:rgba(79,209,224,.15);color:#4fd1e0}
+.x-card-ic .ico{width:22px;height:22px}
+.x-card small{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#f0c24b}
+.x-card b{display:block;font-size:14.5px;margin:2px 0 4px}
+.x-card p{margin:0;font-size:12.5px;line-height:1.5;color:#c4d0ea}
+@media (max-width:620px){.x-card{top:auto;bottom:118px}.x-card p{font-size:12px}}
+.x-note{position:absolute;right:16px;top:70px;max-width:280px;text-align:right;font-size:11px;color:#8193b4}
+@media (max-width:900px){.x-note{display:none}}
+.x-bottom{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:flex-end;gap:12px;padding:14px 16px 18px;
+  background:linear-gradient(#03060f00,#03060fee)}
+.x-play{flex:0 0 auto;width:46px;height:46px;border-radius:50%;border:0;cursor:pointer;background:#4fd1e0;color:#04161c;display:grid;place-items:center}
+.x-play .ico{width:20px;height:20px}
+.x-line{flex:1;min-width:0}
+.x-ticks{position:relative;height:44px;margin-bottom:4px}
+.x-tick{position:absolute;bottom:0;height:44px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;padding:0 2px;
+  background:none;border:0;border-left:1px solid rgba(120,150,210,.25);color:#8193b4;cursor:pointer;font:inherit;overflow:hidden}
+.x-tick .ico{width:16px;height:16px}
+.x-tick span{font-size:9.5px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.x-tick:hover,.x-tick.on{color:#4fd1e0}
+.x-tick.on{background:linear-gradient(rgba(79,209,224,0),rgba(79,209,224,.14))}
+@media (max-width:760px){.x-tick span{display:none}}
+#x-range{width:100%;accent-color:#f0c24b}
+.x-day{flex:0 0 auto;font-family:var(--mono);font-size:13px;color:#f0c24b;min-width:96px;text-align:right;padding-bottom:6px}
+@media (max-width:480px){.x-day{min-width:0;font-size:11px}}
+.x-vr-exit{display:none;position:absolute;left:50%;bottom:14px;transform:translateX(-50%);padding:8px 16px;border-radius:999px;
+  background:rgba(0,0,0,.6);color:#fff;border:1px solid rgba(255,255,255,.3);font:inherit;cursor:pointer}
+.explorer.vr .x-top,.explorer.vr .x-card,.explorer.vr .x-note,.explorer.vr .x-bottom{display:none}
+.explorer.vr .x-vr-exit{display:block}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}

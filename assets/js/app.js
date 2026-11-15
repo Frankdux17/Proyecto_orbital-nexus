@@ -96,7 +96,7 @@ function renderStepper() {
   for (var i = 0; i < STEPS.length; i++) {
     var p = i + 1;
     var cls = S.phase === p ? 'active' : (S.phase > p ? 'done' : '');
-    h += '<span class="step ' + cls + '"><span class="dot">' + (S.phase > p ? '✓' : p) + '</span>' + esc(t(STEPS[i])) + '</span>';
+    h += '<span class="step ' + cls + '"><span class="dot">' + (S.phase > p ? '✓' : p) + '</span>' + icon(PHASE_ICON[p], 'ico step-ic') + '<span class="step-t">' + esc(t(STEPS[i])) + '</span></span>';
   }
   $('stepper').innerHTML = S.phase === 0 ? '' : h;
 }
@@ -209,20 +209,37 @@ function viewSplash() {
     resume = '<button class="btn" data-act="resume">' + esc(es ? 'Continuar misión guardada' : 'Resume saved mission') +
       '<small>' + esc(t(STEPS[Math.min(sv.phase, 7) - 1]) + (sd ? ' · ' + L(sd.name) : '') + (sv.phase === 6 ? ' · ' + t('turn') + ' ' + sv.turn : '')) + '</small></button>';
   }
+  var orbit = '', gal = '', ids = ['leo-sso', 'llo', 'mars-orbit', 'venus-orbit', 'neo', 'europa'];
+  for (var i = 0; i < ids.length; i++)
+    orbit += '<span class="orb o' + i + '" style="--i:' + i + '">' + destArt(ids[i], 'art') + '</span>';
+  for (i = 0; i < DATA.destinations.length; i++) {
+    var d = DATA.destinations[i];
+    gal += '<button class="gal" data-act="demo" data-v="' + d.id + '">' + destArt(d.id, 'art') +
+      '<b>' + esc(L(d.tag)) + '</b><span>' + esc(L(d.name)) + '</span></button>';
+  }
+  var feats = [['orbit3d', 'splash_f1t', 'splash_f1b'], ['console', 'splash_f2t', 'splash_f2b'], ['dish', 'splash_f3t', 'splash_f3b'], ['trophy', 'splash_f4t', 'splash_f4b']];
+  var fh = '';
+  for (i = 0; i < feats.length; i++)
+    fh += '<div><span class="feat-ic">' + icon(feats[i][0], 'ico') + '</span><strong>' + esc(t(feats[i][1])) + '</strong><span>' + esc(t(feats[i][2])) + '</span></div>';
   return '<div class="splash">' +
+    '<div class="hero"><div class="hero-copy">' +
     '<div class="tag">' + esc(t('splash_tag')) + '</div>' +
     '<h1>' + esc(t('splash_title')) + '</h1>' +
     '<p>' + esc(t('splash_body')) + '</p>' +
+    '<div class="cta"><button class="btn primary big" data-act="start">' + icon('rocket', 'ico') + esc(t('splash_start')) + '</button>' + resume +
+    '<button class="btn big ghost" data-act="demo" data-v="mars-orbit">' + icon('orbit3d', 'ico') + esc(es ? 'Ver una misión en 3D' : 'See a mission in 3D') + '</button></div>' +
+    '</div><div class="hero-art" aria-hidden="true"><div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>' +
+    '<div class="hero-sun"></div>' + orbit + '</div></div>' +
+    '<div class="splash-sec"><h2>' + esc(es ? 'Elige tu nivel' : 'Choose your level') + '</h2>' +
     '<div class="diffs" role="group" aria-label="' + esc(es ? 'Dificultad' : 'Difficulty') + '">' + dh + '</div>' +
-    '<div class="cta"><button class="btn primary big" data-act="start">' + esc(t('splash_start')) + '</button>' + resume + '</div>' +
     '<p class="splash-note">' + esc(es ? 'Tu progreso se guarda solo: puedes dejar la misión en un descanso y retomarla después. Atajos: Enter avanza, 1–4 responde a una anomalía.'
-      : 'Progress saves itself: leave the mission during a break and pick it up later. Shortcuts: Enter advances, 1–4 answers an anomaly.') + '</p>' +
-    '<div class="feat">' +
-    '<div><strong>' + esc(t('splash_f1t')) + '</strong><span>' + esc(t('splash_f1b')) + '</span></div>' +
-    '<div><strong>' + esc(t('splash_f2t')) + '</strong><span>' + esc(t('splash_f2b')) + '</span></div>' +
-    '<div><strong>' + esc(t('splash_f3t')) + '</strong><span>' + esc(t('splash_f3b')) + '</span></div>' +
-    '<div><strong>' + esc(t('splash_f4t')) + '</strong><span>' + esc(t('splash_f4b')) + '</span></div>' +
-    '</div>' +
+      : 'Progress saves itself: leave the mission during a break and pick it up later. Shortcuts: Enter advances, 1–4 answers an anomaly.') + '</p></div>' +
+    teamStrip() +
+    '<div class="splash-sec"><h2>' + esc(es ? 'Explora los destinos en 3D' : 'Explore the destinations in 3D') + '</h2>' +
+    '<p>' + esc(es ? 'Toca un destino para ver su trayectoria, cada fase del ciclo de vida de una misión (al estilo de CubeSat 101) y probarla con un visor de realidad virtual tipo Cardboard.'
+      : 'Tap a destination to see its trajectory, every phase of a mission lifecycle (CubeSat 101 style), and try it in a Cardboard-style VR viewer.') + '</p>' +
+    '<div class="gallery">' + gal + '</div></div>' +
+    '<div class="feat">' + fh + '</div>' +
     '<div class="shelf"><h2>' + esc(es ? 'Insignias' : 'Badges') + ' <span>' + shelf.count + '/' + shelf.total + '</span></h2>' +
     '<div class="badges">' + shelf.html + '</div></div></div>';
 }
@@ -250,8 +267,9 @@ function head(kick, title, lead) {
   if (m) meta = '<div class="phase-meta"><span class="pm seg-' + m.seg + '">' + esc(L(SEG_NAME[m.seg])) + '</span>' +
     '<span class="pm">' + esc(L(m.cml)) + '</span>' + (m.mdl ? '<span class="pm">' + esc(L(m.mdl)) + '</span>' : '') +
     '<span class="pm diff-' + S.diff + '">' + esc(L(DIFF[S.diff].name)) + '</span></div>';
-  return '<div class="phase-head"><div class="phase-kicker">' + esc(t(kick)) + '</div>' +
-    '<h1>' + esc(t(title)) + '</h1><p>' + esc(t(lead)) + '</p>' + meta + '</div>';
+  return '<div class="phase-head"><div class="phase-ic">' + icon(PHASE_ICON[S.phase], 'ico') + '</div><div>' +
+    '<div class="phase-kicker">' + esc(t(kick)) + '</div>' +
+    '<h1>' + esc(t(title)) + '</h1><p>' + esc(t(lead)) + '</p>' + meta + '</div></div>' + coachPanel(CACHE || comp());
 }
 
 function specs(arr) {
@@ -260,15 +278,39 @@ function specs(arr) {
   return h + '</div>';
 }
 
+function cardArt(o) {
+  if (o.k === 'destId') return destArt(o.v, 'card-art art-big');
+  var ic = null;
+  if (o.k === 'programId') ic = ART_MAP.programs[o.v];
+  else if (o.k === 'busId') ic = ART_MAP.buses[o.v];
+  else if (o.k === 'propId') ic = o.v;
+  else if (o.k === 'edlId') ic = 'chute';
+  else if (o.k === 'bandId') ic = 'band';
+  else if (o.k === 'groundId') ic = 'dish';
+  else if (o.k === 'shieldingId') ic = 'shield';
+  else if (o.k === 'launcherId') ic = 'rocket';
+  else if (o.act === 'instr') { var it = DATA.find(DATA.instruments, o.v); ic = it ? it.tags[0] : null; }
+  return ic ? '<span class="card-art card-ic ic-' + esc(o.k || o.act) + '">' + icon(ic, 'ico') + '</span>' : '';
+}
+
 function card(o) {
-  return '<button class="card' + (o.on ? ' on' : '') + (o.locked ? ' locked' : '') + '"' +
-    (o.locked ? ' disabled' : '') + ' data-act="' + o.act + '" data-k="' + (o.k || '') + '" data-v="' + o.v + '">' +
+  var art = cardArt(o);
+  return '<button class="card' + (o.on ? ' on' : '') + (o.locked ? ' locked' : '') + (art ? ' has-art' : '') + (o.k === 'destId' ? ' dest' : '') + '"' +
+    (o.locked ? ' disabled' : '') + ' data-act="' + o.act + '" data-k="' + (o.k || '') + '" data-v="' + o.v + '">' + art +
+    '<span class="card-main">' +
     (o.tag ? '<span class="card-tag">' + esc(o.tag) + '</span>' : '') +
     '<span class="card-name">' + esc(o.name) + '</span>' +
     (o.desc ? '<p class="card-desc">' + esc(o.desc) + '</p>' : '') +
     (o.specs ? specs(o.specs) : '') +
     (o.lock ? '<div class="lock-note">' + esc(o.lock) + '</div>' : '') +
-    '</button>';
+    '</span></button>';
+}
+
+function explorerBtn(c, cls) {
+  if (!c || !c.dest) return '';
+  return '<button class="btn x-open ' + (cls || '') + '" data-act="explore">' + icon('orbit3d', 'ico') +
+    '<span><b>' + esc(LANG === 'es' ? 'Explorador 3D de la misión' : '3D mission explorer') + '</b><small>' +
+    esc(LANG === 'es' ? 'Trayectoria, cronograma y modo RV' : 'Trajectory, timeline and VR mode') + '</small></span></button>';
 }
 
 function slider(k, label, val, min, max, step, unit, hint) {
@@ -331,6 +373,7 @@ function viewMission(c) {
   h += '</div></div></div><div class="side">';
 
   if (c.dest) {
+    h += '<div class="panel dest-hero">' + destArt(c.dest.id, 'art hero-art') + '<div><span class="card-tag">' + esc(L(c.dest.tag)) + '</span><b>' + esc(L(c.dest.name)) + '</b></div>' + explorerBtn(c, 'wide') + '</div>';
     h += '<div class="panel"><h2>' + esc(t('objectives')) + '</h2><p class="hint" style="margin:-6px 0 12px">' + esc(t('obj_hint')) + '</p>';
     for (i = 0; i < c.dest.objectives.length; i++) {
       var o = c.dest.objectives[i];
@@ -391,9 +434,9 @@ function viewPlatform(c) {
   /* power */
   h += '<div class="panel"><h2>' + esc(t('power_src')) + '</h2><div class="pills">';
   var rtgLock = !c.bus || !c.bus.allowsRTG || !c.prog || c.prog.rank < DATA.power.rtg.minProgram;
-  h += '<button class="pill' + (S.powerType === 'solar' ? ' on' : '') + '" data-act="pick" data-k="powerType" data-v="solar">' + esc(t('solar')) + '</button>';
+  h += '<button class="pill' + (S.powerType === 'solar' ? ' on' : '') + '" data-act="pick" data-k="powerType" data-v="solar">' + icon('solar', 'ico') + esc(t('solar')) + '</button>';
   h += '<button class="pill' + (S.powerType === 'rtg' ? ' on' : '') + (rtgLock ? ' locked' : '') + '"' + (rtgLock ? ' disabled' : '') +
-    ' data-act="pick" data-k="powerType" data-v="rtg">' + esc(t('rtg')) + '</button>';
+    ' data-act="pick" data-k="powerType" data-v="rtg">' + icon('rtg', 'ico') + esc(t('rtg')) + '</button>';
   h += '</div>';
 
   if (S.powerType === 'solar') {
@@ -529,7 +572,7 @@ function viewLink(c) {
     var d = DATA.antennas[i];
     var lock = c.bus && d > c.bus.antennaMax;
     h += '<button class="pill' + (S.antennaD === d ? ' on' : '') + (lock ? ' locked' : '') + '"' + (lock ? ' disabled' : '') +
-      ' data-act="pick" data-k="antennaD" data-v="' + d + '">' + d + ' m · ' + n0(DATA.antennaMass(d)) + ' kg · ' + money(DATA.antennaCost(d)) + '</button>';
+      ' data-act="pick" data-k="antennaD" data-v="' + d + '">' + icon('dish', 'ico') + d + ' m · ' + n0(DATA.antennaMass(d)) + ' kg · ' + money(DATA.antennaCost(d)) + '</button>';
   }
   h += '</div><div class="hint">' + esc(LANG === 'es'
     ? 'La ganancia crece con el cuadrado del diámetro: duplicar la antena cuadruplica la tasa de datos, pero la masa también se cuadruplica.'
@@ -549,7 +592,7 @@ function viewLink(c) {
   h += '<h3>' + esc(t('twta')) + '</h3><div class="pills">';
   for (i = 0; i < DATA.twtas.length; i++) {
     var w = DATA.twtas[i];
-    h += '<button class="pill' + (S.twtaW === w ? ' on' : '') + '" data-act="pick" data-k="twtaW" data-v="' + w + '">' +
+    h += '<button class="pill' + (S.twtaW === w ? ' on' : '') + '" data-act="pick" data-k="twtaW" data-v="' + w + '">' + icon('twta', 'ico') +
       w + ' W RF · ' + n0(DATA.twtaDC(w)) + ' W DC · ' + n0(DATA.twtaMass(w)) + ' kg</button>';
   }
   h += '</div></div>';
@@ -635,7 +678,7 @@ function viewLaunch(c) {
     (c.dest && c.dest.lander ? [LANG === 'es' ? 'Aterrizaje' : 'Landing', n1(od.edl * 100) + '%'] : null),
     [LANG === 'es' ? 'Probabilidad total de operar' : 'Overall chance of operating', n1(od.total * 100) + '%', true]
   ].filter(function (x) { return x; }));
-  h += '</div></div><div class="side">' + shipPanel(c) + '<div class="panel"><h2>' + esc(LANG === 'es' ? 'Hoja de datos final' : 'Final data sheet') + '</h2>';
+  h += '</div></div><div class="side">' + shipPanel(c) + '<div class="panel">' + explorerBtn(c, 'wide') + '</div><div class="panel"><h2>' + esc(LANG === 'es' ? 'Hoja de datos final' : 'Final data sheet') + '</h2>';
   h += rows([
     [LANG === 'es' ? 'Masa de lanzamiento' : 'Launch mass', n0(c.mass.launch) + ' kg'],
     [LANG === 'es' ? 'Capacidad del cohete' : 'Rocket capability', n0(c.lvCap) + ' kg'],
@@ -1117,6 +1160,7 @@ function viewReport(c) {
   h += '<div class="panel"><h2>' + esc(t('analog')) + '</h2><div class="analog"><div>' +
     '<div class="nasa">NASA</div><strong style="font-size:16px">' + esc(c.dest.analog.name) + '</strong>' +
     '<p style="color:var(--txt-dim);font-size:13px;margin:6px 0 0">' + esc(L(c.dest.analog.note)) + '</p></div></div>' +
+    explorerBtn(c, 'wide') +
     '<button class="btn wide" data-act="copy">' + esc(LANG === 'es' ? 'Copiar informe como texto' : 'Copy report as text') + '</button>' +
     '<button class="btn primary wide" data-act="restart">' + esc(t('restart')) + '</button></div>';
 
@@ -1244,6 +1288,8 @@ function wire() {
     if (act === 'start') { var d0 = S.diff; clearSave(); S = freshState(); S.diff = d0; enterPhase(1); return; }
     if (act === 'diff') { S.diff = el.getAttribute('data-v'); setPref('on_diff', S.diff); render(); return; }
     if (act === 'resume') { resumeGame(); return; }
+    if (act === 'explore') { explorerOpen(explorerCfg(comp())); return; }
+    if (act === 'demo') { explorerOpen(explorerDemo(el.getAttribute('data-v'))); return; }
     if (act === 'pick') { onPick(el.getAttribute('data-k'), el.getAttribute('data-v')); return; }
     if (act === 'instr') {
       var id = el.getAttribute('data-v'), i = S.instruments.indexOf(id);
@@ -1323,6 +1369,7 @@ function resumeGame() {
 /* ---------------------------------------------------------------- *
  * boot                                                             *
  * ---------------------------------------------------------------- */
+injectArt();
 S = freshState();
 starfield();
 wire();

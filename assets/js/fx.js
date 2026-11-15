@@ -104,7 +104,8 @@ var BADGES = [
   { id: 'gradeS', icon: '🏆', name: { es: 'Leyenda de la NASA', en: 'NASA legend' }, desc: { es: 'Obtén calificación S.', en: 'Earn an S grade.' } },
   { id: 'europa', icon: '🧊', name: { es: 'Océano bajo el hielo', en: 'Ocean under the ice' }, desc: { es: 'Completa la misión a Europa.', en: 'Complete the Europa mission.' } },
   { id: 'director', icon: '🎖️', name: { es: 'Director de vuelo', en: 'Flight director' }, desc: { es: 'Completa una misión en la dificultad más alta.', en: 'Complete a mission on the hardest difficulty.' } },
-  { id: 'explorer', icon: '🌌', name: { es: 'Explorador del sistema solar', en: 'Solar system explorer' }, desc: { es: 'Completa misiones a 3 destinos distintos.', en: 'Complete missions to 3 different destinations.' } }
+  { id: 'explorer', icon: '🌌', name: { es: 'Explorador del sistema solar', en: 'Solar system explorer' }, desc: { es: 'Completa misiones a 3 destinos distintos.', en: 'Complete missions to 3 different destinations.' } },
+  { id: 'navigator', icon: '🪐', name: { es: 'Navegante 3D', en: '3D navigator' }, desc: { es: 'Recorre la trayectoria de una misión en el Explorador 3D.', en: 'Fly through a mission trajectory in the 3D Explorer.' } }
 ];
 
 function badgesOwned() { try { return JSON.parse(pref('on_badges', '{}')) || {}; } catch (e) { return {}; } }

@@ -53,6 +53,26 @@ resembles.
 **The central lesson is deliberately brutal: only data you successfully downlink counts.**
 A spectrometer that fills the memory and never transmits scores exactly zero.
 
+### New: play as the mission team, then fly it in 3D
+
+- **A mission team at every console.** Like JPL's Team X concurrent engineering room, each
+  phase seats you next to a different specialist: the principal investigator, the systems
+  engineer, the telecom engineer, the launch director, and an **astronaut CAPCOM** who talks
+  you through operations. Each one reads your live design and tells you the one thing that
+  matters most right now.
+- **3D mission explorer.** Inspired by the Space Apps 2023 *Visualize a space mission in VR*
+  challenge: drag to rotate, pinch to zoom, and scrub a timeline from the concept of
+  operations to end of mission. It shows the Hohmann-type transfer to Mars, Venus, an
+  asteroid or Jupiter, the GTO to geostationary orbit, the trans-lunar injection, the halo
+  orbit around L2, and where every body is on each day.
+- **CubeSat 101 lifecycle.** The explorer timeline walks the nine phases a CubeSat developer
+  goes through: concept, design reviews, build and test, dispenser integration, launch,
+  commissioning, arrival, operations and end of mission.
+- **VR mode.** Side-by-side stereo with head tracking from the phone's orientation sensor:
+  put a phone in a cardboard viewer and look around the solar system.
+- **Illustrated interface.** Every destination, instrument, bus, engine and launcher has its
+  own artwork, drawn as inline SVG so it follows the light and dark themes.
+
 ## Nine destinations
 
 Sun-synchronous LEO · geostationary orbit · low lunar orbit · Sun-Earth L2 ·
@@ -88,6 +108,9 @@ assets/js/data.js       mission catalogue: destinations, buses, instruments, lau
 assets/js/engine.js     the engineering model — rocket equation, power, link budget, scoring
 assets/js/fx.js         sound, badges, difficulty levels, autosave, keyboard shortcuts
 assets/js/viz.js        live spacecraft preview, mission view, launch sequence, arrival mini game
+assets/js/art.js        illustrated destinations, icon set and mission team avatars (inline SVG)
+assets/js/coach.js      the mission team: live, phase-specific advice from each console
+assets/js/explorer.js   3D mission explorer, CubeSat 101 timeline and VR stereo mode
 assets/js/app.js        state machine, interface, operations simulator
 docs/MODEL.md           every equation and where its numbers come from
 ```
@@ -166,6 +189,25 @@ de la NASA a la que más se parece.
 
 **La lección central es deliberadamente brutal: solo cuentan los datos que logras bajar a
 Tierra.** Un espectrómetro que llena la memoria y nunca transmite vale exactamente cero.
+
+### Nuevo: juega como el equipo de misión y vuela tu misión en 3D
+
+- **Un equipo de misión en cada consola.** Como en la sala de ingeniería concurrente Team X
+  del JPL, cada fase te sienta junto a un especialista distinto: la investigadora principal,
+  el ingeniero de sistemas, la ingeniera de telecomunicaciones, la directora de lanzamiento
+  y un **astronauta CAPCOM** que te guía durante las operaciones. Cada uno lee tu diseño en
+  vivo y te dice lo más importante en ese momento.
+- **Explorador 3D de la misión.** Inspirado en el reto *Visualiza una misión espacial con
+  realidad virtual* de Space Apps 2023: gira con el dedo o el ratón, acerca con la rueda o
+  pellizcando y recorre una línea de tiempo desde el concepto hasta el fin de la misión.
+- **Ciclo de vida CubeSat 101.** La línea de tiempo recorre las nueve fases que vive un
+  desarrollador de CubeSat: concepto, revisiones de diseño, fabricación y pruebas,
+  integración en el dispensador, lanzamiento, puesta en servicio, llegada, operaciones y
+  fin de misión.
+- **Modo RV.** Estéreo lado a lado con seguimiento de la cabeza mediante el sensor de
+  orientación del celular: pon el teléfono en un visor tipo Cardboard y mira a tu alrededor.
+- **Interfaz ilustrada.** Cada destino, instrumento, bus, motor y cohete tiene su propia
+  ilustración en SVG, que se adapta al tema claro y oscuro.
 
 ## Nueve destinos
 
