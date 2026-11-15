@@ -1485,3 +1485,59 @@ body{background:
 }
 .gl{display:inline !important;margin:0 !important;font-size:inherit !important;color:inherit}
 .lab-title .lab-badge{color:#04161c;display:grid}
+
+/* ---------------------------------------------------------------- *
+ * vision band on the splash                                         *
+ * ---------------------------------------------------------------- */
+.vision{position:relative;margin-top:30px;padding:24px;border-radius:22px;overflow:hidden;
+  background:linear-gradient(125deg,color-mix(in srgb,var(--accent) 16%,var(--panel)),var(--panel) 50%,color-mix(in srgb,var(--sci) 16%,var(--panel)));
+  border:1px solid color-mix(in srgb,var(--accent) 40%,transparent);box-shadow:var(--shadow)}
+.vision::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,var(--accent),var(--sci),var(--gold))}
+.vision-k{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);font-weight:800}
+.vision-goal{font-size:clamp(17px,2.2vw,22px);font-weight:700;line-height:1.4;margin:6px 0 18px;max-width:62ch;color:var(--txt)}
+.vision-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.vp{display:flex;flex-direction:column;gap:5px;padding:14px;border-radius:14px;background:var(--panel-2);border:1px solid var(--line);transition:transform .18s,border-color .18s}
+.vp:hover{transform:translateY(-3px);border-color:color-mix(in srgb,var(--accent) 55%,transparent)}
+.vp-ic{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;color:#04161c;background:linear-gradient(135deg,var(--accent),var(--accent-2));margin-bottom:4px}
+.vp-ic .ico{width:20px;height:20px}
+.vp b{font-size:14px}
+.vp span:last-child{font-size:12.5px;color:var(--txt-dim);line-height:1.45}
+
+/* buttons that open a mini game */
+.x-open .dr-ic{width:40px;height:40px;border-radius:10px;flex:0 0 auto}
+.drone-cta{max-width:520px;background:linear-gradient(120deg,rgba(201,138,58,.22),rgba(79,209,224,.12));border-color:rgba(232,178,101,.6)}
+.x-open.done{border-color:var(--ok)}
+
+/* ---------------------------------------------------------------- *
+ * Titan flight                                                      *
+ * ---------------------------------------------------------------- */
+.drone{position:fixed;inset:0;z-index:75;background:#2a1808;color:#fff6e0;touch-action:none;user-select:none}
+.drone[hidden]{display:none}
+#dr-cv{position:absolute;inset:0;width:100%;height:100%;display:block}
+.dr-top{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:12px 16px;
+  background:linear-gradient(rgba(20,10,2,.7),transparent)}
+.dr-title b{display:block;font-size:17px}
+.dr-title span{font-size:12px;opacity:.8}
+.dr-x{color:#fff6e0;border-color:rgba(255,230,190,.4)}
+.dr-hud{position:absolute;top:62px;left:16px;display:flex;gap:8px;flex-wrap:wrap;max-width:calc(100% - 32px)}
+.dr-hud > div{background:rgba(20,10,2,.62);border:1px solid rgba(255,230,190,.22);border-radius:10px;padding:6px 10px;min-width:96px}
+.dr-hud span{display:block;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;opacity:.75}
+.dr-hud b{font:700 15px var(--mono)}
+.dr-hud .bad b{color:#ff8a7a} .dr-hud .ok b{color:#9ff0c8}
+.dr-bat i{display:block;width:110px;height:8px;border-radius:5px;background:rgba(255,255,255,.15);margin-top:5px;overflow:hidden}
+.dr-bat em{display:block;height:100%;background:linear-gradient(90deg,#3ecf9a,#4fd1e0)}
+.dr-bat.bad em{background:#f0655f}
+.dr-pad{position:absolute;bottom:18px;left:0;right:0;display:flex;justify-content:center;gap:14px}
+.dr-pad button{width:72px;height:60px;border-radius:16px;border:1px solid rgba(255,230,190,.4);background:rgba(20,10,2,.55);color:#fff6e0;font-size:22px;cursor:pointer}
+.dr-pad button:active{background:rgba(232,178,101,.45)}
+@media (hover:hover) and (pointer:fine){.dr-pad{opacity:.55}}
+.dr-card{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(440px,calc(100% - 32px));padding:24px;border-radius:20px;text-align:center;
+  background:rgba(30,16,4,.88);border:1px solid rgba(232,178,101,.55);box-shadow:0 30px 80px -20px rgba(0,0,0,.8)}
+.dr-card[hidden],.dr-card:empty{display:none}
+.dr-k{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#f0c24b;font-weight:700}
+.dr-card h2{margin:6px 0 8px;font-size:22px}
+.dr-card p{font-size:14px;line-height:1.55;opacity:.9;margin:0 0 16px}
+.dr-btns{display:flex;gap:10px;justify-content:center}
+.drone .btn.ghost{color:#fff6e0;border-color:rgba(255,230,190,.45);background:transparent}
+.vision .vision-goal{margin:6px 0 18px;text-align:left}
+.splash .vision{text-align:left}

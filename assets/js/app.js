@@ -235,6 +235,7 @@ function viewSplash() {
     '<button class="btn big ghost lab-cta" data-act="lab">' + FLASK + esc(es ? 'Laboratorio de ingeniería' : 'Engineering lab') + '</button></div>' +
     '</div><div class="hero-poster"><img src="assets/img/hero.jpg" width="1136" height="884" alt="' +
     esc(es ? 'ORBITAL NEXUS · Ingeniería más allá de la Tierra: un cohete deja la Tierra rumbo a Marte' : 'ORBITAL NEXUS · Engineering Beyond Earth: a rocket leaves Earth for Mars') + '"></div></div>' +
+    visionPanel() +
     '<div class="splash-sec"><h2>' + esc(es ? 'Elige tu nivel' : 'Choose your level') + '</h2>' +
     '<div class="diffs" role="group" aria-label="' + esc(es ? 'Dificultad' : 'Difficulty') + '">' + dh + '</div>' +
     '<p class="splash-note">' + esc(es ? 'Tu progreso se guarda solo: puedes dejar la misión en un descanso y retomarla después. Atajos: Enter avanza, 1–4 responde a una anomalía.'
@@ -244,6 +245,7 @@ function viewSplash() {
     '<p>' + esc(es ? 'Toca un destino para ver su trayectoria, cada fase del ciclo de vida de una misión (al estilo de CubeSat 101) y probarla con un visor de realidad virtual tipo Cardboard.'
       : 'Tap a destination to see its trajectory, every phase of a mission lifecycle (CubeSat 101 style), and try it in a Cardboard-style VR viewer.') + '</p>' +
     '<div class="gallery">' + gal + '</div></div>' +
+    '<div class="splash-sec"><h2>' + esc(es ? 'Minijuego nuevo' : 'New mini game') + '</h2>' + droneBtn('wide drone-cta') + '</div>' +
     '<div class="feat">' + fh + '</div>' +
     '<div class="shelf"><h2>' + esc(es ? 'Insignias' : 'Badges') + ' <span>' + shelf.count + '/' + shelf.total + '</span></h2>' +
     '<div class="badges">' + shelf.html + '</div></div></div>';
@@ -701,7 +703,7 @@ function viewLaunch(c) {
     [LANG === 'es' ? 'Probabilidad total de operar' : 'Overall chance of operating', n1(od.total * 100) + '%', true]
   ].filter(function (x) { return x; }));
   h += readinessPreview(c);
-  h += '</div></div><div class="side">' + statusPanel(c) + shipPanel(c) + '<div class="panel">' + explorerBtn(c, 'wide') + practiceBtn('wide') + '</div><div class="panel"><h2>' + esc(LANG === 'es' ? 'Hoja de datos final' : 'Final data sheet') + '</h2>';
+  h += '</div></div><div class="side">' + statusPanel(c) + shipPanel(c) + '<div class="panel">' + explorerBtn(c, 'wide') + practiceBtn('wide') + shareBtn('wide') + '</div><div class="panel"><h2>' + esc(LANG === 'es' ? 'Hoja de datos final' : 'Final data sheet') + '</h2>';
   h += rows([
     [LANG === 'es' ? 'Masa de lanzamiento' : 'Launch mass', n0(c.mass.launch) + ' kg'],
     [LANG === 'es' ? 'Capacidad del cohete' : 'Rocket capability', n0(c.lvCap) + ' kg'],
@@ -872,7 +874,7 @@ function viewOps(c) {
   var h = head('p6_kick', 'p6_title', 'p6_lead');
   var stored = storedTotal();
 
-  h += '<div class="cols"><div>' + vizPanel();
+  h += '<div class="cols"><div>' + (S.destId === 'titan' && !S.droneDone && S.alive ? '<div class="panel">' + droneBtn('wide') + '</div>' : '') + vizPanel();
 
   /* turn strip */
   h += '<div class="panel"><h2>' + esc(t('turn')) + ' ' + S.turn + ' ' + esc(t('of')) + ' ' + c.opsTurns + '</h2><div class="turnstrip">';
@@ -1262,6 +1264,7 @@ function viewReport(c) {
     '<p style="color:var(--txt-dim);font-size:13px;margin:6px 0 0">' + esc(L(c.dest.analog.note)) + '</p></div></div>' +
     explorerBtn(c, 'wide') +
     '<button class="btn wide" data-act="copy">' + esc(LANG === 'es' ? 'Copiar informe como texto' : 'Copy report as text') + '</button>' +
+    shareBtn('wide') +
     '<button class="btn primary wide" data-act="restart">' + esc(t('restart')) + '</button></div>';
 
   return h;
@@ -1399,6 +1402,8 @@ function wire() {
       return;
     }
     if (act === 'tour') { tourOpen(); return; }
+    if (act === 'share') { shareDesign(el); return; }
+    if (act === 'drone') { droneFromGame(); return; }
     if (act === 'fix') { applyFix(el.getAttribute('data-v')); return; }
     if (act === 'diff') { S.diff = el.getAttribute('data-v'); setPref('on_diff', S.diff); render(); return; }
     if (act === 'resume') { resumeGame(); return; }
@@ -1506,4 +1511,4 @@ wire();
 wireFx();
 wireHelp();
 document.documentElement.lang = LANG;
-render();
+if (!loadShared()) render();

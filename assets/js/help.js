@@ -310,3 +310,89 @@ function wireHelp() {
   }, true);
   window.addEventListener('scroll', function () { if (Math.abs(window.scrollY - GL_Y) > 40) glossHide(); }, { passive: true });
 }
+
+/* ---------------------------------------------------------------- *
+ * share a design by link                                            *
+ * ---------------------------------------------------------------- */
+var SHARE_KEYS = ['programId', 'destId', 'busId', 'powerType', 'arrayArea', 'rtgUnits', 'batteryWh', 'propId', 'propellantKg', 'edlId',
+  'instruments', 'antennaD', 'bandId', 'twtaW', 'groundId', 'shieldingId', 'launcherId', 'devMonths', 'staff', 'diff'];
+
+function shareURL() {
+  var o = {};
+  for (var i = 0; i < SHARE_KEYS.length; i++) o[SHARE_KEYS[i]] = S[SHARE_KEYS[i]];
+  var b = btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  return location.href.split('#')[0] + '#d=' + b;
+}
+
+function shareDesign(btn) {
+  var url = shareURL(), es = LANG === 'es';
+  var msg = es ? '¿Puedes superar mi diseño de misión en ORBITAL NEXUS?' : 'Can you beat my mission design in ORBITAL NEXUS?';
+  if (navigator.share && /Mobi|Android/i.test(navigator.userAgent)) { navigator.share({ title: 'ORBITAL NEXUS', text: msg, url: url }).catch(function () { }); return; }
+  try {
+    navigator.clipboard.writeText(url);
+    toast('<span class="toast-ic">🔗</span><span><b>' + esc(es ? 'Enlace copiado' : 'Link copied') + '</b>' +
+      esc(es ? 'Envíalo y quien lo abra verá tu nave completa y podrá mejorarla.' : 'Send it: whoever opens it sees your full spacecraft and can improve it.') + '</span>', 'gold');
+  } catch (e) { window.prompt(es ? 'Copia este enlace:' : 'Copy this link:', url); }
+  if (btn) btn.classList.add('done');
+}
+
+/* open a design someone shared: only known catalogue ids are accepted */
+function loadShared() {
+  var m = location.hash.match(/#d=([A-Za-z0-9_-]+)/);
+  if (!m) return false;
+  try {
+    var b = m[1].replace(/-/g, '+').replace(/_/g, '/');
+    while (b.length % 4) b += '=';
+    var o = JSON.parse(decodeURIComponent(escape(atob(b))));
+    var st = freshState();
+    var lists = { programId: DATA.programs, destId: DATA.destinations, busId: DATA.buses, propId: DATA.propulsion, edlId: DATA.edl,
+      bandId: DATA.bands, groundId: DATA.grounds, shieldingId: DATA.shielding, launcherId: DATA.launchers };
+    for (var k in lists) if (o[k] != null && DATA.find(lists[k], o[k])) st[k] = o[k];
+    ['arrayArea', 'rtgUnits', 'batteryWh', 'propellantKg', 'devMonths'].forEach(function (k) { if (typeof o[k] === 'number' && isFinite(o[k]) && o[k] >= 0) st[k] = o[k]; });
+    if (o.powerType === 'rtg' || o.powerType === 'solar') st.powerType = o.powerType;
+    if (DATA.antennas.indexOf(o.antennaD) >= 0) st.antennaD = o.antennaD;
+    if (DATA.twtas.indexOf(o.twtaW) >= 0) st.twtaW = o.twtaW;
+    if (Array.isArray(o.instruments)) st.instruments = o.instruments.filter(function (id) { return !!DATA.find(DATA.instruments, id); });
+    if (o.staff && typeof o.staff === 'object') for (var s in st.staff) if (s in o.staff) st.staff[s] = s === 'fido' ? Math.max(0, Math.min(3, o.staff[s] | 0)) : !!o.staff[s];
+    if (DIFF[o.diff]) st.diff = o.diff;
+    if (!st.programId || !st.destId) return false;
+    st.auto = false;  /* keep the sizing exactly as shared */
+    st.phase = st.launcherId ? 5 : (st.groundId ? 4 : (st.instruments.length ? 3 : (st.busId ? 2 : 1)));
+    st.seen = st.phase;
+    S = st;
+    history.replaceState(null, '', location.href.split('#')[0]);
+    render();
+    var es = LANG === 'es';
+    toast('<span class="toast-ic">🛰️</span><span><b>' + esc(es ? 'Diseño compartido cargado' : 'Shared design loaded') + '</b>' +
+      esc(es ? 'Revisa la nave, mejórala y lánzala.' : 'Review the spacecraft, improve it and launch it.') + '</span>', 'gold');
+    return true;
+  } catch (e) { return false; }
+}
+
+function shareBtn(cls) {
+  return '<button class="btn x-open ' + (cls || '') + '" data-act="share">' + icon('spark', 'ico') +
+    '<span><b>' + esc(LANG === 'es' ? 'Compartir mi diseño' : 'Share my design') + '</b><small>' +
+    esc(LANG === 'es' ? 'Un enlace con tu nave: reta a tus compañeros' : 'A link with your spacecraft: challenge your classmates') + '</small></span></button>';
+}
+
+/* ---------------------------------------------------------------- *
+ * why this game exists (splash)                                     *
+ * ---------------------------------------------------------------- */
+function visionPanel() {
+  var es = LANG === 'es';
+  var P = [
+    ['spark', es ? 'Ves las consecuencias antes de decidir' : 'See the consequences before you decide',
+      es ? 'Cada opción muestra qué le hace a la masa, la energía, el Δv y el presupuesto.' : 'Every option shows what it does to mass, power, Δv and budget.'],
+    ['target', es ? 'Todo el espacio de diseño a la vez' : 'The whole design space at once',
+      es ? 'El mapa de compensaciones compara todas las naves posibles, como un equipo de la NASA.' : 'The trade-space map compares every possible spacecraft, like a NASA team.'],
+    ['console', es ? 'Más allá del despegue' : 'Beyond liftoff',
+      es ? 'Centro de control, GO/NO-GO, navegación y fallas: una misión la sostienen personas.' : 'Mission control, GO/NO-GO, navigation and failures: people keep a mission alive.'],
+    ['trophy', es ? 'Para quien empieza y para el experto' : 'For beginners and experts',
+      es ? 'Asistentes para aprender; laboratorio con ecuaciones reales para comprobar cada número.' : 'Assistants to learn; a lab with real equations to check every number.']
+  ];
+  var h = '<div class="vision"><div class="vision-head"><span class="vision-k">' + esc(es ? 'Nuestra meta' : 'Our goal') + '</span><p class="vision-goal">' +
+    esc(es ? 'Que cualquier estudiante piense como un equipo de diseño de misiones de la NASA en una sola partida, y que un ingeniero pueda comprobar cada número.'
+      : 'Any student thinks like a NASA mission design team in a single game, and an engineer can check every number.') + '</p></div><div class="vision-grid">';
+  for (var i = 0; i < P.length; i++) h += '<div class="vp"><span class="vp-ic">' + icon(P[i][0], 'ico') + '</span><b>' + esc(P[i][1]) + '</b><span>' + esc(P[i][2]) + '</span></div>';
+  return h + '</div></div>';
+}

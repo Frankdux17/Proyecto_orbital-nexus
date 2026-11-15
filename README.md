@@ -9,6 +9,27 @@ space tries to break it.
 NASA Space Apps Challenge — *Space Mission Design Game*.
 Bilingual interface (Spanish / English), no build step, no dependencies.
 
+> **Our goal / Nuestra meta.** Any student thinks like a NASA mission design team in a single
+> game, and an engineer can check every number. · Que cualquier estudiante piense como un
+> equipo de diseño de misiones de la NASA en una sola partida, y que un ingeniero pueda
+> comprobar cada número.
+
+**What we saw that is missing:** students don't lack information about missions; they can't
+*see the consequences*. In class each topic is studied alone, but in a real mission one extra
+instrument changes the mass, the power, the propellant, the rocket and the budget at once.
+ORBITAL NEXUS makes that chain visible:
+
+1. **Consequences before decisions** — every option shows its effect on cost, Δv, power and
+   budget before you pick it.
+2. **The whole design space at once** — the trade-space map evaluates every possible spacecraft
+   for your mission and marks the Pareto front, the way NASA concurrent-engineering teams work.
+3. **Beyond liftoff** — mission control staffing, GO/NO-GO, navigation from Earth and in-flight
+   failures: people keep a mission alive.
+4. **Low floor, high ceiling** — one-tap assistants for beginners, an engineering lab with real
+   equations and CSV export for experts.
+5. **Real physics, real missions** — Earth→Mars in 259 days for 5.6 km/s; Titan and Psyche
+   modelled on Dragonfly and Psyche. Share any design by link and challenge a classmate.
+
 ---
 
 ## The challenge
@@ -118,6 +139,10 @@ A spectrometer that fills the memory and never transmits scores exactly zero.
   budget table, solar power and battery over the mission, and a **trade-space map** that
   evaluates every bus × propulsion × rocket × power source for your mission, plots cost
   against chance of success, marks the Pareto front, exports CSV and applies any design.
+- **Share and play.** “Share my design” creates a link with the whole spacecraft for a classmate
+  to open and improve; a new mini game flies a Dragonfly-style drone over Titan's dunes
+  (1.35 m/s² gravity, air four times denser than Earth's, a methane lake and an RTG-charged
+  battery), and its samples add science to a Titan mission.
 - **Friendlier.** A mission status ring lists what is missing in plain words and fixes it
   on request (“Fix it for me”); technical words (Δv, Isp, C3, RTG, krad, DSN…) explain
   themselves when tapped; a three-step welcome tour on the first game; and a celebration
@@ -167,7 +192,8 @@ assets/js/ascent.js     piloted ascent: physics, guidance, controls and the trai
 assets/js/mission.js    mission control staffing, readiness review, GO/NO-GO, cruise navigation
 assets/js/design.js     easy choices: impact preview, automatic sizing, presets and assistants
 assets/js/lab.js        engineering lab: calculators, charts and the trade-space map
-assets/js/help.js       mission status ring, tap-to-explain glossary, welcome tour, celebrations
+assets/js/help.js       status ring, glossary, welcome tour, celebrations, share links, vision panel
+assets/js/titan.js      Titan rotorcraft flight mini game
 assets/img/             project logo, poster, favicon and social preview
 assets/js/app.js        state machine, interface, operations simulator
 docs/MODEL.md           every equation and where its numbers come from
@@ -312,6 +338,10 @@ Tierra.** Un espectrómetro que llena la memoria y nunca transmite vale exactame
   lo largo de la misión, y un **mapa de compensaciones** que evalúa todas las naves posibles
   para tu misión, grafica costo contra probabilidad de éxito, marca la frontera de Pareto,
   exporta CSV y aplica cualquier diseño.
+- **Comparte y juega.** «Compartir mi diseño» crea un enlace con la nave completa para que un
+  compañero la abra y la mejore; un minijuego nuevo vuela un dron tipo Dragonfly sobre las
+  dunas de Titán (gravedad de 1,35 m/s², aire cuatro veces más denso, un lago de metano y una
+  batería que recarga el RTG), y sus muestras suman ciencia a la misión a Titán.
 - **Más amigable.** Un anillo de estado de la misión dice qué falta en palabras simples y
   lo arregla si se lo pides («Arréglalo por mí»); las palabras técnicas (Δv, Isp, C3, RTG,
   krad, DSN…) se explican al tocarlas; una guía de bienvenida de tres pasos y una
