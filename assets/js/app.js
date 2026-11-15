@@ -65,29 +65,13 @@ function comp() { CACHE = ENG.compute(S); return CACHE; }
  * starfield                                                        *
  * ---------------------------------------------------------------- */
 function starfield() {
-  var cv = $('starfield'), ctx = cv.getContext('2d'), stars = [];
-  function size() {
-    cv.width = window.innerWidth; cv.height = window.innerHeight;
-    stars = [];
-    var n = Math.min(260, Math.round(cv.width * cv.height / 7000));
-    for (var i = 0; i < n; i++) stars.push({
-      x: Math.random() * cv.width, y: Math.random() * cv.height,
-      r: Math.random() * 1.25 + 0.2, a: Math.random() * 0.55 + 0.12
-    });
-    draw();
-  }
-  function draw() {
-    ctx.clearRect(0, 0, cv.width, cv.height);
-    for (var i = 0; i < stars.length; i++) {
-      var s = stars[i];
-      ctx.beginPath();
-      ctx.fillStyle = 'rgba(200,220,255,' + s.a + ')';
-      ctx.arc(s.x, s.y, s.r, 0, 6.2832);
-      ctx.fill();
-    }
-  }
-  window.addEventListener('resize', size);
-  size();
+  /* the interactive background lives in space-bg.js; it rests while an
+     overlay (lab, explorer, launch, drone) covers the screen */
+  var mq = window.matchMedia ? window.matchMedia('(prefers-color-scheme: light)') : null;
+  SpaceBG.start($('starfield'), {
+    light: function () { var th = document.documentElement.getAttribute('data-theme'); return th ? th === 'light' : !!(mq && mq.matches); },
+    paused: function () { return OVERLAY_OPEN; }
+  });
 }
 
 /* ---------------------------------------------------------------- *
@@ -100,7 +84,9 @@ function renderStepper() {
   for (var i = 0; i < STEPS.length; i++) {
     var p = i + 1;
     var cls = S.phase === p ? 'active' : (S.phase > p ? 'done' : '');
-    h += '<span class="step ' + cls + '"><span class="dot">' + (S.phase > p ? '✓' : p) + '</span>' + icon(PHASE_ICON[p], 'ico step-ic') + '<span class="step-t">' + esc(t(STEPS[i])) + '</span></span>';
+    var canBack = p < S.phase && S.phase <= 5;
+    h += (canBack ? '<button type="button" class="step back ' + cls + '" data-act="goto" data-v="' + p + '" title="' + esc(LANG === 'es' ? 'Volver a esta fase' : 'Back to this phase') + '">' : '<span class="step ' + cls + '">') +
+      '<span class="dot">' + (S.phase > p ? '✓' : p) + '</span>' + icon(PHASE_ICON[p], 'ico step-ic') + '<span class="step-t">' + esc(t(STEPS[i])) + '</span>' + (canBack ? '</button>' : '</span>');
   }
   $('stepper').innerHTML = S.phase === 0 ? '' : h;
 }
@@ -191,8 +177,8 @@ function renderNav() {
     : '';
 
   var back = $('btn-back'), next = $('btn-next');
-  back.textContent = t('back');
-  back.disabled = S.phase <= 1 || S.phase === 6;
+  back.textContent = S.phase === 1 ? (LANG === 'es' ? '← Inicio' : '← Home') : '← ' + t('back');
+  back.disabled = S.phase === 6;
   if (S.phase === 5) next.textContent = t('launch_btn');
   else if (S.phase === 6) next.textContent = (S.alive && S.turn < c.opsTurns) ? t('next_turn') : t('end_mission');
   else next.textContent = t('next');
@@ -224,7 +210,7 @@ function viewSplash() {
   var fh = '';
   for (i = 0; i < feats.length; i++)
     fh += '<div><span class="feat-ic">' + icon(feats[i][0], 'ico') + '</span><strong>' + esc(t(feats[i][1])) + '</strong><span>' + esc(t(feats[i][2])) + '</span></div>';
-  return '<div class="splash">' + juryBar() +
+  return '<div class="splash">' + quickBar() +
     '<div class="hero"><div class="hero-copy">' +
     '<div class="tag">' + esc(t('splash_tag')) + '</div>' +
     '<h1>' + esc(t('splash_title')) + '</h1>' +
@@ -1265,6 +1251,7 @@ function viewReport(c) {
     explorerBtn(c, 'wide') +
     '<button class="btn wide" data-act="copy">' + esc(LANG === 'es' ? 'Copiar informe como texto' : 'Copy report as text') + '</button>' +
     shareBtn('wide') +
+    '<button class="btn wide ghost" data-act="home">' + esc(LANG === 'es' ? '← Volver al inicio' : '← Back to home') + '</button>' +
     '<button class="btn primary wide" data-act="restart">' + esc(t('restart')) + '</button></div>';
 
   return h;
@@ -1404,6 +1391,8 @@ function wire() {
     if (act === 'tour') { tourOpen(); return; }
     if (act === 'share') { shareDesign(el); return; }
     if (act === 'quickdemo') { quickDemo(); return; }
+    if (act === 'goto') { var gp = parseInt(el.getAttribute('data-v'), 10); if (gp >= 1 && gp < S.phase && S.phase <= 5) enterPhase(gp); return; }
+    if (act === 'home') { goHome(); return; }
     if (act === 'drone') { droneFromGame(); return; }
     if (act === 'fix') { applyFix(el.getAttribute('data-v')); return; }
     if (act === 'diff') { S.diff = el.getAttribute('data-v'); setPref('on_diff', S.diff); render(); return; }
@@ -1478,7 +1467,12 @@ function wire() {
     }
     enterPhase(S.phase + 1);
   });
-  $('btn-back').addEventListener('click', function () { if (S.phase > 1) enterPhase(S.phase - 1); });
+  $('btn-back').addEventListener('click', function () {
+    if (OVERLAY_OPEN) return;
+    if (S.phase > 1) enterPhase(S.phase - 1); else goHome();
+  });
+  /* the logo always leads home */
+  document.querySelector('.brand').addEventListener('click', function () { if (!OVERLAY_OPEN) goHome(); });
 
   $('lang-toggle').addEventListener('click', function () {
     LANG = LANG === 'es' ? 'en' : 'es';

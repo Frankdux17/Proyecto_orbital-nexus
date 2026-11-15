@@ -398,7 +398,7 @@ function visionPanel() {
 }
 
 /* ---------------------------------------------------------------- *
- * for the jury: a complete mission in one click                     *
+ * a complete mission in one click                                   *
  * ---------------------------------------------------------------- */
 /* A Discovery-class Mars orbiter built by the same assistants a player
    uses, dropped on the launch phase so the whole game can be seen in a
@@ -432,14 +432,23 @@ function quickDemo() {
     esc(es ? 'Revisa el diseño y pulsa «Lanzar misión». Puedes volver a cualquier fase.' : 'Review the design and press “Launch mission”. You can go back to any phase.') + '</span>', 'gold');
 }
 
-/* the strip at the top of the splash that sends the jury straight to the point */
-function juryBar() {
+/* shortcuts at the top of the splash: see the whole game in a few minutes */
+function quickBar() {
   var es = LANG === 'es';
-  return '<div class="jury"><span class="jury-k">' + esc(es ? 'Para el jurado · 3 minutos' : 'For the jury · 3 minutes') + '</span>' +
-    '<div class="jury-links">' +
-    '<a class="jury-a" href="presentacion.html"><b>1</b><span>' + esc(es ? 'Presentación (7 diapositivas)' : 'Presentation (7 slides)') + '</span></a>' +
-    '<button class="jury-a" type="button" data-act="quickdemo"><b>2</b><span>' + esc(es ? 'Demo rápida: misión lista para lanzar' : 'Quick demo: a mission ready to launch') + '</span></button>' +
-    '<button class="jury-a" type="button" data-act="lab" data-v="trade"><b>3</b><span>' + esc(es ? 'Laboratorio de ingeniería' : 'Engineering lab') + '</span></button>' +
-    '<button class="jury-a" type="button" data-act="drone"><b>4</b><span>' + esc(es ? 'Minijuego: dron en Titán' : 'Mini game: drone on Titan') + '</span></button>' +
+  return '<div class="quick"><span class="quick-k">' + esc(es ? 'Explora en 3 minutos' : 'Explore in 3 minutes') + '</span>' +
+    '<div class="quick-links">' +
+    '<a class="quick-a" href="presentacion.html"><b>1</b><span>' + esc(es ? 'Presentación (7 diapositivas)' : 'Presentation (7 slides)') + '</span></a>' +
+    '<button class="quick-a" type="button" data-act="quickdemo"><b>2</b><span>' + esc(es ? 'Misión lista para lanzar' : 'A mission ready to launch') + '</span></button>' +
+    '<button class="quick-a" type="button" data-act="lab" data-v="trade"><b>3</b><span>' + esc(es ? 'Laboratorio de ingeniería' : 'Engineering lab') + '</span></button>' +
+    '<button class="quick-a" type="button" data-act="drone"><b>4</b><span>' + esc(es ? 'Minijuego: dron en Titán' : 'Mini game: drone on Titan') + '</span></button>' +
     '</div></div>';
+}
+
+/* back to the home screen; the mission stays saved and can be resumed */
+function goHome() {
+  if (S.phase === 0) { window.scrollTo(0, 0); return; }
+  saveGame();
+  var d0 = S.diff;
+  S = freshState(); S.diff = d0;
+  render();
 }
