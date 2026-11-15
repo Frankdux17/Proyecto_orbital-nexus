@@ -152,7 +152,9 @@ A spectrometer that fills the memory and never transmits scores exactly zero.
   heat island) and confirm them with a second instrument, and some are false alarms. Targets are
   based on real finds: penguin colonies spotted by their guano, whales counted from orbit,
   Jezero's delta, methane at Gale, Europa's plumes. Discoveries export to CSV and add science
-  to Earth, Mars and Europa missions.
+  to Earth, Mars and Europa missions. **Five exploration levels** (Earth training, Earth patrol,
+  Mars water and ancient life, the methane hunt, Europa's hidden ocean) give clues instead of
+  names, time the search and award up to three stars — confirming a false alarm costs one.
 - **Share and play.** “Share my design” creates a link with the whole spacecraft for a classmate
   to open and improve; a new mini game flies a Dragonfly-style drone over Titan's dunes
   (1.35 m/s² gravity, air four times denser than Earth's, a methane lake and an RTG-charged
@@ -362,6 +364,9 @@ Tierra.** Un espectrómetro que llena la memoria y nunca transmite vale exactame
   instrumento; algunas son falsas alarmas. Los objetivos se basan en hallazgos reales: colonias
   de pingüinos vistas por su guano, ballenas contadas desde la órbita, el delta de Jezero, el
   metano de Gale, los penachos de Europa. Los hallazgos se exportan a CSV y suman ciencia.
+  **Cinco niveles de exploración** (entrenamiento en la Tierra, patrulla terrestre, Marte: agua
+  y vida antigua, la caza del metano, el océano oculto de Europa) dan pistas en vez de nombres,
+  miden el tiempo y otorgan hasta tres estrellas; confirmar una falsa alarma cuesta una.
 - **Comparte y juega.** «Compartir mi diseño» crea un enlace con la nave completa para que un
   compañero la abra y la mejore; un minijuego nuevo vuela un dron tipo Dragonfly sobre las
   dunas de Titán (gravedad de 1,35 m/s², aire cuatro veces más denso, un lago de metano y una

@@ -440,7 +440,7 @@ function quickBar() {
     '<button class="quick-a" type="button" data-act="quickdemo"><b>1</b><span>' + esc(es ? 'Misión lista para lanzar' : 'A mission ready to launch') + '</span></button>' +
     '<button class="quick-a" type="button" data-act="lab" data-v="trade"><b>2</b><span>' + esc(es ? 'Laboratorio de ingeniería' : 'Engineering lab') + '</span></button>' +
     '<button class="quick-a" type="button" data-act="drone"><b>3</b><span>' + esc(es ? 'Minijuego: dron en Titán' : 'Mini game: drone on Titan') + '</span></button>' +
-    '<button class="quick-a" type="button" data-act="scan"><b>4</b><span>' + esc(es ? 'Escáner orbital: busca señales de vida' : 'Orbital scanner: search for signs of life') + '</span></button>' +
+    '<button class="quick-a" type="button" data-act="scan"><b>4</b><span>' + esc(es ? 'Escáner orbital: 5 niveles buscando vida' : 'Orbital scanner: 5 levels searching for life') + '</span></button>' +
     '</div></div>';
 }
 

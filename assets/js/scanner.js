@@ -8,7 +8,7 @@
    some signals are false alarms — which is exactly why scientists confirm.
    The maps are simulated; the targets are based on real discoveries. */
 
-var SCAN = { world: 'earth', sensor: 'vis', layers: {}, prog: {}, done: {}, lx: 0.5, ly: 0.5, hold: 0, open: false, raf: 0, last: 0, msg: '', msgT: 0, opts: null, gained: 0, lensOn: false };
+var SCAN = { mode: 'levels', level: null, lvT: 0, lvFalse: 0, lvWon: false, world: 'earth', sensor: 'vis', layers: {}, prog: {}, done: {}, lx: 0.5, ly: 0.5, hold: 0, open: false, raf: 0, last: 0, msg: '', msgT: 0, opts: null, gained: 0, lensOn: false };
 var SW = 720, SH = 360;
 
 var SENSORS = [
@@ -164,7 +164,7 @@ function heatRamp(t) {
 /* ---------- open / close ---------- */
 function scanOpen(opts) {
   SCAN.opts = opts || {};
-  if (SCAN.opts.world) SCAN.world = SCAN.opts.world;
+  if (SCAN.opts.world) { SCAN.world = SCAN.opts.world; SCAN.mode = 'free'; } else if (SCAN.opts.levels) { SCAN.mode = 'levels'; SCAN.level = null; }
   SCAN.gained = 0;
   var root = document.getElementById('scanner');
   if (!root) {
@@ -201,15 +201,23 @@ function scanRender() {
     sh += '<button class="sc-sensor' + (s.id === SCAN.sensor ? ' on' : '') + '" data-sc="sensor" data-v="' + s.id + '">' + icon(s.ic, 'ico') +
       '<span><b>' + s.k + ' · ' + esc(sx(s.es[0], s.en[0])) + '</b><small>' + esc(sx(s.es[1], s.en[1])) + '</small></span></button>';
   });
-  root.innerHTML = '<div class="sc-wrap">' +
-    '<header class="sc-head"><div class="sc-title"><span class="sc-badge">' + icon('target', 'ico') + '</span><div><b>' + esc(sx('Escáner orbital', 'Orbital scanner')) + '</b><span>' +
-    esc(sx('Busca señales de vida y geolocalízalas desde la órbita', 'Search for signs of life and geolocate them from orbit')) + '</span></div></div>' +
-    '<div class="sc-worlds">' + tw + '</div>' +
-    '<button class="icon-btn sc-x" data-sc="close" aria-label="' + esc(sx('Cerrar', 'Close')) + '">' + icon('close', 'ico') + '</button></header>' +
+  var lv = SCAN.mode === 'levels' && SCAN.level != null ? SCAN_LEVELS[SCAN.level] : null;
+  var modes = '<div class="sc-modes"><button class="sc-mode' + (SCAN.mode === 'levels' ? ' on' : '') + '" data-sc="levels">★ ' + esc(sx('Niveles', 'Levels')) + '</button>' +
+    '<button class="sc-mode' + (SCAN.mode === 'free' ? ' on' : '') + '" data-sc="free">' + esc(sx('Exploración libre', 'Free exploration')) + '</button></div>';
+  var head = '<header class="sc-head"><div class="sc-title"><span class="sc-badge">' + icon('target', 'ico') + '</span><div><b>' + esc(sx('Escáner orbital', 'Orbital scanner')) + '</b><span>' +
+    esc(sx('Busca señales de vida y geolocalízalas desde la órbita', 'Search for signs of life and geolocate them from orbit')) + '</span></div></div>' + modes +
+    (SCAN.mode === 'free' ? '<div class="sc-worlds">' + tw + '</div>' : '') +
+    '<button class="icon-btn sc-x" data-sc="close" aria-label="' + esc(sx('Cerrar', 'Close')) + '">' + icon('close', 'ico') + '</button></header>';
+  if (SCAN.mode === 'levels' && SCAN.level == null) { root.innerHTML = '<div class="sc-wrap">' + head + scanLevelSelect() + '</div>'; return; }
+  var goals = lv ? '<div class="lv-play"><div class="lv-play-top"><span class="lv-n">' + sx('Nivel ', 'Level ') + (SCAN.level + 1) + ' · ' + esc(sx(WORLDS[lv.world].es[0], WORLDS[lv.world].en[0])) + '</span>' +
+    '<span class="lv-time" id="lv-time">0 s</span></div><b>' + esc(sx(lv.es[0], lv.en[0])) + '</b><ul class="lv-goals" id="lv-goals">' + scanGoalsHTML() + '</ul>' +
+    '<button class="btn ghost wide" data-sc="levels">← ' + esc(sx('Mapa de niveles', 'Level map')) + '</button></div>' : '';
+  root.innerHTML = '<div class="sc-wrap">' + head +
     '<div class="sc-grid"><section class="sc-mapbox"><canvas id="sc-cv" class="sc-cv" aria-label="' + esc(sx('Mapa del planeta visto por el sensor elegido', 'Planet map seen through the chosen sensor')) + '"></canvas>' +
+    '<div class="lv-end" id="lv-end" hidden></div>' +
     '<div class="sc-read" id="sc-read"></div><p class="sc-note">' + esc(sx(W0.es[1], W0.en[1])) + ' · ' +
     esc(sx('Mueve el mouse o el dedo sobre el mapa; flechas y teclas 1–4 también sirven.', 'Move the mouse or your finger over the map; arrow keys and 1–4 work too.')) + '</p></section>' +
-    '<aside class="sc-side"><h3>' + esc(sx('Instrumentos', 'Instruments')) + '</h3><div class="sc-sensors">' + sh + '</div>' +
+    '<aside class="sc-side">' + goals + '<h3>' + esc(sx('Instrumentos', 'Instruments')) + '</h3><div class="sc-sensors">' + sh + '</div>' +
     '<div class="sc-truth"><b>' + esc(sx('¿Se pueden ver extraterrestres?', 'Can we see aliens?')) + '</b><span>' +
     esc(sx('No directamente. Los satélites buscan señales —gases, calor, plantas, agua— y las confirman con un segundo instrumento, porque muchas son falsas alarmas.',
       'Not directly. Satellites look for signals —gases, heat, plants, water— and confirm them with a second instrument, because many are false alarms.')) + '</span></div>' +
@@ -244,6 +252,10 @@ function scanFrame(ts) {
   SCAN.raf = requestAnimationFrame(scanFrame);
   var dt = SCAN.last ? Math.min(0.05, (ts - SCAN.last) / 1000) : 0.016; SCAN.last = ts;
   var cv = document.getElementById('sc-cv'); if (!cv) return;
+  if (SCAN.mode === 'levels' && SCAN.level != null && !SCAN.lvWon) {
+    SCAN.lvT += dt;
+    var te = document.getElementById('lv-time'); if (te) { te.textContent = Math.floor(SCAN.lvT) + ' s'; te.classList.toggle('late', SCAN.lvT > SCAN_LEVELS[SCAN.level].par); }
+  }
   var dpr = Math.min(2, window.devicePixelRatio || 1), w = cv.clientWidth, h = Math.round(w / 2);
   if (cv.height !== Math.round(h * dpr) || cv.width !== Math.round(w * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); cv.style.height = h + 'px'; }
   var g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -322,7 +334,8 @@ function scanLock(t) {
     if (typeof SFX !== 'undefined' && SFX.chime) SFX.chime();
     scanCatalog();
     var all = true; WORLDS[SCAN.world].targets.forEach(function (q) { if (!SCAN.done[SCAN.world + ':' + q.id] && q.kind !== 'false') all = false; });
-    if (all && typeof award === 'function') award('hunter');
+    if (all && SCAN.mode === 'free' && typeof award === 'function') award('hunter');
+    if (SCAN.mode === 'levels') scanLevelCheck(t);
   } else {
     SCAN.msg = sx('Señal registrada. Ahora confírmala con: ', 'Signal logged. Now confirm it with: ') + sensorName(t.bands[SCAN.prog[key]]);
     SCAN.msgT = 3.2;
@@ -337,6 +350,9 @@ function scanClick(e) {
   if (a === 'world') { SCAN.world = b.getAttribute('data-v'); SCAN.hold = 0; SCAN.msgT = 0; scanRender(); return; }
   if (a === 'sensor') { SCAN.sensor = b.getAttribute('data-v'); SCAN.hold = 0; var s = document.querySelectorAll('.sc-sensor'); for (var i = 0; i < s.length; i++) s[i].classList.toggle('on', s[i].getAttribute('data-v') === SCAN.sensor); return; }
   if (a === 'csv') { scanCSV(); return; }
+  if (a === 'levels') { SCAN.mode = 'levels'; SCAN.level = null; scanRender(); return; }
+  if (a === 'free') { SCAN.mode = 'free'; SCAN.level = null; scanRender(); return; }
+  if (a === 'level') { scanStartLevel(parseInt(b.getAttribute('data-v'), 10)); return; }
 }
 function scanKey(e) {
   if (e.key === 'Escape') { scanClose(); return; }
@@ -371,11 +387,119 @@ function scanBtn(cls) {
 }
 function scanFromGame() {
   var w = S.phase === 6 ? scanWorldFor(S.destId) : null, inOps = !!w && S.alive && !S.scanDone;
-  scanOpen({ world: w || SCAN.world, done: function (r) {
+  scanOpen({ world: w || null, levels: !w, done: function (r) {
     if (inOps && r.science > 0) {
       S.bonusScience = (S.bonusScience || 0) + r.science; S.scanDone = true;
       logit(sx('Escaneo orbital: +', 'Orbital scan: +') + r.science + ' pts', 'sci');
     }
     render();
   } });
+}
+
+/* ---------------------------------------------------------------- *
+ * exploration levels                                                *
+ * ---------------------------------------------------------------- */
+/* Five missions that unlock one after another. Each gives clues instead
+   of names, times the search, and costs a star for every false alarm the
+   player confirms, so the lesson is the scientist's: check before you
+   announce. */
+var SCAN_LEVELS = [
+  { world: 'earth', par: 40,
+    es: ['Entrenamiento: vida verde', 'Tu primer día como analista de satélites. Encuentra vida vegetal desde la órbita.'],
+    en: ['Training: green life', 'Your first day as a satellite analyst. Find plant life from orbit.'],
+    goals: [{ t: 'forest', es: 'Una gran zona viva cerca del ecuador, en Sudamérica. Pista: las plantas brillan en infrarrojo cercano.', en: 'A large living area near the equator, in South America. Hint: plants glow in near infrared.' }] },
+  { world: 'earth', par: 90,
+    es: ['Patrulla terrestre', 'Vigila la Tierra como los satélites de observación: vida, peligros y ciudades.'],
+    en: ['Earth patrol', 'Watch Earth like observation satellites do: life, hazards and cities.'],
+    goals: [
+      { t: 'fire', es: 'Algo muy caliente en la selva. Pista: infrarrojo térmico.', en: 'Something very hot in the rainforest. Hint: thermal infrared.' },
+      { t: 'penguins', es: 'Manchas oscuras sobre el hielo de la Antártida.', en: 'Dark stains on the Antarctic ice.' },
+      { t: 'whales', es: 'Puntos claros en el océano, al sureste de Australia.', en: 'Bright specks in the ocean, south-east of Australia.' },
+      { t: 'city', es: 'Una isla de calor con calles en cuadrícula, en Asia.', en: 'A heat island with a street grid, in Asia.' }] },
+  { world: 'mars', par: 90,
+    es: ['Marte: agua y vida antigua', 'Elige dónde aterrizará la próxima misión: busca agua y un lago antiguo.'],
+    en: ['Mars: water and ancient life', 'Choose where the next mission lands: look for water and an ancient lake.'],
+    goals: [
+      { t: 'jezero', es: 'Un delta en forma de abanico al norte del ecuador. Confírmalo con arcillas.', en: 'A fan-shaped delta north of the equator. Confirm it with clays.' },
+      { t: 'ice', es: 'Un lugar anormalmente frío en el norte. Pista: térmico.', en: 'An unusually cold spot in the north. Hint: thermal.' },
+      { t: 'rover', es: 'Un punto brillante diminuto cerca del ecuador: tecnología humana.', en: 'A tiny bright dot near the equator: human technology.' }] },
+  { world: 'mars', par: 60, trap: true,
+    es: ['La caza del metano', 'Un gas que podría venir de microbios. Cuidado: Marte también engaña a los sensores.'],
+    en: ['The methane hunt', 'A gas that might come from microbes. Careful: Mars fools sensors too.'],
+    goals: [{ t: 'methane', es: 'Un penacho de gas cerca del cráter Gale. Pista: espectrómetro de gases.', en: 'A gas plume near Gale crater. Hint: gas spectrometer.' }] },
+  { world: 'europa', par: 90, trap: true,
+    es: ['Europa: el océano oculto', 'Bajo el hielo hay un océano. Encuentra por dónde se asoma.'],
+    en: ['Europa: the hidden ocean', 'There is an ocean under the ice. Find where it peeks out.'],
+    goals: [
+      { t: 'plume', es: 'Vapor de agua saliendo al espacio en el sur. Confírmalo con el térmico.', en: 'Water vapour escaping to space in the south. Confirm it with thermal.' },
+      { t: 'salts', es: 'Grietas con sales que vienen del océano. Pista: infrarrojo cercano.', en: 'Cracks with salts from the ocean. Hint: near infrared.' },
+      { t: 'thin', es: 'Una zona más tibia donde el hielo podría ser delgado.', en: 'A warmer patch where the ice may be thin.' }] }
+];
+
+function scanLvStore() { try { return JSON.parse(pref('on_scan_lv', '{}')) || {}; } catch (e) { return {}; } }
+function scanLvSave(o) { setPref('on_scan_lv', JSON.stringify(o)); }
+function scanLvUnlocked(i) { return i === 0 || !!scanLvStore()[i - 1]; }
+
+function scanLevelSelect() {
+  var st = scanLvStore(), h = '<div class="lv-grid">';
+  for (var i = 0; i < SCAN_LEVELS.length; i++) {
+    var L = SCAN_LEVELS[i], open = scanLvUnlocked(i), stars = st[i] || 0, w = L.world;
+    h += '<button class="lv-card' + (open ? '' : ' locked') + (stars ? ' won' : '') + '"' + (open ? ' data-sc="level" data-v="' + i + '"' : ' disabled') + '>' +
+      destArt(w === 'earth' ? 'leo-sso' : (w === 'mars' ? 'mars-orbit' : 'europa'), 'art lv-art') +
+      '<span class="lv-n">' + sx('Nivel ', 'Level ') + (i + 1) + (L.trap ? ' · ⚠ ' + sx('falsas alarmas', 'false alarms') : '') + '</span>' +
+      '<b>' + esc(sx(L.es[0], L.en[0])) + '</b><span class="lv-d">' + esc(sx(L.es[1], L.en[1])) + '</span>' +
+      '<span class="lv-stars">' + (open ? '★★★'.slice(0, stars) + '<i>' + '★★★'.slice(stars) + '</i>' : '🔒 ' + sx('Completa el nivel anterior', 'Finish the previous level')) + '</span></button>';
+  }
+  var total = 0; for (var k in st) total += st[k];
+  return '<div class="lv-wrap"><div class="lv-head"><div><b>' + esc(sx('Misiones de exploración', 'Exploration missions')) + '</b><span>' +
+    esc(sx('Investiga lugares de la Tierra, Marte y Europa como un analista de la NASA. Cada nivel desbloquea el siguiente.',
+      'Investigate places on Earth, Mars and Europa like a NASA analyst. Each level unlocks the next.')) + '</span></div>' +
+    '<span class="lv-total">★ ' + total + ' / ' + (SCAN_LEVELS.length * 3) + '</span></div>' + h + '</div></div>';
+}
+
+function scanStartLevel(i) {
+  var L = SCAN_LEVELS[i];
+  SCAN.level = i; SCAN.world = L.world; SCAN.lvT = 0; SCAN.lvFalse = 0; SCAN.lvWon = false; SCAN.hold = 0; SCAN.msgT = 0;
+  WORLDS[L.world].targets.forEach(function (t) { delete SCAN.done[L.world + ':' + t.id]; delete SCAN.prog[L.world + ':' + t.id]; });
+  SCAN.sensor = 'vis';
+  scanRender();
+}
+
+function scanGoalsHTML() {
+  var L = SCAN_LEVELS[SCAN.level], h = '';
+  L.goals.forEach(function (gl) {
+    var ok = !!SCAN.done[L.world + ':' + gl.t], t = scanTarget(L.world, gl.t);
+    h += '<li class="' + (ok ? 'ok' : '') + '"><span>' + (ok ? '✓' : '?') + '</span><div><b>' + esc(ok ? sx(t.es[0], t.en[0]) : sx('Objetivo desconocido', 'Unknown target')) + '</b><small>' +
+      esc(ok ? fmtLL(t.lat, t.lon) : sx(gl.es, gl.en)) + '</small></div></li>';
+  });
+  return h;
+}
+function scanTarget(w, id) { var T = WORLDS[w].targets; for (var i = 0; i < T.length; i++) if (T[i].id === id) return T[i]; return null; }
+
+/* called after every confirmation while a level is running */
+function scanLevelCheck(t) {
+  if (SCAN.level == null || SCAN.lvWon) return;
+  var L = SCAN_LEVELS[SCAN.level];
+  if (t.kind === 'false') {
+    SCAN.lvFalse++;
+    SCAN.msg = '⚠ ' + sx('¡Falsa alarma confirmada! Pierdes una estrella. Revisa con otro instrumento antes de anunciar.', 'False alarm confirmed! You lose a star. Check with another instrument before announcing.');
+    SCAN.msgT = 4;
+  }
+  var gl = document.getElementById('lv-goals'); if (gl) gl.innerHTML = scanGoalsHTML();
+  var all = L.goals.every(function (g) { return SCAN.done[L.world + ':' + g.t]; });
+  if (!all) return;
+  SCAN.lvWon = true;
+  var stars = 3; if (SCAN.lvT > L.par) stars--; stars -= Math.min(2, SCAN.lvFalse); stars = Math.max(1, stars);
+  var st = scanLvStore(); if (!st[SCAN.level] || st[SCAN.level] < stars) { st[SCAN.level] = stars; scanLvSave(st); }
+  if (SCAN.level === SCAN_LEVELS.length - 1 && typeof award === 'function') award('hunter');
+  var next = SCAN.level + 1 < SCAN_LEVELS.length;
+  var box = document.getElementById('lv-end');
+  if (!box) return;
+  box.innerHTML = '<span class="lv-k">' + esc(sx('Nivel completado', 'Level complete')) + '</span><div class="lv-big">' + '★★★'.slice(0, stars) + '<i>' + '★★★'.slice(stars) + '</i></div>' +
+    '<p>' + esc(sx('Tiempo: ', 'Time: ')) + Math.round(SCAN.lvT) + ' s · ' + esc(sx('meta ', 'target ')) + L.par + ' s · ' + esc(sx('falsas alarmas: ', 'false alarms: ')) + SCAN.lvFalse + '</p>' +
+    '<div class="lv-btns"><button class="btn ghost" data-sc="level" data-v="' + SCAN.level + '">' + esc(sx('Repetir', 'Replay')) + '</button>' +
+    (next ? '<button class="btn primary" data-sc="level" data-v="' + (SCAN.level + 1) + '">' + esc(sx('Siguiente nivel →', 'Next level →')) + '</button>'
+      : '<button class="btn primary" data-sc="levels">' + esc(sx('¡Todos los niveles! Ver mapa', 'All levels done! See the map')) + '</button>') + '</div>';
+  box.hidden = false;
+  if (typeof confetti === 'function') confetti();
 }
