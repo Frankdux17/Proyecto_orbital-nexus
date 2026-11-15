@@ -1,5 +1,7 @@
 # ORBITAL NEXUS
 
+![ORBITAL NEXUS — Engineering Beyond Earth](assets/img/og.jpg)
+
 **An interactive space mission design game.** Pick a destination, build the spacecraft,
 fight for every watt and every gigabit, then operate the mission turn by turn while
 space tries to break it.

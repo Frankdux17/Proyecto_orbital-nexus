@@ -212,10 +212,8 @@ function viewSplash() {
     resume = '<button class="btn" data-act="resume">' + esc(es ? 'Continuar misión guardada' : 'Resume saved mission') +
       '<small>' + esc(t(STEPS[Math.min(sv.phase, 7) - 1]) + (sd ? ' · ' + L(sd.name) : '') + (sv.phase === 6 ? ' · ' + t('turn') + ' ' + sv.turn : '')) + '</small></button>';
   }
-  var orbit = '', gal = '', ids = ['leo-sso', 'llo', 'mars-orbit', 'venus-orbit', 'neo', 'europa'];
-  for (var i = 0; i < ids.length; i++)
-    orbit += '<span class="orb o' + i + '" style="--i:' + i + '">' + destArt(ids[i], 'art') + '</span>';
-  for (i = 0; i < DATA.destinations.length; i++) {
+  var gal = '';
+  for (var i = 0; i < DATA.destinations.length; i++) {
     var d = DATA.destinations[i];
     gal += '<button class="gal" data-act="demo" data-v="' + d.id + '">' + destArt(d.id, 'art') +
       '<b>' + esc(L(d.tag)) + '</b><span>' + esc(L(d.name)) + '</span></button>';
@@ -232,8 +230,8 @@ function viewSplash() {
     '<div class="cta"><button class="btn primary big" data-act="start">' + icon('rocket', 'ico') + esc(t('splash_start')) + '</button>' + resume +
     '<button class="btn big ghost" data-act="demo" data-v="mars-orbit">' + icon('orbit3d', 'ico') + esc(es ? 'Ver una misión en 3D' : 'See a mission in 3D') + '</button>' +
     '<button class="btn big ghost" data-act="practice">' + icon('rocket', 'ico') + esc(es ? 'Simulador de despegue' : 'Launch simulator') + '</button></div>' +
-    '</div><div class="hero-art" aria-hidden="true"><div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>' +
-    '<div class="hero-sun"></div>' + orbit + '</div></div>' +
+    '</div><div class="hero-poster"><img src="assets/img/hero.jpg" width="1136" height="884" alt="' +
+    esc(es ? 'ORBITAL NEXUS · Ingeniería más allá de la Tierra: un cohete deja la Tierra rumbo a Marte' : 'ORBITAL NEXUS · Engineering Beyond Earth: a rocket leaves Earth for Mars') + '"></div></div>' +
     '<div class="splash-sec"><h2>' + esc(es ? 'Elige tu nivel' : 'Choose your level') + '</h2>' +
     '<div class="diffs" role="group" aria-label="' + esc(es ? 'Dificultad' : 'Difficulty') + '">' + dh + '</div>' +
     '<p class="splash-note">' + esc(es ? 'Tu progreso se guarda solo: puedes dejar la misión en un descanso y retomarla después. Atajos: Enter avanza, 1–4 responde a una anomalía.'
