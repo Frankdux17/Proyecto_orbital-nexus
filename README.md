@@ -145,6 +145,14 @@ A spectrometer that fills the memory and never transmits scores exactly zero.
   budget table, solar power and battery over the mission, and a **trade-space map** that
   evaluates every bus × propulsion × rocket × power source for your mission, plots cost
   against chance of success, marks the Pareto front, exports CSV and applies any design.
+- **Orbital scanner: search for signs of life.** Look down on Earth, Mars or Europa through
+  four instruments —black-and-white visible camera, thermal infrared, near infrared and a gas
+  spectrometer— and geolocate what each one reveals (latitude and longitude). Satellites cannot
+  "see aliens": they find signals (plants' red edge, heat, methane, water vapour, ice, a city's
+  heat island) and confirm them with a second instrument, and some are false alarms. Targets are
+  based on real finds: penguin colonies spotted by their guano, whales counted from orbit,
+  Jezero's delta, methane at Gale, Europa's plumes. Discoveries export to CSV and add science
+  to Earth, Mars and Europa missions.
 - **Share and play.** “Share my design” creates a link with the whole spacecraft for a classmate
   to open and improve; a new mini game flies a Dragonfly-style drone over Titan's dunes
   (1.35 m/s² gravity, air four times denser than Earth's, a methane lake and an RTG-charged
@@ -201,6 +209,7 @@ assets/js/lab.js        engineering lab: calculators, charts and the trade-space
 assets/js/help.js       status ring, glossary, welcome tour, celebrations, share links, vision panel
 assets/js/titan.js      Titan rotorcraft flight mini game
 assets/js/space-bg.js   interactive space background (parallax stars, nebulae, constellation, comets)
+assets/js/scanner.js    orbital scanner: four instruments, geolocated signs of life on Earth, Mars, Europa
 assets/img/             project logo, poster, favicon and social preview
 assets/js/app.js        state machine, interface, operations simulator
 docs/MODEL.md           every equation and where its numbers come from
@@ -345,6 +354,14 @@ Tierra.** Un espectrómetro que llena la memoria y nunca transmite vale exactame
   lo largo de la misión, y un **mapa de compensaciones** que evalúa todas las naves posibles
   para tu misión, grafica costo contra probabilidad de éxito, marca la frontera de Pareto,
   exporta CSV y aplica cualquier diseño.
+- **Escáner orbital: busca señales de vida.** Mira la Tierra, Marte o Europa con cuatro
+  instrumentos —cámara visible en blanco y negro, infrarrojo térmico, infrarrojo cercano y un
+  espectrómetro de gases— y geolocaliza lo que revela cada uno (latitud y longitud). Los
+  satélites no «ven extraterrestres»: encuentran señales (el borde rojo de las plantas, calor,
+  metano, vapor de agua, hielo, la isla de calor de una ciudad) y las confirman con un segundo
+  instrumento; algunas son falsas alarmas. Los objetivos se basan en hallazgos reales: colonias
+  de pingüinos vistas por su guano, ballenas contadas desde la órbita, el delta de Jezero, el
+  metano de Gale, los penachos de Europa. Los hallazgos se exportan a CSV y suman ciencia.
 - **Comparte y juega.** «Compartir mi diseño» crea un enlace con la nave completa para que un
   compañero la abra y la mejore; un minijuego nuevo vuela un dron tipo Dragonfly sobre las
   dunas de Titán (gravedad de 1,35 m/s², aire cuatro veces más denso, un lago de metano y una

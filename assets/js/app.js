@@ -860,7 +860,8 @@ function viewOps(c) {
   var h = head('p6_kick', 'p6_title', 'p6_lead');
   var stored = storedTotal();
 
-  h += '<div class="cols"><div>' + (S.destId === 'titan' && !S.droneDone && S.alive ? '<div class="panel">' + droneBtn('wide') + '</div>' : '') + vizPanel();
+  h += '<div class="cols"><div>' + (S.destId === 'titan' && !S.droneDone && S.alive ? '<div class="panel">' + droneBtn('wide') + '</div>' : '') +
+    (scanWorldFor(S.destId) && !S.scanDone && S.alive ? '<div class="panel">' + scanBtn('wide') + '</div>' : '') + vizPanel();
 
   /* turn strip */
   h += '<div class="panel"><h2>' + esc(t('turn')) + ' ' + S.turn + ' ' + esc(t('of')) + ' ' + c.opsTurns + '</h2><div class="turnstrip">';
@@ -1394,6 +1395,7 @@ function wire() {
     if (act === 'goto') { var gp = parseInt(el.getAttribute('data-v'), 10); if (gp >= 1 && gp < S.phase && S.phase <= 5) enterPhase(gp); return; }
     if (act === 'home') { goHome(); return; }
     if (act === 'drone') { droneFromGame(); return; }
+    if (act === 'scan') { scanFromGame(); return; }
     if (act === 'fix') { applyFix(el.getAttribute('data-v')); return; }
     if (act === 'diff') { S.diff = el.getAttribute('data-v'); setPref('on_diff', S.diff); render(); return; }
     if (act === 'resume') { resumeGame(); return; }
