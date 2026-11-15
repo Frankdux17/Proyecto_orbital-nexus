@@ -155,6 +155,13 @@ A spectrometer that fills the memory and never transmits scores exactly zero.
   to Earth, Mars and Europa missions. **Five exploration levels** (Earth training, Earth patrol,
   Mars water and ancient life, the methane hunt, Europa's hidden ocean) give clues instead of
   names, time the search and award up to three stars — confirming a false alarm costs one.
+- **Future mode: quantum portal (science fiction, clearly labelled).** What if we didn't need
+  rockets? Astronauts are stranded with under a minute of oxygen on the Moon, Mars, Europa or
+  Proxima b; the player opens a portal and keeps it stable with exotic energy — too little and
+  it collapses, too much and it overloads — while people cross. Each mission ends with the real
+  physics (wormholes need negative energy; quantum teleportation is real but moves information,
+  as the Micius satellite showed in 2017) and a rocket comparison: trip time and roughly
+  300–400 t of CO₂ per kerosene launch.
 - **Share and play.** “Share my design” creates a link with the whole spacecraft for a classmate
   to open and improve; a new mini game flies a Dragonfly-style drone over Titan's dunes
   (1.35 m/s² gravity, air four times denser than Earth's, a methane lake and an RTG-charged
@@ -211,6 +218,7 @@ assets/js/lab.js        engineering lab: calculators, charts and the trade-space
 assets/js/help.js       status ring, glossary, welcome tour, celebrations, share links, vision panel
 assets/js/titan.js      Titan rotorcraft flight mini game
 assets/js/space-bg.js   interactive space background (parallax stars, nebulae, constellation, comets)
+assets/js/portal.js     future mode: the quantum portal rescue game (labelled science fiction)
 assets/js/scanner.js    orbital scanner: four instruments, geolocated signs of life on Earth, Mars, Europa
 assets/img/             project logo, poster, favicon and social preview
 assets/js/app.js        state machine, interface, operations simulator
@@ -367,6 +375,13 @@ Tierra.** Un espectrómetro que llena la memoria y nunca transmite vale exactame
   **Cinco niveles de exploración** (entrenamiento en la Tierra, patrulla terrestre, Marte: agua
   y vida antigua, la caza del metano, el océano oculto de Europa) dan pistas en vez de nombres,
   miden el tiempo y otorgan hasta tres estrellas; confirmar una falsa alarma cuesta una.
+- **Modo futuro: portal cuántico (ficción científica, bien señalada).** ¿Y si no hiciera falta
+  un cohete? Hay astronautas atrapados con menos de un minuto de oxígeno en la Luna, Marte,
+  Europa o Próxima b; el jugador abre un portal y lo mantiene estable con energía exótica
+  —poca y colapsa, mucha y se sobrecarga— mientras las personas cruzan. Cada misión termina con
+  la física real (los agujeros de gusano necesitan energía negativa; la teletransportación
+  cuántica existe pero mueve información, como mostró el satélite Micius en 2017) y una
+  comparación con el cohete: tiempo de viaje y unas 300–400 t de CO₂ por lanzamiento.
 - **Comparte y juega.** «Compartir mi diseño» crea un enlace con la nave completa para que un
   compañero la abra y la mejore; un minijuego nuevo vuela un dron tipo Dragonfly sobre las
   dunas de Titán (gravedad de 1,35 m/s², aire cuatro veces más denso, un lago de metano y una

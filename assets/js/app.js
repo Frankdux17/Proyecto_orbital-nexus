@@ -1396,6 +1396,7 @@ function wire() {
     if (act === 'home') { goHome(); return; }
     if (act === 'drone') { droneFromGame(); return; }
     if (act === 'scan') { scanFromGame(); return; }
+    if (act === 'portal') { portalOpen(); return; }
     if (act === 'fix') { applyFix(el.getAttribute('data-v')); return; }
     if (act === 'diff') { S.diff = el.getAttribute('data-v'); setPref('on_diff', S.diff); render(); return; }
     if (act === 'resume') { resumeGame(); return; }
