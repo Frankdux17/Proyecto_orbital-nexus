@@ -74,17 +74,21 @@ function voiceSay(who, text, opts) {
 function voiceStop() { try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) { } }
 
 /* the caption: who is talking and what they said */
+function capSize() { return pref('on_cap_size', 'normal'); }
+function capPos() { return pref('on_cap_pos', 'bl'); }
 function voiceCaption(who, text) {
+  if (capSize() === 'off') return;
   var el = document.getElementById('vcap');
   if (!el) { el = document.createElement('div'); el.id = 'vcap'; el.className = 'vcap'; el.setAttribute('aria-live', 'polite'); document.body.appendChild(el); }
   var seat = TEAM[who], isAI = !seat;
-  el.className = 'vcap show ' + (isAI ? 'vcap-ai' : 'vcap-team');
+  var base = 'vcap ' + (isAI ? 'vcap-ai' : 'vcap-team') + ' pos-' + capPos() + (capSize() === 'compact' ? ' vcap-compact' : '');
+  el.className = base + ' show';
   el.innerHTML = (isAI ? '<span class="vcap-orb"><i></i><i></i><i></i></span>' : useSvg(seat.av, 'vcap-av')) +
     '<div><b>' + esc(isAI ? 'NEXUS · ' + (LANG === 'es' ? 'asistente de a bordo' : 'onboard assistant') : seat.name) + '</b><span>' + esc(text) + '</span></div>' +
     '<button class="vcap-x" type="button" aria-label="' + esc(LANG === 'es' ? 'Cerrar' : 'Close') + '">×</button>';
-  el.querySelector('.vcap-x').onclick = function () { el.className = 'vcap'; voiceStop(); };
+  el.querySelector('.vcap-x').onclick = function () { el.className = base; voiceStop(); };
   clearTimeout(VOICE.capT);
-  VOICE.capT = setTimeout(function () { el.className = 'vcap'; }, Math.min(16000, 3500 + text.length * 70));
+  VOICE.capT = setTimeout(function () { el.className = base; }, Math.min(capSize() === 'compact' ? 9000 : 16000, 3000 + text.length * (capSize() === 'compact' ? 45 : 70)));
 }
 
 /* ---------- what NEXUS says ---------- */
@@ -151,6 +155,7 @@ function crewOpen() {
   if (!root) {
     root = document.createElement('div'); root.id = 'crew'; root.className = 'tour-back'; root.setAttribute('role', 'dialog'); root.setAttribute('aria-modal', 'true');
     document.body.appendChild(root);
+    root.addEventListener('change', function (e) { var k = e.target.getAttribute && e.target.getAttribute('data-crew-opt'); if (k) { setPref(k, e.target.value); voiceCaption('nexus', LANG === 'es' ? 'Así se verán los subtítulos.' : 'This is how captions will look.'); } });
     root.addEventListener('click', function (e) {
       var b = e.target.closest ? e.target.closest('[data-crew]') : null;
       if (!b) { if (e.target === root) crewClose(); return; }
@@ -177,6 +182,10 @@ function crewPaint() {
     '<div class="crew-rows">' + rows + '</div>' +
     '<div class="crew-voice"><button class="switch' + (voicePref() ? ' on' : '') + '" data-crew="voice" role="switch" aria-checked="' + voicePref() + '"><i></i></button><span>' +
     esc(es ? 'Voces del equipo y de NEXUS ' + (voicePref() ? 'activadas' : 'desactivadas') + ' (los subtítulos siempre se muestran)' : 'Team and NEXUS voices ' + (voicePref() ? 'on' : 'off') + ' (captions always show)') + '</span></div>' +
+    '<div class="crew-opts"><label>' + esc(es ? 'Subtítulos' : 'Captions') + '<select data-crew-opt="on_cap_size">' +
+      [['normal', es ? 'Normales' : 'Normal'], ['compact', es ? 'Compactos (una línea)' : 'Compact (one line)'], ['off', es ? 'Ocultos' : 'Hidden']].map(function (o) { return '<option value="' + o[0] + '"' + (capSize() === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select></label>' +
+      '<label>' + esc(es ? 'Posición' : 'Position') + '<select data-crew-opt="on_cap_pos">' +
+      [['bl', es ? 'Abajo a la izquierda' : 'Bottom left'], ['br', es ? 'Abajo a la derecha' : 'Bottom right'], ['top', es ? 'Arriba' : 'Top']].map(function (o) { return '<option value="' + o[0] + '"' + (capPos() === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select></label></div>' +
     '<div class="tour-btns"><button class="btn ghost" data-crew="test">🔊 ' + esc(es ? 'Probar voz' : 'Test voice') + '</button><button class="btn primary" data-crew="save">' + esc(es ? 'Guardar tripulación' : 'Save crew') + '</button></div></div>';
 }
 function crewSave(close) {

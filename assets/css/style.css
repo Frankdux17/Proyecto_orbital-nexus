@@ -1809,3 +1809,29 @@ body{background:
 .nx-kb button{justify-self:end;border:0;background:none;color:#f0655f;font:600 11.5px inherit;cursor:pointer}
 .nx-btn{font-size:16px}
 @media (max-width:560px){.nx{right:8px;left:8px;width:auto;top:64px;bottom:8px}}
+
+/* captions that stay out of the way */
+.vcap.pos-br{left:auto;right:16px}
+.vcap.pos-top{top:64px;bottom:auto;left:50%;transform:translate(-50%,-10px)}
+.vcap.pos-top.show{transform:translate(-50%,0)}
+.vcap.vcap-compact{padding:6px 34px 6px 8px;gap:8px;align-items:center;max-width:min(460px,calc(100% - 32px));opacity:0;background:rgba(6,10,28,.82)}
+.vcap.vcap-compact.show{opacity:.96}
+.vcap-compact .vcap-orb,.vcap-compact .vcap-av{width:26px;height:26px}
+.vcap-compact .vcap-orb i{display:none}
+.vcap-compact b{display:none}
+.vcap-compact span{display:block;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:380px}
+.crew-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;text-align:left}
+.crew-opts label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--txt-dim);font-weight:600}
+.crew-opts select{padding:8px;border-radius:10px;border:1px solid var(--line-strong);background:var(--panel-2);color:var(--txt);font:inherit}
+@media (max-width:480px){.crew-opts{grid-template-columns:1fr}}
+/* NEXUS chat: minimise, switch side, open-a-game button */
+.nx.left{right:auto;left:16px}
+.nx-hb{color:#e8eefc;border-color:rgba(140,170,230,.3);font-size:16px;margin-left:4px}
+.nx-head .nx-hb:first-of-type{margin-left:auto}
+.nx-head .nx-x{margin-left:4px}
+.nx-pill{display:none}
+.nx.mini{top:auto;bottom:16px;width:auto;border-radius:999px;background:transparent;border:0;box-shadow:none;backdrop-filter:none}
+.nx.mini > *:not(.nx-pill){display:none}
+.nx.mini .nx-pill{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:999px;border:1px solid #4fd1e0;
+  background:rgba(6,10,28,.92);color:#e8eefc;font:700 13px inherit;letter-spacing:.08em;cursor:pointer;box-shadow:0 0 24px -8px #4fd1e0}
+.nx-go{display:inline-block;margin:8px 8px 0 0;padding:6px 12px;border-radius:999px;border:0;cursor:pointer;font:700 12px inherit;color:#04161c;background:linear-gradient(135deg,#3ecf9a,#4fd1e0)}

@@ -54,7 +54,7 @@ function nxRules() {
       var miss = statusItems(c).filter(function (x) { return !x.ok; });
       return miss.length ? T('Falta: ', 'Missing: ') + miss.map(function (x) { return x.t + ' (' + x.fix + ')'; }).join(' ') : T('No falta nada: todos los sistemas en verde.', 'Nothing is missing: all systems green.');
     } },
-    { k: ['cohete', 'lanzador', 'lanzamiento', 'despegue', 'rocket', 'launcher', 'launch', 'liftoff'], a: function (c) {
+    { k: ['cohete', 'lanzador', 'rocket', 'launcher'], a: function (c) {
       if (!c.lv) return T('Aún no hay cohete. En la fase 5 el asistente elige el más barato que lleva tu nave con margen.', 'No rocket yet. In phase 5 the assistant picks the cheapest one that carries your spacecraft with margin.');
       return T(L(c.lv.name) + ': lleva ' + n0(c.lvCap) + ' kg a tu trayectoria y tu nave pesa ' + n0(c.mass.launch) + ' kg; fiabilidad ' + n1(c.lv.reliability * 100) + '%.', L(c.lv.name) + ': it carries ' + n0(c.lvCap) + ' kg to your trajectory and your spacecraft weighs ' + n0(c.mass.launch) + ' kg; reliability ' + n1(c.lv.reliability * 100) + '%.');
     } },
@@ -62,6 +62,50 @@ function nxRules() {
       var l = crewList();
       return l.length ? T('Tripulación: ', 'Crew: ') + l.map(function (x) { return (es ? x.role.es : x.role.en) + ' ' + x.name; }).join(', ') + '.' : T('Aún no registraste la tripulación. Pulsa el botón de astronauta para agregar nombres.', 'You have not logged the crew yet. Press the astronaut button to add names.');
     } }
+  ];
+}
+
+/* how every game and tool works, so NEXUS can teach the player to use them */
+function nxGuide() {
+  var es = LANG === 'es';
+  function T(a, b) { return es ? a : b; }
+  return [
+    { w: 0.8, k: ['juegos', 'minijuegos', 'que juegos', 'que puedo jugar', 'modos', 'como se juega', 'games', 'mini games', 'what games', 'what can i play', 'modes', 'how to play'],
+      a: function () { return T('Hay seis formas de jugar: diseñar una misión completa en 6 fases, el simulador de despegue, el explorador 3D con modo RV, el dron en Titán, el escáner orbital con 5 niveles y el modo futuro del portal cuántico, que es ficción. Además está el laboratorio de ingeniería para hacer cálculos. Pregúntame cómo se juega cualquiera y te lo abro.',
+        'There are six ways to play: design a full mission in 6 phases, the launch simulator, the 3D explorer with VR mode, the drone on Titan, the orbital scanner with 5 levels and the quantum portal future mode, which is fiction. There is also the engineering lab for calculations. Ask me how to play any of them and I will open it.'); } },
+    { w: 1.2, k: ['disenar', 'diseno', 'disenar una mision', 'fases', 'empezar', 'iniciar', 'mision completa', 'design', 'design a mission', 'phases', 'start', 'begin'], act: 'quickdemo',
+      a: function () { return T('Pulsa «Iniciar diseño de misión». Pasas 6 fases: misión, plataforma, ciencia, enlace, lanzamiento y operaciones. En cada fase el asistente te propone un paquete, cada opción muestra su efecto antes de elegirla y el anillo de estado dice qué falta; «Arréglalo por mí» lo resuelve. Luego votas GO o NO-GO, despegas y operas turno a turno. Si quieres, te abro una misión lista para lanzar.',
+        'Press “Start mission design”. You go through 6 phases: mission, platform, science, link, launch and operations. In each phase the assistant proposes a package, every option shows its effect before you pick it and the status ring says what is missing; “Fix it for me” solves it. Then you poll GO or NO-GO, launch and operate turn by turn. If you like, I will open a mission ready to launch.'); } },
+    { w: 1.5, k: ['dron', 'drone', 'titan', 'dragonfly', 'volar'], act: 'drone',
+      a: function () { return T('Dron en Titán: mantén ▲ o Espacio para subir y ◀ ▶ para avanzar. Aterriza suave, a menos de 2,2 metros por segundo, sobre las 3 banderas para tomar muestras, y evita el lago de metano. La batería solo se recarga en tierra, con el RTG.',
+        'Drone on Titan: hold ▲ or Space to climb and ◀ ▶ to move. Land gently, under 2.2 metres per second, on the 3 flags to take samples, and avoid the methane lake. The battery only recharges on the ground, from the RTG.'); } },
+    { w: 1.5, k: ['escaner', 'escanear', 'niveles', 'buscar vida', 'satelite', 'infrarrojo', 'geolocalizar', 'scanner', 'levels', 'search for life', 'satellite', 'infrared', 'geolocate'], act: 'scan',
+      a: function () { return T('Escáner orbital: mueve la lupa sobre el mapa y cambia de instrumento con las teclas 1 a 4: visible, térmico, infrarrojo cercano y gases. Cuando la señal llega al 100% se fija el objetivo y te da su latitud y longitud; confírmalo con el segundo instrumento. Cada nivel da pistas, mide el tiempo y da hasta 3 estrellas; confirmar una falsa alarma resta una.',
+        'Orbital scanner: move the lens over the map and switch instrument with keys 1 to 4: visible, thermal, near infrared and gas. When the signal reaches 100% it locks on and gives you latitude and longitude; confirm it with the second instrument. Each level gives clues, times you and awards up to 3 stars; confirming a false alarm costs one.'); } },
+    { w: 1.5, k: ['portal', 'cuantico', 'modo futuro', 'agujero de gusano', 'teletransporte', 'quantum', 'future mode', 'wormhole', 'teleport'], act: 'portal',
+      a: function () { return T('Modo futuro, que es ficción científica: mantén pulsado INYECTAR o la barra espaciadora para que la estabilidad del portal quede en la franja verde mientras cruzan los astronautas. Con poca energía colapsa y con mucha se sobrecarga. Al terminar te explico la física real.',
+        'Future mode, which is science fiction: hold INJECT or the space bar to keep the portal’s stability in the green band while the astronauts cross. Too little energy collapses it and too much overloads it. At the end I explain the real physics.'); } },
+    { w: 1.5, k: ['laboratorio', 'calculos', 'calculadora', 'ecuacion', 'hohmann', 'pareto', 'compensaciones', 'lab', 'calculations', 'calculator', 'equation', 'trade space'], act: 'lab',
+      a: function () { return T('Laboratorio de ingeniería: seis herramientas con las ecuaciones a la vista: ecuación del cohete, transferencias y ventanas, órbita, enlace en decibelios, energía y el mapa de compensaciones con todas las naves posibles. Cambia cualquier número; «Cargar mi misión» trae tu diseño y puedes exportar a CSV.',
+        'Engineering lab: six tools with the equations in view: rocket equation, transfers and windows, orbit, decibel link budget, power and the trade-space map with every possible spacecraft. Change any number; “Load my mission” brings in your design and you can export to CSV.'); } },
+    { w: 1.5, k: ['simulador de despegue', 'simulador', 'despegue', 'despegar', 'ascenso', 'pilotar', 'pilotear', 'piloto el', 'launch simulator', 'ascent', 'fly the rocket', 'fly the launch', 'liftoff', 'take off'], act: 'practice',
+      a: function () { return T('Simulador de despegue: ◀ ▶ cambian el cabeceo, ▲ ▼ el empuje y Espacio separa la etapa o suelta la cofia. Inclina poco a poco, baja el empuje en Max-Q, separa la etapa cuando se agote y suelta la cofia sobre 100 kilómetros. Llegas a órbita cuando el perigeo supera 160 kilómetros. También hay piloto automático.',
+        'Launch simulator: ◀ ▶ change pitch, ▲ ▼ throttle and Space stages or drops the fairing. Pitch over gently, throttle down through Max-Q, stage when it runs dry and drop the fairing above 100 kilometres. You reach orbit when perigee clears 160 kilometres. There is an autopilot too.'); } },
+    { w: 1.5, k: ['3d', 'explorador', 'realidad virtual', 'rv', 'vr', 'trayectoria', 'explorer', 'virtual reality', 'trajectory'], act: 'demo',
+      a: function () { return T('Explorador 3D: muestra la trayectoria real, la línea de tiempo con las 9 fases de CubeSat 101 y un modo RV para visor tipo Cardboard. Arrastra para girar y usa la rueda o los dedos para acercar.',
+        '3D explorer: it shows the real trajectory, the timeline with CubeSat 101’s 9 phases and a VR mode for Cardboard-style viewers. Drag to rotate and use the wheel or your fingers to zoom.'); } },
+    { k: ['compartir', 'retar', 'compartir diseno', 'share', 'challenge', 'share my design'],
+      a: function () { return T('En la fase de lanzamiento o en el informe pulsa «Compartir mi diseño»: copia un enlace con tu nave completa para que otra persona la abra, la mejore y la lance.',
+        'In the launch phase or the report press “Share my design”: it copies a link with your whole spacecraft so someone else can open it, improve it and launch it.'); } },
+    { k: ['que puedes hacer', 'quien eres', 'que eres', 'como te uso', 'como funcionas', 'que no puedes', 'limites', 'what can you do', 'who are you', 'how do i use you', 'how do you work', 'what can t you do', 'limits'],
+      a: function () { return T('Soy NEXUS. Puedo decirte el estado de tu misión y qué falta, explicarte términos y cómo se juega cada modo, y abrirlo por ti. Háblame con el micrófono o escribe. Si no sé algo te lo digo y puedes enseñarme. No puedo inventar datos que no conozco ni conectarme a internet o a la NASA, y lo que aprendo se queda en este navegador: puedes exportarlo.',
+        'I am NEXUS. I can tell you your mission status and what is missing, explain terms and how each mode is played, and open it for you. Talk to me with the microphone or type. If I do not know something I tell you and you can teach me. I cannot make up data I do not know or connect to the internet or NASA, and what I learn stays in this browser: you can export it.'); } },
+    { k: ['ensenar', 'aprender', 'como te enseno', 'como aprendes', 'teach', 'learn', 'how do you learn'],
+      a: function () { return T('Pregúntame algo que no sepa y te mostraré un cuadro para escribir la respuesta. También puedes pulsar «Corregir o mejorar esta respuesta» debajo de cualquier respuesta. Lo aprendido lleva el nombre de quien lo enseñó y se exporta o importa en JSON.',
+        'Ask me something I do not know and I will show you a box to type the answer. You can also press “Correct or improve this answer” under any answer. What I learn carries the name of whoever taught it and exports or imports as JSON.'); } },
+    { k: ['voz', 'voces', 'subtitulos', 'silenciar', 'molesta', 'tapa', 'estorba', 'pantalla', 'voice', 'voices', 'captions', 'mute', 'in the way', 'covers', 'cover', 'screen', 'block'], w: 1.2,
+      a: function () { return T('Para que no estorbe: en el botón del astronauta puedes apagar las voces y elegir subtítulos normales, compactos u ocultos, y ponerlos abajo o arriba. Este chat se minimiza con el botón menos y se cambia de lado con las flechas.',
+        'So I do not get in the way: in the astronaut button you can turn voices off and choose normal, compact or hidden captions, at the bottom or the top. This chat minimises with the minus button and switches side with the arrows.'); } }
   ];
 }
 
@@ -89,7 +133,7 @@ function nxAnswer(q) {
   });
   if (bestS >= 4) return best;
   var bestHit = [];
-  nxRules().concat(nxCatalog()).forEach(function (r) {
+  nxRules().concat(nxGuide(), nxCatalog()).forEach(function (r) {
     var sc = 0, hit = [];
     r.k.forEach(function (k) {
       k = nxNorm(k); if (!k) return;
@@ -97,7 +141,7 @@ function nxAnswer(q) {
       else if (k.length > 5 && nq.indexOf(k) >= 0) { sc += 0.8; hit = hit.concat(k.split(' ')); }
     });
     sc *= r.w || 1;
-    if (sc > bestS) { bestS = sc; best = { text: r.a(c), src: 'rule' }; bestHit = hit; }
+    if (sc > bestS) { bestS = sc; best = { text: r.a(c), src: 'rule', act: r.act }; bestHit = hit; }
   });
   if (bestS < 1) return best && best.src === 'learned' ? best : null;
   /* honesty check: if the question asks about things this answer does not cover,
@@ -108,7 +152,7 @@ function nxAnswer(q) {
   }
   return best;
 }
-var NX_GENERIC = 'mision mission nave spacecraft dime cuentame hablame informacion info sobre explica explicame tell about explain please favor sabes know quiero saber want todo esta estan como cual cuanto cuanta'.split(' ');
+var NX_GENERIC = 'mision mission nave spacecraft dime cuentame hablame informacion info sobre explica explicame tell about explain please favor sabes know quiero saber want todo esta estan como cual cuanto cuanta juego juegos jugar juega play game games usar uso use usa funciona works work abrir open modo mode'.split(' ');
 
 /* ---------- chat ---------- */
 function nxOpen() {
@@ -121,6 +165,8 @@ function nxOpen() {
     root.addEventListener('change', function (e) { if (e.target.id === 'nx-file') nxImport(e.target.files[0]); });
   }
   root.hidden = false; NX.open = true;
+  root.classList.remove('mini');
+  root.classList.toggle('left', pref('on_nx_side', 'right') === 'left');
   nxPaint();
   if (!root.querySelector('.nx-msg')) nxBot(LANG === 'es' ? 'Hola' + (crewName('cmd') ? ', comandante ' + crewName('cmd') : '') + '. Soy NEXUS. Pregúntame por los propulsores, la energía, el tiempo de la misión o lo que falta. Si no sé algo, enséñamelo y lo recordaré.'
     : 'Hello' + (crewName('cmd') ? ', Commander ' + crewName('cmd') : '') + '. I am NEXUS. Ask me about the thrusters, power, mission time or what is missing. If I do not know something, teach me and I will remember it.', 'rule');
@@ -130,11 +176,14 @@ function nxClose() { var r = document.getElementById('nexus'); if (r) r.hidden =
 
 function nxPaint() {
   var root = document.getElementById('nexus'), es = LANG === 'es', keep = root.querySelector('.nx-log');
-  var chips = es ? ['¿Cómo están los propulsores?', '¿Qué falta?', '¿Cuánto dura la misión?', '¿Qué es delta-v?', 'Informe completo']
-    : ['How are the thrusters?', 'What is missing?', 'How long is the mission?', 'What is delta-v?', 'Full report'];
+  var chips = es ? ['¿Qué juegos hay?', '¿Cómo se juega el escáner?', '¿Cómo están los propulsores?', '¿Qué falta?', '¿Qué puedes hacer?']
+    : ['What games are there?', 'How do I play the scanner?', 'How are the thrusters?', 'What is missing?', 'What can you do?'];
   var n = nxLearned().length, hasMic = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
   root.innerHTML = '<header class="nx-head"><span class="vcap-orb"><i></i><i></i><i></i></span><div><b>NEXUS</b><span>' + esc(es ? 'IA de a bordo · sistema experto que aprende' : 'Onboard AI · an expert system that learns') + '</span></div>' +
+    '<button class="icon-btn nx-hb" data-nx="side" title="' + esc(es ? 'Cambiar de lado' : 'Switch side') + '" aria-label="' + esc(es ? 'Cambiar de lado' : 'Switch side') + '">⇄</button>' +
+    '<button class="icon-btn nx-hb" data-nx="mini" title="' + esc(es ? 'Minimizar' : 'Minimise') + '" aria-label="' + esc(es ? 'Minimizar' : 'Minimise') + '">–</button>' +
     '<button class="icon-btn nx-x" data-nx="close" aria-label="' + esc(es ? 'Cerrar' : 'Close') + '">' + icon('close', 'ico') + '</button></header>' +
+    '<button class="nx-pill" data-nx="expand">🛰️ NEXUS</button>' +
     '<div class="nx-log" id="nx-log" aria-live="polite"></div>' +
     '<div class="nx-chips">' + chips.map(function (c) { return '<button class="nx-chip" data-nx="chip">' + esc(c) + '</button>'; }).join('') + '</div>' +
     '<div class="nx-teach" id="nx-teach" hidden></div>' +
@@ -152,10 +201,10 @@ function nxMsg(who, text, extra) {
   var d = document.createElement('div'); d.className = 'nx-msg nx-' + who; d.innerHTML = '<p>' + esc(text) + '</p>' + (extra || '');
   log.appendChild(d); log.scrollTop = log.scrollHeight;
 }
-function nxBot(text, src, by, q) {
-  var es = LANG === 'es', tag = src === 'learned' ? '<span class="nx-src">🧠 ' + esc(es ? 'Aprendido' : 'Learned') + (by ? ' · ' + esc(by) : '') + '</span>' : '';
+function nxBot(text, src, by, q, act) {
+  var es = LANG === 'es', go = act ? '<button class="nx-go" data-nx="go" data-v="' + act + '">▶ ' + esc(es ? 'Abrir ahora' : 'Open now') + '</button>' : '', tag = src === 'learned' ? '<span class="nx-src">🧠 ' + esc(es ? 'Aprendido' : 'Learned') + (by ? ' · ' + esc(by) : '') + '</span>' : '';
   var fix = q ? '<button class="nx-fix" data-nx="fix" data-q="' + esc(q) + '">' + esc(es ? 'Corregir o mejorar esta respuesta' : 'Correct or improve this answer') + '</button>' : '';
-  nxMsg('bot', text, tag + fix);
+  nxMsg('bot', text, go + tag + fix);
   if (typeof voiceSay === 'function') voiceSay('nexus', text);
 }
 
@@ -170,7 +219,7 @@ function nxAsk(text) {
     nxTeachBox(q);
     return;
   }
-  if (r) { nxBot(r.text, r.src, r.by, q); return; }
+  if (r) { nxBot(r.text, r.src, r.by, q, r.act); return; }
   nxBot(LANG === 'es' ? 'Todavía no lo sé. ¿Me lo enseñas? Escribe la respuesta y la recordaré para la próxima vez.' : 'I do not know that yet. Will you teach me? Type the answer and I will remember it next time.', 'rule');
   nxTeachBox(q);
 }
@@ -259,6 +308,24 @@ function nxClick(e) {
   else if (a === 'cancel') { document.getElementById('nx-teach').hidden = true; NX.teach = null; }
   else if (a === 'fix') { var q = b.getAttribute('data-q'); var cur = nxAnswer(q); nxTeachBox(q, cur && cur.src === 'learned' ? cur.text : ''); }
   else if (a === 'list') nxList();
+  else if (a === 'go') nxGo(b.getAttribute('data-v'));
+  else if (a === 'mini') nxMini();
+  else if (a === 'side') { var r2 = document.getElementById('nexus'); r2.classList.toggle('left'); setPref('on_nx_side', r2.classList.contains('left') ? 'left' : 'right'); }
+  else if (a === 'expand') nxMini(false);
   else if (a === 'export') nxExport();
   else if (a === 'del') { var l = nxLearned(); l.splice(parseInt(b.getAttribute('data-v'), 10), 1); nxSaveLearned(l); nxPaint(); nxList(); }
+}
+
+function nxGo(act) {
+  nxMini(true);
+  var b = document.createElement('button');
+  b.setAttribute('data-act', act);
+  if (act === 'demo') b.setAttribute('data-v', S.destId || 'mars-orbit');
+  b.style.display = 'none'; document.body.appendChild(b); b.click(); b.remove();
+}
+/* minimise to a small pill so the scientist can see the screen */
+function nxMini(on) {
+  var r = document.getElementById('nexus'); if (!r) return;
+  if (on == null) on = !r.classList.contains('mini');
+  r.classList.toggle('mini', !!on);
 }
