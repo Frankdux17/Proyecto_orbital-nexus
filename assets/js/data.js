@@ -459,6 +459,40 @@ DATA.edl = [
 ];
 
 /* ------------------------------------------------------------------ *
+ * MISSION CONTROL — the flight control consoles you staff on Earth.   *
+ * Named after the positions in NASA's Mission Operations Control Room *
+ * cost: fraction of the program's per-turn operations cost, per seat  *
+ * ------------------------------------------------------------------ */
+DATA.consoles = [
+  { id: 'flight', required: true, cost: 0.10, icon: 'console',
+    name: { es: 'Director de vuelo (FLIGHT)', en: 'Flight director (FLIGHT)' },
+    desc: { es: 'Tiene la última palabra en cada decisión. Siempre presente.', en: 'Has the final word on every decision. Always on console.' } },
+  { id: 'capcom', required: true, cost: 0.10, icon: 'rs',
+    name: { es: 'CAPCOM', en: 'CAPCOM' },
+    desc: { es: 'La única voz que habla con la nave. Tradicionalmente un astronauta.', en: 'The only voice that talks to the spacecraft. Traditionally an astronaut.' } },
+  { id: 'fido', levels: 3, cost: 0.12, icon: 'orbit3d',
+    name: { es: 'Navegación y dinámica de vuelo (FIDO)', en: 'Navigation and flight dynamics (FIDO)' },
+    desc: { es: 'Determina la órbita con el rastreo desde Tierra y diseña las maniobras. Más navegantes = correcciones más precisas y menos propelente gastado.',
+            en: 'Determines the orbit from ground tracking and designs the burns. More navigators = more precise corrections and less propellant spent.' } },
+  { id: 'gnc', cost: 0.12, icon: 'target',
+    name: { es: 'Guiado y control de actitud (GNC)', en: 'Guidance and attitude control (GNC)' },
+    desc: { es: 'Ruedas de reacción, giróscopos y sensores estelares. Da soluciones más baratas cuando fallan.',
+            en: 'Reaction wheels, gyros and star trackers. Offers cheaper fixes when they fail.' } },
+  { id: 'eecom', cost: 0.12, icon: 'battery',
+    name: { es: 'Energía y térmico (EECOM)', en: 'Power and thermal (EECOM)' },
+    desc: { es: 'Vigila paneles, baterías y calefactores. Reduce 40% el daño permanente de potencia.',
+            en: 'Watches arrays, batteries and heaters. Cuts permanent power damage by 40%.' } },
+  { id: 'inco', cost: 0.12, icon: 'dish',
+    name: { es: 'Comunicaciones (INCO)', en: 'Communications (INCO)' },
+    desc: { es: 'Planifica los pases de antena y el enlace. +8% de datos bajados y menos errores de comandos.',
+            en: 'Plans antenna passes and the link. +8% data downlinked and fewer command errors.' } },
+  { id: 'sci', cost: 0.12, icon: 'cam',
+    name: { es: 'Operaciones científicas (SCI)', en: 'Science operations (SCI)' },
+    desc: { es: 'Planifica las observaciones. +8% de ciencia y aprovecha mejor las oportunidades.',
+            en: 'Plans the observations. +8% science and makes more of opportunities.' } }
+];
+
+/* ------------------------------------------------------------------ *
  * OPERATIONS EVENTS                                                   *
  * weight: relative probability. env: restricts to destinations.       *
  * ------------------------------------------------------------------ */
@@ -478,6 +512,7 @@ DATA.events = [
     title: { es: 'Rueda de reacción degradada', en: 'Reaction wheel degraded' },
     text: { es: 'Una de las cuatro ruedas muestra fricción creciente. Puedes operar con tres a costa de precisión de puntería, o pagar una campaña de recalibración.',
             en: 'One of four wheels shows rising friction. You can operate on three at the cost of pointing precision, or pay for a recalibration campaign.' },
+    staff: 'gnc', staffChoice: { label: { es: 'Equipo GNC: control con 3 ruedas y magnetopares', en: 'GNC team: 3-wheel control with magnetorquers' }, note: { es: 'Imagen −10% permanente, sin costo', en: 'Imaging −10% permanently, no cost' }, effect: { permImagingMult: 0.9 } },
     choices: [
       { label: { es: 'Operar con tres ruedas', en: 'Operate on three wheels' }, note: { es: 'Datos de imagen −35% el resto de la misión', en: 'Imaging data −35% for the rest of the mission' }, effect: { permImagingMult: 0.65 } },
       { label: { es: 'Campaña de recalibración', en: 'Recalibration campaign' }, note: { es: '−$14M y medio turno sin ciencia', en: '−$14M and half a turn without science' }, effect: { cost: 14, scienceMult: 0.5 } }
@@ -497,6 +532,7 @@ DATA.events = [
     title: { es: 'Red de Espacio Profundo sobresuscrita', en: 'Deep Space Network oversubscribed' },
     text: { es: 'Una misión de clase Flagship en fase crítica se queda con tus pases. Puedes aceptar la pérdida o comprar tiempo de emergencia.',
             en: 'A flagship mission in a critical phase takes your passes. You can accept the loss or buy emergency time.' },
+    staff: 'inco', staffChoice: { label: { es: 'Equipo INCO: negociar un pase compartido', en: 'INCO team: negotiate a shared pass' }, note: { es: 'Transmisión −20% este turno, sin costo', en: 'Downlink −20% this turn, no cost' }, effect: { dlMult: 0.8 } },
     choices: [
       { label: { es: 'Aceptar la reprogramación', en: 'Accept the rescheduling' }, note: { es: 'Transmisión −55% este turno', en: 'Downlink −55% this turn' }, effect: { dlMult: 0.45 } },
       { label: { es: 'Comprar tiempo de emergencia', en: 'Buy emergency time' }, note: { es: '−$9M, enlace nominal', en: '−$9M, nominal link' }, effect: { cost: 9 } }
@@ -547,6 +583,7 @@ DATA.events = [
     title: { es: 'Objetivo de oportunidad detectado', en: 'Target of opportunity detected' },
     text: { es: 'Un fenómeno transitorio aparece en el campo de visión. Reapuntar rompe el plan de observación, pero la ciencia es irrepetible.',
             en: 'A transient phenomenon appears in the field of view. Repointing breaks the observation plan, but the science is unrepeatable.' },
+    staff: 'sci', staffChoice: { label: { es: 'Equipo SCI: observación rápida planificada', en: 'SCI team: planned quick-look observation' }, note: { es: '+110 pts de ciencia, propelente −2%', en: '+110 science pts, propellant −2%' }, effect: { bonusScience: 110, propLoss: 0.02 } },
     choices: [
       { label: { es: 'Reapuntar de inmediato', en: 'Repoint immediately' }, note: { es: '+90 pts de ciencia bonus, propelente −4%', en: '+90 bonus science pts, propellant −4%' }, effect: { bonusScience: 90, propLoss: 0.04 } },
       { label: { es: 'Mantener el plan nominal', en: 'Keep the nominal plan' }, note: { es: 'Sin cambios', en: 'No change' }, effect: {} }
@@ -557,6 +594,7 @@ DATA.events = [
     title: { es: 'Latch-up en un instrumento', en: 'Instrument latch-up' },
     text: { es: 'Un ion pesado dejó un instrumento sin responder. Un ciclo de potencia podría recuperarlo, o podría ser el final de ese instrumento.',
             en: 'A heavy ion left an instrument unresponsive. A power cycle might recover it, or it might be the end of that instrument.' },
+    staff: 'eecom', staffChoice: { label: { es: 'Equipo EECOM: ciclo de potencia controlado', en: 'EECOM team: controlled power cycle' }, note: { es: '85% de recuperación, ciencia −20% este turno', en: '85% recovery, science −20% this turn' }, effect: { scienceMult: 0.8, gamble: { p: 0.15, killInstrument: true } } },
     choices: [
       { label: { es: 'Ciclo de potencia inmediato', en: 'Immediate power cycle' }, note: { es: '65% de recuperación, 35% pérdida definitiva', en: '65% recovery, 35% permanent loss' }, effect: { gamble: { p: 0.35, killInstrument: true } } },
       { label: { es: 'Diagnóstico lento desde Tierra', en: 'Slow diagnosis from the ground' }, note: { es: '−$8M, 90% de recuperación, medio turno sin ciencia', en: '−$8M, 90% recovery, half a turn without science' }, effect: { cost: 8, scienceMult: 0.5, gamble: { p: 0.10, killInstrument: true } } }
@@ -567,6 +605,7 @@ DATA.events = [
     title: { es: 'Degradación de los calefactores', en: 'Heater degradation' },
     text: { es: 'Una zona del bus se está enfriando más de lo previsto. Subir la potencia de calefacción quita vatios a la ciencia.',
             en: 'A zone of the bus is running colder than predicted. Raising heater power takes watts away from science.' },
+    staff: 'eecom', staffChoice: { label: { es: 'Equipo EECOM: reprogramar los ciclos de calefacción', en: 'EECOM team: reprogram the heater duty cycles' }, note: { es: 'Potencia útil −4% permanente', en: 'Usable power −4% permanently' }, effect: { permPowerMult: 0.96 } },
     choices: [
       { label: { es: 'Aumentar calefacción', en: 'Increase heating' }, note: { es: 'Potencia útil −10% permanente', en: 'Usable power −10% permanently' }, effect: { permPowerMult: 0.90 } },
       { label: { es: 'Aceptar el riesgo térmico', en: 'Accept the thermal risk' }, note: { es: '30% de perder un instrumento', en: '30% chance of losing an instrument' }, effect: { riskInstrument: 0.30 } }
@@ -597,9 +636,76 @@ DATA.events = [
     title: { es: 'Reinicio inesperado del computador de vuelo', en: 'Unexpected flight computer reset' },
     text: { es: 'La nave despertó en modo seguro sin causa clara. Hay que decidir cuánto esfuerzo invertir en entender por qué.',
             en: 'The spacecraft woke up in safe mode with no clear cause. You must decide how much effort to spend understanding why.' },
+    staff: 'gnc', staffChoice: { label: { es: 'Equipo GNC: reconfigurar la unidad inercial', en: 'GNC team: reconfigure the inertial unit' }, note: { es: '−$2M, sin perder ciencia, menos anomalías', en: '−$2M, no science lost, fewer anomalies' }, effect: { cost: 2, permAnomalyMult: 0.85 } },
     choices: [
       { label: { es: 'Investigación a fondo', en: 'Full investigation' }, note: { es: '−$6M y un turno sin ciencia, pero reduce anomalías futuras', en: '−$6M and a turn without science, but fewer future anomalies' }, effect: { cost: 6, scienceMult: 0, permAnomalyMult: 0.7 } },
       { label: { es: 'Reanudar operaciones ya', en: 'Resume operations now' }, note: { es: 'Transmisión −30% este turno', en: 'Downlink −30% this turn' }, effect: { dlMult: 0.7 } }
+    ]
+  },
+  {
+    id: 'conjunction', weight: 8, kind: { es: 'Basura espacial', en: 'Space debris' }, onlyDest: ['leo-sso', 'geo-relay'],
+    title: { es: 'Alerta de conjunción con basura espacial', en: 'Space debris conjunction alert' },
+    text: { es: 'El radar de vigilancia espacial predice que una etapa de cohete abandonada pasará a 180 m de tu nave en 30 horas. La probabilidad de choque es 1 en 3000.',
+            en: 'Space surveillance radar predicts an abandoned rocket stage will pass 180 m from your spacecraft in 30 hours. The collision probability is 1 in 3000.' },
+    staff: 'fido', staffChoice: { label: { es: 'Equipo FIDO: maniobra mínima calculada', en: 'FIDO team: computed minimum burn' }, note: { es: 'Propelente −1%, ciencia −10% este turno', en: 'Propellant −1%, science −10% this turn' }, effect: { propLoss: 0.01, scienceMult: 0.9 } },
+    choices: [
+      { label: { es: 'Maniobra de evasión', en: 'Avoidance manoeuvre' }, note: { es: 'Propelente −3%, ciencia −30% este turno', en: 'Propellant −3%, science −30% this turn' }, effect: { propLoss: 0.03, scienceMult: 0.7 } },
+      { label: { es: 'Aceptar el riesgo', en: 'Accept the risk' }, note: { es: '6% de probabilidad de impacto: paneles −35% y un instrumento perdido', en: '6% impact chance: arrays −35% and one instrument lost' }, effect: { gamble: { p: 0.06, arrayDamage: 0.35, killInstrument: true } } }
+    ]
+  },
+  {
+    id: 'los', weight: 6, kind: { es: 'Comunicaciones', en: 'Communications' },
+    title: { es: 'Pérdida de señal', en: 'Loss of signal' },
+    text: { es: 'La nave dejó de responder en el pase programado. Puede estar en modo seguro con la antena mal apuntada.',
+            en: 'The spacecraft did not answer at the scheduled pass. It may be in safe mode with the antenna mispointed.' },
+    staff: 'inco', staffChoice: { label: { es: 'Equipo INCO: comandar por la antena de baja ganancia', en: 'INCO team: command through the low-gain antenna' }, note: { es: 'Transmisión −50% este turno, sin costo', en: 'Downlink −50% this turn, no cost' }, effect: { dlMult: 0.5 } },
+    choices: [
+      { label: { es: 'Esperar la recuperación autónoma', en: 'Wait for autonomous recovery' }, note: { es: 'Sin transmisión y ciencia −50% este turno', en: 'No downlink and science −50% this turn' }, effect: { dlMult: 0, scienceMult: 0.5 } },
+      { label: { es: 'Barrido de emergencia con la antena de 70 m', en: 'Emergency sweep with the 70 m dish' }, note: { es: '−$6M, transmisión −40% este turno', en: '−$6M, downlink −40% this turn' }, effect: { cost: 6, dlMult: 0.6 } }
+    ]
+  },
+  {
+    id: 'cmd', weight: 6, kind: { es: 'Error humano', en: 'Human error' }, lessWith: 'inco',
+    title: { es: 'Secuencia de comandos con un error', en: 'Command sequence with an error' },
+    text: { es: 'Una secuencia ya enviada desde Tierra tiene una tabla de apuntamiento equivocada: en 6 horas un instrumento podría mirar directo al Sol.',
+            en: 'A sequence already uplinked from the ground has a wrong pointing table: in 6 hours an instrument could stare straight at the Sun.' },
+    staff: 'sci', staffChoice: { label: { es: 'Equipo SCI: corregir solo la tabla de apuntamiento', en: 'SCI team: patch only the pointing table' }, note: { es: 'Ciencia −15% este turno', en: 'Science −15% this turn' }, effect: { scienceMult: 0.85 } },
+    choices: [
+      { label: { es: 'Abortar la secuencia y replanificar', en: 'Abort the sequence and re-plan' }, note: { es: 'Ciencia −60% este turno', en: 'Science −60% this turn' }, effect: { scienceMult: 0.4 } },
+      { label: { es: 'Dejarla correr y vigilar', en: 'Let it run and watch' }, note: { es: '25% de dañar un instrumento', en: '25% chance of damaging an instrument' }, effect: { gamble: { p: 0.25, killInstrument: true } } }
+    ]
+  },
+  {
+    id: 'battery', weight: 5, kind: { es: 'Energía', en: 'Power' },
+    title: { es: 'Falla de una celda de batería', en: 'Battery cell failure' },
+    text: { es: 'Una celda de la batería quedó en cortocircuito. Durante los eclipses la nave tendrá menos energía.',
+            en: 'One battery cell shorted. During eclipses the spacecraft will have less energy.' },
+    staff: 'eecom', staffChoice: { label: { es: 'Equipo EECOM: rebalancear la batería', en: 'EECOM team: rebalance the battery' }, note: { es: 'Ciencia −4% permanente', en: 'Science −4% permanently' }, effect: { permScienceMult: 0.96 } },
+    choices: [
+      { label: { es: 'Reducir la profundidad de descarga', en: 'Reduce the depth of discharge' }, note: { es: 'Ciencia −12% permanente', en: 'Science −12% permanently' }, effect: { permScienceMult: 0.88 } },
+      { label: { es: 'Puentear la celda', en: 'Bypass the cell' }, note: { es: '30% de probabilidad de perder 20% de la potencia', en: '30% chance of losing 20% of power' }, effect: { gamble: { p: 0.3, arrayDamage: 0.2 } } }
+    ]
+  },
+  {
+    id: 'storm', weight: 6, kind: { es: 'Clima espacial', en: 'Space weather' }, onlyDest: ['leo-sso'],
+    title: { es: 'Tormenta geomagnética', en: 'Geomagnetic storm' },
+    text: { es: 'Una eyección de masa coronal calentó la alta atmósfera. El arrastre se multiplicó y la órbita baja más rápido.',
+            en: 'A coronal mass ejection heated the upper atmosphere. Drag multiplied and the orbit is decaying faster.' },
+    staff: 'fido', staffChoice: { label: { es: 'Equipo FIDO: subir la órbita en el momento óptimo', en: 'FIDO team: raise the orbit at the optimal time' }, note: { es: 'Propelente −2,5%', en: 'Propellant −2.5%' }, effect: { propLoss: 0.025 } },
+    choices: [
+      { label: { es: 'Subir la órbita ya', en: 'Raise the orbit now' }, note: { es: 'Propelente −6%', en: 'Propellant −6%' }, effect: { propLoss: 0.06 } },
+      { label: { es: 'Aceptar una órbita más baja', en: 'Accept a lower orbit' }, note: { es: 'Ciencia −10% permanente (cobertura distinta)', en: 'Science −10% permanently (different coverage)' }, effect: { permScienceMult: 0.9 } }
+    ]
+  },
+  {
+    id: 'startracker', weight: 5, kind: { es: 'Guiado', en: 'Guidance' },
+    title: { es: 'Sensor estelar cegado', en: 'Star tracker blinded' },
+    text: { es: 'Un reflejo del Sol cegó el sensor estelar y la nave no sabe con precisión hacia dónde apunta.',
+            en: 'Sun glint blinded the star tracker and the spacecraft no longer knows precisely where it is pointing.' },
+    staff: 'gnc', staffChoice: { label: { es: 'Equipo GNC: cambiar al sensor de respaldo', en: 'GNC team: switch to the backup tracker' }, note: { es: 'Ciencia −10% este turno', en: 'Science −10% this turn' }, effect: { scienceMult: 0.9 } },
+    choices: [
+      { label: { es: 'Operar solo con giróscopos', en: 'Fly on gyros only' }, note: { es: 'Ciencia −40% este turno', en: 'Science −40% this turn' }, effect: { scienceMult: 0.6 } },
+      { label: { es: 'Apuntamiento seguro al Sol', en: 'Safe Sun-pointing' }, note: { es: 'Ciencia −70% este turno, sin riesgo', en: 'Science −70% this turn, no risk' }, effect: { scienceMult: 0.3 } }
     ]
   }
 ];

@@ -206,12 +206,14 @@ ENG.compute = function (S) {
   var cLv = lv ? lv.cost : 0;
   var cDev = prog ? prog.burnPerMonth * devMonths : 0;
   var cOps = prog ? (prog.opsPerTurn + (grd ? grd.costPerTurn : 0)) * opsTurns : 0;
+  var staffTurn = ENG.staffPerTurn(S, prog);
+  cOps += staffTurn * opsTurns;
   var total = cBus + payloadCost + powerCost + commsCost + cProp + cShield + cEdl + cLv + cDev + cOps;
   var budget = prog ? prog.budget : 0;
 
   r.cost = {
     bus: cBus, payload: payloadCost, power: powerCost, comms: commsCost, prop: cProp,
-    shield: cShield, edl: cEdl, launcher: cLv, dev: cDev, ops: cOps,
+    shield: cShield, edl: cEdl, launcher: cLv, dev: cDev, ops: cOps, staffPerTurn: staffTurn,
     total: total, budget: budget, margin: budget - total,
     marginPct: budget > 0 ? (budget - total) / budget : 0
   };
@@ -365,6 +367,26 @@ ENG.compute = function (S) {
 };
 
 /* ---------------- probability of a successful start ---------------- */
+/* the ground team: who sits on console in mission control, and what it costs.
+   Each seat costs a share of the program's per-turn operations cost; a 24/7
+   operation needs three shifts and costs a little over twice as much. */
+ENG.staff = function (S) {
+  var st = S.staff || {}, seats = [], people = 0;
+  for (var i = 0; i < DATA.consoles.length; i++) {
+    var k = DATA.consoles[i], n = k.required ? 1 : (k.levels ? (st[k.id] || 0) : (st[k.id] ? 1 : 0));
+    if (n > 0) { seats.push({ con: k, n: n }); people += n; }
+  }
+  var shifts = st.h24 ? 3 : 1;
+  return { seats: seats, onConsole: people, total: people * shifts, shifts: shifts };
+};
+ENG.staffPerTurn = function (S, prog) {
+  if (!prog || !DATA.consoles) return 0;
+  var st = ENG.staff(S), c = 0;
+  for (var i = 0; i < st.seats.length; i++) c += st.seats[i].con.cost * st.seats[i].n;
+  return c * prog.opsPerTurn * (st.shifts === 3 ? 2.2 : 1);
+};
+ENG.has = function (S, id) { return !!(S.staff && S.staff[id]); };
+
 ENG.successOdds = function (c) {
   var pLaunch = c.lv ? c.lv.reliability : 0.9;
   var shortfall = Math.max(0, 1 - c.readiness);

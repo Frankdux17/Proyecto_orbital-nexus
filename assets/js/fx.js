@@ -105,6 +105,12 @@ var BADGES = [
   { id: 'europa', icon: '🧊', name: { es: 'Océano bajo el hielo', en: 'Ocean under the ice' }, desc: { es: 'Completa la misión a Europa.', en: 'Complete the Europa mission.' } },
   { id: 'director', icon: '🎖️', name: { es: 'Director de vuelo', en: 'Flight director' }, desc: { es: 'Completa una misión en la dificultad más alta.', en: 'Complete a mission on the hardest difficulty.' } },
   { id: 'explorer', icon: '🌌', name: { es: 'Explorador del sistema solar', en: 'Solar system explorer' }, desc: { es: 'Completa misiones a 3 destinos distintos.', en: 'Complete missions to 3 different destinations.' } },
+  { id: 'pilot', icon: '🧑‍🚀', name: { es: 'Piloto de ascenso', en: 'Ascent pilot' }, desc: { es: 'Lleva tu misión a órbita pilotando el cohete a mano.', en: 'Fly your mission to orbit by hand.' } },
+  { id: 'trainee', icon: '🎮', name: { es: 'Graduado del simulador', en: 'Simulator graduate' }, desc: { es: 'Alcanza la órbita en el simulador de despegue.', en: 'Reach orbit in the launch simulator.' } },
+  { id: 'navigator2', icon: '🧭', name: { es: 'Navegación de precisión', en: 'Precision navigation' }, desc: { es: 'Llega dentro del corredor tras las correcciones de trayectoria.', en: 'Arrive inside the corridor after the trajectory corrections.' } },
+  { id: 'patience', icon: '⛈️', name: { es: 'Paciencia de la sala', en: 'Launch-room patience' }, desc: { es: 'Pospón por clima y lanza después con todo en GO.', en: 'Scrub for weather, then launch with everything GO.' } },
+  { id: 'nogo', icon: '🎲', name: { es: 'Temerario', en: 'Daredevil' }, desc: { es: 'Lanza con el clima en NO-GO.', en: 'Launch with a weather NO-GO.' } },
+  { id: 'teamwork', icon: '🤝', name: { es: 'Trabajo en equipo', en: 'Teamwork' }, desc: { es: 'Resuelve una falla con la solución de tu centro de control.', en: 'Fix a failure with your mission control team\'s solution.' } },
   { id: 'navigator', icon: '🪐', name: { es: 'Navegante 3D', en: '3D navigator' }, desc: { es: 'Recorre la trayectoria de una misión en el Explorador 3D.', en: 'Fly through a mission trajectory in the 3D Explorer.' } }
 ];
 

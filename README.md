@@ -73,6 +73,31 @@ A spectrometer that fills the memory and never transmits scores exactly zero.
 - **Illustrated interface.** Every destination, instrument, bus, engine and launcher has its
   own artwork, drawn as inline SVG so it follows the light and dark themes.
 
+### New: the ground segment — mission control, launch day and navigation
+
+- **Staff mission control.** Choose who sits on console: FLIGHT and CAPCOM, then FIDO
+  navigators (0–3), GNC, EECOM, INCO and science operations, on one shift or 24/7. Every seat
+  costs money each turn and changes the game: navigators make trajectory corrections more
+  precise, EECOM softens power damage, INCO and SCI raise data and science, and a staffed
+  console unlocks a cheaper **team answer** when its subsystem fails.
+- **New failures.** Space debris conjunctions, loss of signal, a human error in an uplinked
+  command sequence, a battery cell short, a geomagnetic storm that drags a low orbit down,
+  and a blinded star tracker.
+- **Flight readiness review and GO / NO-GO poll.** Before liftoff every item is checked, each
+  with a "how to improve it" fix, then the day's weather (pad winds, upper-level winds, the
+  lightning rule, the range exclusion zone, space weather) and a roll call of every console.
+  Scrub 24 h and pay the standing-army cost, or launch into a NO-GO and accept the risk.
+- **Fly the ascent yourself.** A point-mass ascent over a round, rotating Earth: gravity turn,
+  Max-Q (above 45 kPa the vehicle breaks up), staging, fairing jettison above 100 km, and
+  orbit judged from the perigee of the live state vector. A risk-free launch simulator is
+  available from the start screen.
+- **Navigation from Earth.** During the cruise, track the spacecraft with the Deep Space
+  Network (Doppler, ranging, ΔDOR) and fly three trajectory correction manoeuvres on the
+  B-plane. Early corrections are cheap and late ones are expensive. The final miss widens or
+  narrows the arrival burn window and changes the landing odds.
+- **Recommendations.** The bus, propulsion and launcher that fit your design are flagged as
+  recommended, and each phase has a "how to choose" guide.
+
 ## Nine destinations
 
 Sun-synchronous LEO · geostationary orbit · low lunar orbit · Sun-Earth L2 ·
@@ -111,6 +136,8 @@ assets/js/viz.js        live spacecraft preview, mission view, launch sequence, 
 assets/js/art.js        illustrated destinations, icon set and mission team avatars (inline SVG)
 assets/js/coach.js      the mission team: live, phase-specific advice from each console
 assets/js/explorer.js   3D mission explorer, CubeSat 101 timeline and VR stereo mode
+assets/js/ascent.js     piloted ascent: physics, guidance, controls and the training simulator
+assets/js/mission.js    mission control staffing, readiness review, GO/NO-GO, cruise navigation
 assets/js/app.js        state machine, interface, operations simulator
 docs/MODEL.md           every equation and where its numbers come from
 ```
@@ -208,6 +235,32 @@ Tierra.** Un espectrómetro que llena la memoria y nunca transmite vale exactame
   orientación del celular: pon el teléfono en un visor tipo Cardboard y mira a tu alrededor.
 - **Interfaz ilustrada.** Cada destino, instrumento, bus, motor y cohete tiene su propia
   ilustración en SVG, que se adapta al tema claro y oscuro.
+
+### Nuevo: el segmento terrestre — centro de control, día del lanzamiento y navegación
+
+- **Arma tu centro de control.** Eliges quién se sienta en cada consola: FLIGHT y CAPCOM,
+  navegantes FIDO (de 0 a 3), GNC, EECOM, INCO y operaciones científicas, en un turno o
+  24/7. Cada puesto cuesta dinero por turno y cambia el juego: los navegantes hacen más
+  precisas las correcciones, EECOM reduce el daño de potencia, INCO y SCI suben los datos y
+  la ciencia, y cuando una consola tiene a alguien, aparece una **respuesta del equipo**
+  más barata si su subsistema falla.
+- **Nuevas fallas.** Alerta de choque con basura espacial, pérdida de señal, error humano en
+  los comandos enviados, cortocircuito de una celda de batería, tormenta geomagnética que
+  baja la órbita y sensor estelar cegado.
+- **Revisión de vuelo y votación GO / NO-GO.** Antes del despegue se revisa cada punto, con
+  una sugerencia de «cómo mejorarlo». Después se revisa el clima del día (viento, vientos en
+  altura, regla de rayos, zona de exclusión, clima espacial) y cada consola vota. Puedes
+  posponer 24 h pagando el costo de espera, o lanzar con un NO-GO y asumir el riesgo.
+- **Pilota el despegue.** Física de ascenso sobre una Tierra redonda que gira: giro
+  gravitatorio, Max-Q (sobre 45 kPa el cohete se rompe), separación de etapas, la cofia por
+  encima de 100 km, y la órbita se juzga por el perigeo. Hay un simulador de práctica sin
+  riesgo desde la portada.
+- **Navegación desde la Tierra.** Durante el crucero rastreas la nave con la Red de Espacio
+  Profundo (Doppler, distancia, ΔDOR) y haces tres correcciones de trayectoria en el plano B.
+  Corregir temprano es barato y tarde es caro. El error final ensancha o estrecha la ventana
+  del encendido de llegada y cambia la probabilidad de aterrizar.
+- **Recomendaciones.** Se marcan el bus, la propulsión y el cohete que mejor encajan con tu
+  diseño, y cada fase trae una guía de «cómo elegir».
 
 ## Nueve destinos
 
