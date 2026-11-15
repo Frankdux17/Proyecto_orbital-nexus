@@ -111,6 +111,7 @@ var BADGES = [
   { id: 'patience', icon: '⛈️', name: { es: 'Paciencia de la sala', en: 'Launch-room patience' }, desc: { es: 'Pospón por clima y lanza después con todo en GO.', en: 'Scrub for weather, then launch with everything GO.' } },
   { id: 'nogo', icon: '🎲', name: { es: 'Temerario', en: 'Daredevil' }, desc: { es: 'Lanza con el clima en NO-GO.', en: 'Launch with a weather NO-GO.' } },
   { id: 'teamwork', icon: '🤝', name: { es: 'Trabajo en equipo', en: 'Teamwork' }, desc: { es: 'Resuelve una falla con la solución de tu centro de control.', en: 'Fix a failure with your mission control team\'s solution.' } },
+  { id: 'engineer', icon: '🧮', name: { es: 'Ingeniero de cálculo', en: 'Number cruncher' }, desc: { es: 'Abre el Laboratorio de ingeniería y haz tus propios cálculos.', en: 'Open the Engineering lab and run your own numbers.' } },
   { id: 'navigator', icon: '🪐', name: { es: 'Navegante 3D', en: '3D navigator' }, desc: { es: 'Recorre la trayectoria de una misión en el Explorador 3D.', en: 'Fly through a mission trajectory in the 3D Explorer.' } }
 ];
 

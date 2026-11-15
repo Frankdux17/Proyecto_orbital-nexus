@@ -13,6 +13,7 @@ function freshState() {
     instruments: [],
     antennaD: null, bandId: 'x', twtaW: null, groundId: null, shieldingId: 'none',
     launcherId: null, devMonths: null,
+    auto: true,  /* arrays, battery and propellant size themselves */
     /* operations */
     turn: 0, alive: true, launchSuccess: true, failReason: null,
     storage: {}, collected: {}, downlinked: {}, dead: {},
@@ -229,7 +230,8 @@ function viewSplash() {
     '<p>' + esc(t('splash_body')) + '</p>' +
     '<div class="cta"><button class="btn primary big" data-act="start">' + icon('rocket', 'ico') + esc(t('splash_start')) + '</button>' + resume +
     '<button class="btn big ghost" data-act="demo" data-v="mars-orbit">' + icon('orbit3d', 'ico') + esc(es ? 'Ver una misión en 3D' : 'See a mission in 3D') + '</button>' +
-    '<button class="btn big ghost" data-act="practice">' + icon('rocket', 'ico') + esc(es ? 'Simulador de despegue' : 'Launch simulator') + '</button></div>' +
+    '<button class="btn big ghost" data-act="practice">' + icon('rocket', 'ico') + esc(es ? 'Simulador de despegue' : 'Launch simulator') + '</button>' +
+    '<button class="btn big ghost lab-cta" data-act="lab">' + FLASK + esc(es ? 'Laboratorio de ingeniería' : 'Engineering lab') + '</button></div>' +
     '</div><div class="hero-poster"><img src="assets/img/hero.jpg" width="1136" height="884" alt="' +
     esc(es ? 'ORBITAL NEXUS · Ingeniería más allá de la Tierra: un cohete deja la Tierra rumbo a Marte' : 'ORBITAL NEXUS · Engineering Beyond Earth: a rocket leaves Earth for Mars') + '"></div></div>' +
     '<div class="splash-sec"><h2>' + esc(es ? 'Elige tu nivel' : 'Choose your level') + '</h2>' +
@@ -301,10 +303,12 @@ function card(o) {
     (o.locked ? ' disabled' : '') + ' data-act="' + o.act + '" data-k="' + (o.k || '') + '" data-v="' + o.v + '">' + art +
     '<span class="card-main">' +
     (o.rec ? '<span class="rec">★ ' + esc(LANG === 'es' ? 'Recomendado' : 'Recommended') + '</span>' : '') +
-    (o.tag ? '<span class="card-tag">' + esc(o.tag) + '</span>' : '') +
+    (o.tag || o.badge ? '<span class="card-tags">' + (o.tag ? '<span class="card-tag">' + esc(o.tag) + '</span>' : '') +
+      (o.badge ? '<span class="lvl lvl-' + o.badge.id + '">' + esc(LANG === 'es' ? o.badge.es : o.badge.en) + '</span>' : '') + '</span>' : '') +
     '<span class="card-name">' + esc(o.name) + '</span>' +
     (o.desc ? '<p class="card-desc">' + esc(o.desc) + '</p>' : '') +
     (o.specs ? specs(o.specs) : '') +
+    (o.extra || '') +
     (o.lock ? '<div class="lock-note">' + esc(o.lock) + '</div>' : '') +
     '</span></button>';
 }
@@ -343,7 +347,7 @@ function alerts(c) {
  * phase 1 — mission                                                *
  * ---------------------------------------------------------------- */
 function viewMission(c) {
-  var h = head('p1_kick', 'p1_title', 'p1_lead') + '<div class="cols"><div>';
+  var h = head('p1_kick', 'p1_title', 'p1_lead') + '<div class="cols"><div>' + presetPanel();
 
   h += '<div class="panel"><h2>' + esc(t('program')) + '</h2><div class="grid c2">';
   for (var i = 0; i < DATA.programs.length; i++) {
@@ -363,7 +367,7 @@ function viewMission(c) {
     var locked = !S.programId || DATA.find(DATA.programs, S.programId).rank < d.minProgram;
     h += card({
       act: 'pick', k: 'destId', v: d.id, on: S.destId === d.id, locked: locked,
-      tag: L(d.tag), name: L(d.name), desc: L(d.blurb),
+      tag: L(d.tag), badge: destLevel(d), name: L(d.name), desc: L(d.blurb),
       specs: ['Δv <b>' + n2(d.dv) + '</b> km/s',
       (LANG === 'es' ? 'crucero' : 'cruise') + ' <b>' + d.cruiseDays + '</b> d',
       (LANG === 'es' ? 'enlace' : 'link') + ' <b>' + (d.commAu < 0.02 ? n0(d.commAu * AU_M / 1000) + ' km' : n1(d.commAu) + ' UA') + '</b>',
@@ -415,7 +419,7 @@ function tagName(tag) {
  * phase 2 — platform                                               *
  * ---------------------------------------------------------------- */
 function viewPlatform(c) {
-  var h = head('p2_kick', 'p2_title', 'p2_lead') + '<div class="cols"><div>' + guideBox(2);
+  var h = head('p2_kick', 'p2_title', 'p2_lead') + '<div class="cols"><div>' + kitPanel(c) + guideBox(2);
   var rec = recommend(c);
 
   h += '<div class="panel"><h2>' + esc(t('bus')) + '</h2><div class="grid c2">';
@@ -430,7 +434,8 @@ function viewPlatform(c) {
       (LANG === 'es' ? 'antena' : 'antenna') + ' ≤<b>' + b.antennaMax + '</b> m',
       (LANG === 'es' ? 'tanques' : 'tanks') + ' ≤<b>' + b.propMax + '</b> kg',
       (LANG === 'es' ? 'memoria' : 'memory') + ' <b>' + b.storeGb + '</b> Gb',
-      '<b>' + money(b.cost) + '</b>']
+      '<b>' + money(b.cost) + '</b>'],
+      extra: impactOf('busId', b.id)
     });
   }
   h += '</div></div>';
@@ -476,6 +481,7 @@ function viewPlatform(c) {
       name: L(p.name), desc: L(p.desc),
       specs: ['Isp <b>' + p.isp + '</b> s', (LANG === 'es' ? 'seco' : 'dry') + ' <b>' + p.dryBase + '</b> kg+' + n0(p.dryFrac * 100) + '%',
       p.powerW ? '<b>' + p.powerW + '</b> W' : ''],
+      extra: lock ? '' : impactOf('propId', p.id),
       lock: lock ? (LANG === 'es' ? 'Necesita un bus mayor' : 'Needs a larger bus') : null
     });
   }
@@ -494,7 +500,8 @@ function viewPlatform(c) {
         act: 'pick', k: 'edlId', v: e.id, on: S.edlId === e.id,
         name: L(e.name), desc: L(e.desc),
         specs: ['+<b>' + n0(e.massFrac * 100) + '%</b> ' + (LANG === 'es' ? 'de masa' : 'mass'),
-        '<b>' + n0(e.success * 100) + '%</b> ' + (LANG === 'es' ? 'éxito' : 'success'), '<b>' + money(e.cost) + '</b>']
+        '<b>' + n0(e.success * 100) + '%</b> ' + (LANG === 'es' ? 'éxito' : 'success'), '<b>' + money(e.cost) + '</b>'],
+        extra: impactOf('edlId', e.id)
       });
     }
     h += '</div></div>';
@@ -524,7 +531,7 @@ function viewPlatform(c) {
  * phase 3 — science payload                                         *
  * ---------------------------------------------------------------- */
 function viewScience(c) {
-  var h = head('p3_kick', 'p3_title', 'p3_lead') + '<div class="cols"><div>' + guideBox(3);
+  var h = head('p3_kick', 'p3_title', 'p3_lead') + '<div class="cols"><div>' + sciencePanel(c) + guideBox(3);
   h += '<div class="panel"><h2>' + esc(t('payload')) + '</h2><div class="grid c2">';
   for (var i = 0; i < DATA.instruments.length; i++) {
     var it = DATA.instruments[i];
@@ -542,7 +549,8 @@ function viewScience(c) {
       specs: ['<b>' + it.mass + '</b> kg', '<b>' + it.powerW + '</b> W',
       '<b>' + gb(it.dataGb) + '</b>/' + (LANG === 'es' ? 'turno' : 'turn'),
       '<b>' + money(it.cost) + '</b>',
-      (LANG === 'es' ? 'riesgo' : 'risk') + ' <b>' + ['—', 'bajo', 'medio', 'alto'][it.risk] + '</b>'],
+      (LANG === 'es' ? 'riesgo' : 'risk') + ' <b>' + (LANG === 'es' ? ['—', 'bajo', 'medio', 'alto'] : ['—', 'low', 'medium', 'high'])[it.risk] + '</b>'],
+      extra: lock ? '' : impactInstr(it.id),
       lock: lockMsg
     });
   }
@@ -569,7 +577,7 @@ function viewScience(c) {
  * phase 4 — link and survival                                       *
  * ---------------------------------------------------------------- */
 function viewLink(c) {
-  var h = head('p4_kick', 'p4_title', 'p4_lead') + '<div class="cols"><div>' + guideBox(4);
+  var h = head('p4_kick', 'p4_title', 'p4_lead') + '<div class="cols"><div>' + linkPanel(c) + guideBox(4);
 
   h += '<div class="panel"><h2>' + esc(t('antenna')) + '</h2><div class="pills">';
   for (var i = 0; i < DATA.antennas.length; i++) {
@@ -588,7 +596,8 @@ function viewLink(c) {
     h += card({
       act: 'pick', k: 'bandId', v: b.id, on: S.bandId === b.id,
       name: L(b.name), desc: L(b.desc),
-      specs: ['<b>' + b.ghz + '</b> GHz', '+<b>' + b.extraMass + '</b> kg', '+<b>' + money(b.extraCost) + '</b>']
+      specs: ['<b>' + b.ghz + '</b> GHz', '+<b>' + b.extraMass + '</b> kg', '+<b>' + money(b.extraCost) + '</b>'],
+      extra: impactOf('bandId', b.id)
     });
   }
   h += '</div>';
@@ -608,7 +617,8 @@ function viewLink(c) {
       act: 'pick', k: 'groundId', v: g.id, on: S.groundId === g.id,
       name: L(g.name), desc: L(g.desc),
       specs: ['<b>' + g.dia + '</b> m', '<b>' + n0(g.maxHoursPerTurn) + '</b> h/' + (LANG === 'es' ? 'turno' : 'turn'),
-      '<b>' + money(g.costPerTurn) + '</b>/' + (LANG === 'es' ? 'turno' : 'turn')]
+      '<b>' + money(g.costPerTurn) + '</b>/' + (LANG === 'es' ? 'turno' : 'turn')],
+      extra: impactOf('groundId', g.id)
     });
   }
   h += '</div></div>';
@@ -621,6 +631,7 @@ function viewLink(c) {
       name: L(s.name), desc: L(s.desc),
       specs: ['+<b>' + n0(s.massFrac * 100) + '%</b> ' + (LANG === 'es' ? 'masa' : 'mass'),
       (LANG === 'es' ? 'tolera' : 'tolerates') + ' <b>' + s.krad + '</b> krad', '<b>' + money(s.cost) + '</b>'],
+      extra: impactOf('shieldingId', s.id),
       lock: c.dest && c.dest.radKrad > s.krad ? (LANG === 'es' ? 'Insuficiente para ' + c.dest.radKrad + ' krad' : 'Insufficient for ' + c.dest.radKrad + ' krad') : null
     });
   }
@@ -649,7 +660,7 @@ function viewLink(c) {
  * phase 5 — launch                                                  *
  * ---------------------------------------------------------------- */
 function viewLaunch(c) {
-  var h = head('p5_kick', 'p5_title', 'p5_lead') + '<div class="cols"><div>' + guideBox(5);
+  var h = head('p5_kick', 'p5_title', 'p5_lead') + '<div class="cols"><div>' + launchPanel(c) + guideBox(5);
   var rec = recommend(c);
   h += '<div class="panel"><h2>' + esc(t('launcher')) + '</h2><div class="grid c2">';
   for (var i = 0; i < DATA.launchers.length; i++) {
@@ -668,6 +679,7 @@ function viewLaunch(c) {
       (LANG === 'es' ? 'fiabilidad' : 'reliability') + ' <b>' + n1(lv.reliability * 100) + '%</b>',
       (LANG === 'es' ? 'cofre' : 'fairing') + ' <b>' + lv.fairing + '</b> m',
       '<b>' + money(lv.cost) + '</b>'],
+      extra: lock ? '' : impactOf('launcherId', lv.id),
       lock: lockMsg
     });
   }
@@ -1306,6 +1318,7 @@ function readinessPreview(c) {
 /* ---------------------------------------------------------------- *
  * render                                                           *
  * ---------------------------------------------------------------- */
+var LAST_PHASE = -1;
 function render() {
   var c = comp();
   var h = '';
@@ -1319,12 +1332,14 @@ function render() {
   else h = viewReport(c);
   $('stage').innerHTML = h;
   $('brand-sub').textContent = t('sub');
+  $('lab-top-txt').textContent = LANG === 'es' ? 'Laboratorio' : 'Lab';
   renderStepper();
   renderHUD();
   renderNav();
   var lt = $('lang-toggle').querySelectorAll('.lang-opt');
   for (var i = 0; i < lt.length; i++) lt[i].className = 'lang-opt' + (lt[i].getAttribute('data-l') === LANG ? ' on' : '');
-  window.scrollTo(0, 0);
+  if (LAST_PHASE !== S.phase) window.scrollTo(0, 0);
+  LAST_PHASE = S.phase;
   saveGame();
   if (S.phase === 6) vizStart();
 }
@@ -1341,6 +1356,7 @@ function enterPhase(p) {
     S.propId = c.bus.rank === 0 ? 'coldgas' : (c.bus.rank === 1 ? 'mono' : 'biprop');
   }
   if (p === 4 && !S.groundId) S.groundId = c.dest.commAu > 0.05 ? 'dsn34' : 'comm13';
+  if (p >= 2 && p <= 5) autoSizeIfOn();
   if (p === 5 && S.devMonths == null) S.devMonths = comp().devNeed;
   render();
 }
@@ -1349,28 +1365,8 @@ function enterPhase(p) {
  * events / wiring                                                  *
  * ---------------------------------------------------------------- */
 function onPick(k, v) {
-  if (k === 'antennaD' || k === 'twtaW') v = parseFloat(v);
-  S[k] = v;
-  if (k === 'busId') {
-    var b = DATA.find(DATA.buses, v);
-    if (S.arrayArea > b.arrayMax) S.arrayArea = b.arrayMax;
-    if (S.propellantKg > b.propMax) S.propellantKg = b.propMax;
-    if (S.batteryWh > b.batteryMax) S.batteryWh = b.batteryMax;
-    if (!b.allowsRTG && S.powerType === 'rtg') S.powerType = 'solar';
-    if (S.propId) { var p = DATA.find(DATA.propulsion, S.propId); if (p.minRank > b.rank) S.propId = null; }
-    /* clear instruments that no longer fit */
-    var keep = [];
-    for (var i = 0; i < S.instruments.length; i++) {
-      var it = DATA.find(DATA.instruments, S.instruments[i]);
-      if (it.minBusRank == null || b.rank >= it.minBusRank) keep.push(it.id);
-    }
-    S.instruments = keep;
-  }
-  if (k === 'programId') {
-    var pr = DATA.find(DATA.programs, v);
-    if (S.destId) { var d = DATA.find(DATA.destinations, S.destId); if (d.minProgram > pr.rank) S.destId = null; }
-  }
-  if (k === 'destId') { S.devMonths = null; S.instruments = []; S.edlId = null; }
+  pickInto(S, k, v);
+  if (S.phase >= 2) autoSizeIfOn();
   render();
 }
 
@@ -1385,6 +1381,7 @@ function applyRange(k, v) {
   } else S[k] = v;
 }
 
+var SIZING_KEYS = ['arrayArea', 'rtgUnits', 'batteryWh', 'propellantKg'];
 function wire() {
   document.addEventListener('click', function (e) {
     var el = e.target.closest ? e.target.closest('[data-act]') : null;
@@ -1400,9 +1397,20 @@ function wire() {
     if (act === 'h24') { S.staff.h24 = !S.staff.h24; render(); return; }
     if (act === 'demo') { explorerOpen(explorerDemo(el.getAttribute('data-v'))); return; }
     if (act === 'pick') { onPick(el.getAttribute('data-k'), el.getAttribute('data-v')); return; }
+    if (act === 'preset') { applyPreset(el.getAttribute('data-v')); return; }
+    if (act === 'kit') { applyKit(el.getAttribute('data-v')); return; }
+    if (act === 'auto') { S.auto = S.auto === false; autoSizeIfOn(); render(); return; }
+    if (act === 'autosci') { S.instruments = autoInstruments(S); autoSizeIfOn(); render(); return; }
+    if (act === 'autolink') {
+      var sol = solveLink(S);
+      if (sol) ['antennaD', 'twtaW', 'bandId', 'groundId', 'arrayArea', 'rtgUnits', 'batteryWh', 'propellantKg'].forEach(function (k) { S[k] = sol.st[k]; });
+      render(); return;
+    }
+    if (act === 'lab') { labOpen(el.getAttribute('data-v')); return; }
     if (act === 'instr') {
       var id = el.getAttribute('data-v'), i = S.instruments.indexOf(id);
       if (i >= 0) S.instruments.splice(i, 1); else S.instruments.push(id);
+      autoSizeIfOn();
       render(); return;
     }
     if (act === 'toggle') {
@@ -1432,6 +1440,7 @@ function wire() {
     var k = e.target.getAttribute('data-k');
     if (!k) return;
     applyRange(k, e.target.value);
+    if (SIZING_KEYS.indexOf(k) >= 0) S.auto = false;
     var box = e.target.parentNode, out = box ? box.querySelector('output') : null;
     if (out) out.textContent = (Math.round(parseFloat(e.target.value) * 100) / 100) + ' ' + (e.target.getAttribute('data-unit') || '');
     comp(); renderHUD(); renderNav();

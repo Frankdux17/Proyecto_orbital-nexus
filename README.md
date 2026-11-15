@@ -100,6 +100,25 @@ A spectrometer that fills the memory and never transmits scores exactly zero.
 - **Recommendations.** The bus, propulsion and launcher that fit your design are flagged as
   recommended, and each phase has a "how to choose" guide.
 
+### New: easy choices and an engineering lab
+
+- **See before you choose.** Every bus, engine, band, station, shield and rocket card shows
+  what it would do to the mission before you click it: the cost change and a ✓ / ✕ for Δv,
+  power, payload and budget. Rocket cards show a bar of how much of their capability you use.
+- **Automatic sizing.** Arrays, battery and propellant size themselves with the same rules
+  an engineer applies by hand (rocket equation, end-of-life power, eclipse battery). Move a
+  slider to take manual control; flip the switch to hand it back.
+- **One-tap assistants.** Ready missions for a first flight (Moon, Mars, Europa), three design
+  packages (Lean / Balanced / Robust) with their margins side by side, an instrument picker
+  that keeps a budget reserve, a link solver that tries every antenna × amplifier × band ×
+  station, and a rocket picker.
+- **Engineering lab** for scientists, engineers and astronauts who want their own numbers:
+  rocket equation with engine comparison, Hohmann transfers with phase angle, launch-window
+  period and departure C3, orbit geometry (period, eclipse, ground track), a decibel link
+  budget table, solar power and battery over the mission, and a **trade-space map** that
+  evaluates every bus × propulsion × rocket × power source for your mission, plots cost
+  against chance of success, marks the Pareto front, exports CSV and applies any design.
+
 ## Nine destinations
 
 Sun-synchronous LEO · geostationary orbit · low lunar orbit · Sun-Earth L2 ·
@@ -140,6 +159,9 @@ assets/js/coach.js      the mission team: live, phase-specific advice from each 
 assets/js/explorer.js   3D mission explorer, CubeSat 101 timeline and VR stereo mode
 assets/js/ascent.js     piloted ascent: physics, guidance, controls and the training simulator
 assets/js/mission.js    mission control staffing, readiness review, GO/NO-GO, cruise navigation
+assets/js/design.js     easy choices: impact preview, automatic sizing, presets and assistants
+assets/js/lab.js        engineering lab: calculators, charts and the trade-space map
+assets/img/             project logo, poster, favicon and social preview
 assets/js/app.js        state machine, interface, operations simulator
 docs/MODEL.md           every equation and where its numbers come from
 ```
@@ -263,6 +285,26 @@ Tierra.** Un espectrómetro que llena la memoria y nunca transmite vale exactame
   del encendido de llegada y cambia la probabilidad de aterrizar.
 - **Recomendaciones.** Se marcan el bus, la propulsión y el cohete que mejor encajan con tu
   diseño, y cada fase trae una guía de «cómo elegir».
+
+### Nuevo: elegir fácil y un laboratorio de ingeniería
+
+- **Mira antes de elegir.** Cada tarjeta de bus, motor, banda, estación, blindaje y cohete
+  muestra qué le haría a la misión antes de tocarla: el cambio de costo y un ✓ / ✕ para Δv,
+  energía, carga y presupuesto. Los cohetes muestran una barra de cuánto de su capacidad usas.
+- **Dimensionado automático.** Paneles, batería y propelente se ajustan solos con las mismas
+  reglas que usa un ingeniero (ecuación del cohete, potencia al final de la vida, batería
+  para el eclipse). Mueve un control para tomar el mando manual.
+- **Asistentes de un toque.** Misiones listas para empezar (Luna, Marte, Europa), tres
+  paquetes de diseño (Económica / Equilibrada / Robusta) con sus márgenes lado a lado, un
+  selector de instrumentos que guarda reserva de presupuesto, un solucionador de enlace que
+  prueba todas las antenas × amplificadores × bandas × estaciones, y un selector de cohete.
+- **Laboratorio de ingeniería** para científicos, ingenieros y astronautas que quieren sus
+  propios cálculos: ecuación del cohete con comparación de motores, transferencias de
+  Hohmann con ángulo de fase, período de ventanas y C3 de salida, geometría orbital
+  (período, eclipse, traza), presupuesto de enlace en decibelios, energía solar y batería a
+  lo largo de la misión, y un **mapa de compensaciones** que evalúa todas las naves posibles
+  para tu misión, grafica costo contra probabilidad de éxito, marca la frontera de Pareto,
+  exporta CSV y aplica cualquier diseño.
 
 ## Nueve destinos
 
