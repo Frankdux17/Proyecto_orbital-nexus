@@ -118,6 +118,10 @@ A spectrometer that fills the memory and never transmits scores exactly zero.
   budget table, solar power and battery over the mission, and a **trade-space map** that
   evaluates every bus × propulsion × rocket × power source for your mission, plots cost
   against chance of success, marks the Pareto front, exports CSV and applies any design.
+- **Friendlier.** A mission status ring lists what is missing in plain words and fixes it
+  on request (“Fix it for me”); technical words (Δv, Isp, C3, RTG, krad, DSN…) explain
+  themselves when tapped; a three-step welcome tour on the first game; and a celebration
+  the first time each phase closes with every margin green.
 
 ## Nine destinations
 
@@ -161,6 +165,7 @@ assets/js/ascent.js     piloted ascent: physics, guidance, controls and the trai
 assets/js/mission.js    mission control staffing, readiness review, GO/NO-GO, cruise navigation
 assets/js/design.js     easy choices: impact preview, automatic sizing, presets and assistants
 assets/js/lab.js        engineering lab: calculators, charts and the trade-space map
+assets/js/help.js       mission status ring, tap-to-explain glossary, welcome tour, celebrations
 assets/img/             project logo, poster, favicon and social preview
 assets/js/app.js        state machine, interface, operations simulator
 docs/MODEL.md           every equation and where its numbers come from
@@ -305,6 +310,10 @@ Tierra.** Un espectrómetro que llena la memoria y nunca transmite vale exactame
   lo largo de la misión, y un **mapa de compensaciones** que evalúa todas las naves posibles
   para tu misión, grafica costo contra probabilidad de éxito, marca la frontera de Pareto,
   exporta CSV y aplica cualquier diseño.
+- **Más amigable.** Un anillo de estado de la misión dice qué falta en palabras simples y
+  lo arregla si se lo pides («Arréglalo por mí»); las palabras técnicas (Δv, Isp, C3, RTG,
+  krad, DSN…) se explican al tocarlas; una guía de bienvenida de tres pasos y una
+  celebración la primera vez que cada fase cierra con todos los márgenes en verde.
 
 ## Nueve destinos
 

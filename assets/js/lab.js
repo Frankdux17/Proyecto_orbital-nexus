@@ -120,7 +120,7 @@ function labRefresh() {
   var tmp = document.createElement('div');
   tmp.innerHTML = labBody();
   var src = tmp.querySelector('.lab-out'), dst = document.querySelector('#lab .lab-out');
-  if (src && dst) dst.innerHTML = src.innerHTML;
+  if (src && dst) { dst.innerHTML = src.innerHTML; glossify(dst); }
   labDraw();
 }
 function labRender() {
@@ -139,6 +139,7 @@ function labRender() {
     '<button class="btn ghost" data-lab="copy">' + esc(lx('Copiar resultados', 'Copy results')) + '</button>' +
     '<button class="icon-btn lab-x" data-lab="close" aria-label="' + esc(lx('Cerrar', 'Close')) + '">' + icon('close', 'ico') + '</button></div></header>' +
     '<nav class="lab-tabs" role="tablist">' + tabs + '</nav><main class="lab-body">' + body + '</main></div>';
+  glossify(root);
   labDraw();
 }
 

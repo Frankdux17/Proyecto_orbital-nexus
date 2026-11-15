@@ -197,6 +197,7 @@ function renderNav() {
   else if (S.phase === 6) next.textContent = (S.alive && S.turn < c.opsTurns) ? t('next_turn') : t('end_mission');
   else next.textContent = t('next');
   next.disabled = S.phase === 6 ? false : blocked;
+  next.classList.toggle('ready', !blocked && S.phase >= 1 && S.phase <= 5);
 }
 
 /* ---------------------------------------------------------------- *
@@ -271,8 +272,11 @@ function head(kick, title, lead) {
   if (m) meta = '<div class="phase-meta"><span class="pm seg-' + m.seg + '">' + esc(L(SEG_NAME[m.seg])) + '</span>' +
     '<span class="pm">' + esc(L(m.cml)) + '</span>' + (m.mdl ? '<span class="pm">' + esc(L(m.mdl)) + '</span>' : '') +
     '<span class="pm diff-' + S.diff + '">' + esc(L(DIFF[S.diff].name)) + '</span></div>';
-  return '<div class="phase-head"><div class="phase-ic">' + icon(PHASE_ICON[S.phase], 'ico') + '</div><div>' +
+  var hc = CACHE || comp();
+  return '<div class="phase-head">' + (hc.dest ? '<div class="phase-art" aria-hidden="true">' + destArt(hc.dest.id, 'art') + '</div>' : '') +
+    '<div class="phase-ic">' + icon(PHASE_ICON[S.phase], 'ico') + '</div><div class="phase-txt">' +
     '<div class="phase-kicker">' + esc(t(kick)) + '</div>' +
+    '<div class="phase-prog" aria-hidden="true"><i style="width:' + n0(Math.min(6, S.phase) / 6 * 100) + '%"></i></div>' +
     '<h1>' + esc(t(title)) + '</h1><p>' + esc(t(lead)) + '</p>' + meta + '</div></div>' + coachPanel(CACHE || comp());
 }
 
@@ -377,7 +381,7 @@ function viewMission(c) {
       lock: locked ? t('min_class') + ': ' + L(DATA.programs[d.minProgram].name) : null
     });
   }
-  h += '</div></div></div><div class="side">';
+  h += '</div></div></div><div class="side">' + statusPanel(c);
 
   if (c.dest) {
     h += '<div class="panel dest-hero">' + destArt(c.dest.id, 'art hero-art') + '<div><span class="card-tag">' + esc(L(c.dest.tag)) + '</span><b>' + esc(L(c.dest.name)) + '</b></div>' + explorerBtn(c, 'wide') + '</div>';
@@ -507,7 +511,7 @@ function viewPlatform(c) {
     h += '</div></div>';
   }
 
-  h += '</div><div class="side">' + shipPanel(c) + '<div class="panel"><h2>' + esc(LANG === 'es' ? 'Presupuestos' : 'Budgets') + '</h2>';
+  h += '</div><div class="side">' + statusPanel(c) + shipPanel(c) + '<div class="panel"><h2>' + esc(LANG === 'es' ? 'Presupuestos' : 'Budgets') + '</h2>';
   h += rows([
     [LANG === 'es' ? 'Masa seca' : 'Dry mass', n0(c.mass.dry) + ' kg'],
     [LANG === 'es' ? '· bus' : '· bus', n0(c.mass.bus) + ' kg'],
@@ -554,7 +558,7 @@ function viewScience(c) {
       lock: lockMsg
     });
   }
-  h += '</div></div></div><div class="side">' + shipPanel(c) + '<div class="panel"><h2>' + esc(t('obj_coverage')) + '</h2>';
+  h += '</div></div></div><div class="side">' + statusPanel(c) + shipPanel(c) + '<div class="panel"><h2>' + esc(t('obj_coverage')) + '</h2>';
   for (i = 0; i < c.coverage.length; i++) {
     var cv = c.coverage[i];
     var cls = cv.full ? 'met' : (cv.have > 0 ? 'partial' : 'unmet');
@@ -638,7 +642,7 @@ function viewLink(c) {
   h += '</div></div>';
 
   h += staffPanel(c);
-  h += '</div><div class="side">' + shipPanel(c) + '<div class="panel"><h2>' + esc(t('link_calc')) + '</h2>' + rows([
+  h += '</div><div class="side">' + statusPanel(c) + shipPanel(c) + '<div class="panel"><h2>' + esc(t('link_calc')) + '</h2>' + rows([
     [LANG === 'es' ? 'Distancia de diseño' : 'Design distance', c.dest ? (c.dest.commAu < 0.02 ? n0(c.dest.commAu * AU_M / 1000) + ' km' : n2(c.dest.commAu) + ' UA') : '—'],
     [LANG === 'es' ? 'Tasa de bajada' : 'Downlink rate', bps(c.link.bps)],
     [LANG === 'es' ? 'Horas de contacto' : 'Contact hours', n0(c.link.hours) + ' h/' + (LANG === 'es' ? 'turno' : 'turn')],
@@ -697,7 +701,7 @@ function viewLaunch(c) {
     [LANG === 'es' ? 'Probabilidad total de operar' : 'Overall chance of operating', n1(od.total * 100) + '%', true]
   ].filter(function (x) { return x; }));
   h += readinessPreview(c);
-  h += '</div></div><div class="side">' + shipPanel(c) + '<div class="panel">' + explorerBtn(c, 'wide') + practiceBtn('wide') + '</div><div class="panel"><h2>' + esc(LANG === 'es' ? 'Hoja de datos final' : 'Final data sheet') + '</h2>';
+  h += '</div></div><div class="side">' + statusPanel(c) + shipPanel(c) + '<div class="panel">' + explorerBtn(c, 'wide') + practiceBtn('wide') + '</div><div class="panel"><h2>' + esc(LANG === 'es' ? 'Hoja de datos final' : 'Final data sheet') + '</h2>';
   h += rows([
     [LANG === 'es' ? 'Masa de lanzamiento' : 'Launch mass', n0(c.mass.launch) + ' kg'],
     [LANG === 'es' ? 'Capacidad del cohete' : 'Rocket capability', n0(c.lvCap) + ' kg'],
@@ -1331,6 +1335,7 @@ function render() {
   else if (S.phase === 6) h = viewOps(c);
   else h = viewReport(c);
   $('stage').innerHTML = h;
+  glossify($('stage'));
   $('brand-sub').textContent = t('sub');
   $('lab-top-txt').textContent = LANG === 'es' ? 'Laboratorio' : 'Lab';
   renderStepper();
@@ -1342,6 +1347,7 @@ function render() {
   LAST_PHASE = S.phase;
   saveGame();
   if (S.phase === 6) vizStart();
+  celebrateCheck();
 }
 
 /* ---------------------------------------------------------------- *
@@ -1387,7 +1393,13 @@ function wire() {
     var el = e.target.closest ? e.target.closest('[data-act]') : null;
     if (!el) return;
     var act = el.getAttribute('data-act');
-    if (act === 'start') { var d0 = S.diff; clearSave(); S = freshState(); S.diff = d0; enterPhase(1); return; }
+    if (act === 'start') {
+      var d0 = S.diff; clearSave(); S = freshState(); S.diff = d0; enterPhase(1);
+      if (!pref('on_tour', '')) tourOpen();
+      return;
+    }
+    if (act === 'tour') { tourOpen(); return; }
+    if (act === 'fix') { applyFix(el.getAttribute('data-v')); return; }
     if (act === 'diff') { S.diff = el.getAttribute('data-v'); setPref('on_diff', S.diff); render(); return; }
     if (act === 'resume') { resumeGame(); return; }
     if (act === 'explore') { explorerOpen(explorerCfg(comp())); return; }
@@ -1492,5 +1504,6 @@ S = freshState();
 starfield();
 wire();
 wireFx();
+wireHelp();
 document.documentElement.lang = LANG;
 render();
