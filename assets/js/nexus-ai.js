@@ -74,18 +74,23 @@ function nxGuide() {
   function T(a, b) { return es ? a : b; }
   return [
     { w: 0.8, k: ['opciones', 'que opciones', 'options', 'what options', 'menu', 'juegos', 'minijuegos', 'que juegos', 'cuantos juegos', 'how many games', 'que puedo jugar', 'modos', 'como se juega', 'games', 'mini games', 'what games', 'what can i play', 'modes', 'how to play'],
+      s: function () { return T('6 formas de jugar: misión completa, despegue, explorador 3D, dron en Titán, escáner y portal. Y un laboratorio de cálculos.', '6 ways to play: full mission, launch, 3D explorer, Titan drone, scanner and portal. Plus a calculation lab.'); },
       a: function () { return T('Hay seis formas de jugar: diseñar una misión completa en 6 fases, el simulador de despegue, el explorador 3D con modo RV, el dron en Titán, el escáner orbital con 5 niveles y el modo futuro del portal cuántico, que es ficción. Además está el laboratorio de ingeniería para hacer cálculos. Pregúntame cómo se juega cualquiera y te lo abro.',
         'There are six ways to play: design a full mission in 6 phases, the launch simulator, the 3D explorer with VR mode, the drone on Titan, the orbital scanner with 5 levels and the quantum portal future mode, which is fiction. There is also the engineering lab for calculations. Ask me how to play any of them and I will open it.'); } },
     { w: 1.4, k: ['introduccion', 'intro', 'presentacion', 'introduction', 'overview', 'proyecto', 'como funciona el proyecto', 'que hace', 'que no hace', 'de que trata', 'para que sirve', 'orbital nexus', 'the project', 'how does the project work', 'what does it do', 'what doesn t it do', 'what is this', 'what is it for'],
+      s: function () { return T('Un simulador para explorar una idea de misión espacial en minutos: diseñas, lanzas y operas con física real.', 'A simulator to explore a space mission idea in minutes: you design, launch and operate with real physics.'); },
       a: function () { return T('ORBITAL NEXUS es un simulador web para explorar una idea de misión espacial en minutos. Qué hace: diseñas la misión en 6 fases con física real, ves el efecto de cada decisión antes de tomarla, armas el centro de control, votas GO o NO-GO, despegas, navegas y operas la misión mientras ocurren fallas, y al final recibes un informe con la misión real de la NASA más parecida. Además tiene seis formas de jugar, un laboratorio de cálculos y a mí, NEXUS. Si te pierdes, pregúntame «¿dónde estoy?». Qué no hace: no es software oficial de la NASA, no se conecta a datos en vivo, los mapas del escáner son simulados, los costos son aproximados y el portal cuántico es ficción. Funciona en el navegador, sin instalar, en español e inglés.',
         'ORBITAL NEXUS is a web simulator to explore a space mission idea in minutes. What it does: you design the mission in 6 phases with real physics, see the effect of each decision before making it, staff mission control, poll GO or NO-GO, launch, navigate and operate the mission while failures happen, and finish with a report naming the closest real NASA mission. It also has six ways to play, a calculation lab and me, NEXUS. If you get lost, ask me “where am I?”. What it does not do: it is not official NASA software, it does not connect to live data, the scanner maps are simulated, costs are approximate and the quantum portal is fiction. It runs in the browser, nothing to install, in English and Spanish.'); } },
     { w: 1.7, k: ['como se usa', 'como uso', 'como usar', 'como lo uso', 'instrucciones', 'how to use', 'how do i use it', 'how do i use this', 'instructions', 'usage'],
+      s: function () { return T('Pulsa «Iniciar diseño de misión» y avanza con el botón de abajo a la derecha. ¿Te pierdes? Pregúntame «¿dónde estoy?».', 'Press “Start mission design” and move on with the button at the bottom right. Lost? Ask me “where am I?”.'); },
       a: function () { return T('Se usa así. Arriba a la derecha están los controles: 👤 es tu nombre y tu avance, ES / EN cambia el idioma, 🛰️ me abre o me minimiza, 👩‍🚀 registra a la tripulación y ajusta voces y subtítulos, el signo de interrogación muestra la guía y el matraz abre el laboratorio. En la portada pulsa «Iniciar diseño de misión» para recorrer las 6 fases, o «Explora en 3 minutos» para abrir una misión lista o cualquier juego. En cada pantalla avanzas con el botón de abajo a la derecha y vuelves con «Atrás» o con el logo. Tu avance se guarda solo con tu nombre. Y en cualquier momento pregúntame «¿dónde estoy?» o «¿qué falta?».',
         'This is how you use it. The controls are at the top right: 👤 is your name and progress, ES / EN switches language, 🛰️ opens or minimises me, 👩‍🚀 logs the crew and sets voices and captions, the question mark shows the guide and the flask opens the lab. On the home screen press “Start mission design” to go through the 6 phases, or “Explore in 3 minutes” to open a ready mission or any game. On every screen you move on with the button at the bottom right and go back with “Back” or the logo. Your progress saves itself under your name. And at any moment ask me “where am I?” or “what is missing?”.'); } },
     { w: 1.7, k: ['idioma', 'ingles', 'espanol', 'castellano', 'cambiar idioma', 'traducir', 'traduccion', 'no entiendo espanol', 'no hablo espanol', 'no entiendo ingles', 'no hablo ingles', 'language', 'english', 'spanish', 'change language', 'translate', 'translation', 'do not speak', 'don t speak', 'do not understand spanish', 'don t understand spanish', 'do not read', 'speak english', 'speak spanish'], act: 'lang',
+      s: function () { return T('Pulsa ES / EN arriba a la derecha, o este botón.', 'Press ES / EN at the top right, or this button.'); },
       a: function () { return T('Para cambiar de idioma pulsa ES / EN arriba a la derecha, o el botón de aquí abajo. Cambia todo a la vez: las pantallas, las voces, los subtítulos y yo. If you do not read Spanish, press ES / EN at the top right to switch everything to English.',
         'To change language press ES / EN at the top right, or the button below. Everything switches at once: the screens, the voices, the captions and me. Si no lees inglés, pulsa ES / EN arriba a la derecha para pasar todo a español.'); } },
     { w: 1.6, k: ['guardar', 'guardo', 'guarda', 'guardado', 'partida', 'avance', 'progreso', 'perfil', 'mi nombre', 'usuario', 'cuenta', 'contrasena', 'registro', 'registrarme', 'otra persona', 'save', 'saved', 'saves', 'progress', 'profile', 'my name', 'user', 'account', 'password', 'sign in', 'log in', 'login', 'someone else'], act: 'who',
+      s: function () { return T('Se guarda solo, con tu nombre y sin contraseña. Al volver, toca tu nombre.', 'It saves itself, under your name, with no password. When you return, tap your name.') + ' ' + (PROFILE ? T('Ahora eres ', 'You are ') + PROFILE.name + '.' : T('Ahora eres invitado.', 'You are a guest now.')); },
       a: function () { var n = PROFILE ? PROFILE.name : '';
         return T('Tu avance se guarda solo y con tu nombre, sin contraseña ni registro: la misión en curso, las insignias, los niveles del escáner, los rescates del portal y tu tripulación. Cada persona que entra escribe su nombre y tiene su propia partida; al volver toca su nombre y elige continuar donde se quedó o empezar desde cero. En la portada se ve el avance de todos los exploradores. Se guarda en este navegador y en este equipo: no viaja a otros dispositivos. ' + (n ? 'Ahora exploras como ' + n + '.' : 'Ahora exploras sin nombre, como invitado.'),
           'Your progress saves itself under your name, with no password and no sign-up: the mission in progress, badges, scanner levels, portal rescues and your crew. Each person who comes in types their name and gets a separate game; when they return they tap their name and choose to continue where they left off or start from zero. The home screen shows the progress of every explorer. It is stored in this browser on this device: it does not travel to other devices. ' + (n ? 'You are exploring as ' + n + ' now.' : 'You are exploring without a name, as a guest, now.')); } },
@@ -116,6 +121,7 @@ function nxGuide() {
       a: function () { return T('En la fase de lanzamiento o en el informe pulsa «Compartir mi diseño»: copia un enlace con tu nave completa para que otra persona la abra, la mejore y la lance.',
         'In the launch phase or the report press “Share my design”: it copies a link with your whole spacecraft so someone else can open it, improve it and launch it.'); } },
     { k: ['que puedes hacer', 'quien eres', 'que eres', 'como te uso', 'como funcionas', 'que no puedes', 'limites', 'what can you do', 'who are you', 'how do i use you', 'how do you work', 'what can t you do', 'limits'],
+      s: function () { return T('Soy NEXUS: te guío, respondo y abro cada juego. Si no sé algo, me lo enseñas.', 'I am NEXUS: I guide you, answer and open each game. If I do not know something, you teach me.'); },
       a: function () { return T('Soy NEXUS. Puedo decirte el estado de tu misión y qué falta, explicarte términos y cómo se juega cada modo, y abrirlo por ti. Háblame con el micrófono o escribe. Si no sé algo te lo digo y puedes enseñarme. No puedo inventar datos que no conozco ni conectarme a internet o a la NASA, y lo que aprendo se queda en este navegador: puedes exportarlo.',
         'I am NEXUS. I can tell you your mission status and what is missing, explain terms and how each mode is played, and open it for you. Talk to me with the microphone or type. If I do not know something I tell you and you can teach me. I cannot make up data I do not know or connect to the internet or NASA, and what I learn stays in this browser: you can export it.'); } },
     { k: ['ensenar', 'aprender', 'como te enseno', 'como aprendes', 'teach', 'learn', 'how do you learn'],
@@ -159,7 +165,7 @@ function nxAnswer(q) {
       else if (k.length > 5 && nq.indexOf(k) >= 0) { sc += 0.8; hit = hit.concat(k.split(' ')); }
     });
     sc *= r.w || 1;
-    if (sc > bestS) { bestS = sc; best = { text: r.a(c), src: 'rule', act: r.act }; bestHit = hit; }
+    if (sc > bestS) { bestS = sc; best = { text: r.a(c), short: r.s ? r.s(c) : '', src: 'rule', act: r.act }; bestHit = hit; }
   });
   if (bestS < 1) return best && best.src === 'learned' ? best : null;
   /* honesty check: if the question asks about things this answer does not cover,
@@ -214,26 +220,26 @@ function nxBoot(known) {
   }, true);
 }
 
+/* said out loud; the chat itself only shows a short greeting */
 function nxWelcomeText() {
-  return LANG === 'es' ? 'Bienvenido a ORBITAL NEXUS. Soy NEXUS y estoy aquí para guiarte y ayudarte. Si quieres te doy una introducción del proyecto: qué hace, cómo funciona, cómo se usa y qué opciones tiene. Cualquier cosa que no sepas, solo dímelo: yo te guío.'
-    : 'Welcome to ORBITAL NEXUS. I am NEXUS and I am here to guide you and help you. If you like, I can give you an introduction to the project: what it does, how it works, how to use it and what options it has. Anything you do not know, just tell me: I will guide you.';
+  return LANG === 'es' ? 'Bienvenido a ORBITAL NEXUS. Soy NEXUS y estoy aquí para guiarte y ayudarte. Si quieres te doy una introducción del proyecto: qué hace, cómo se usa y qué opciones tiene. Dime tu nombre y guardo tu avance. Si prefieres inglés, cambia el idioma arriba a la derecha. Cualquier cosa que no sepas, solo dímelo: yo te guío.'
+    : 'Welcome to ORBITAL NEXUS. I am NEXUS and I am here to guide you and help you. If you like, I can introduce the project: what it does, how to use it and what options it has. Tell me your name and I will save your progress. If you prefer Spanish, switch language at the top right. Anything you do not know, just tell me: I will guide you.';
 }
 function nxBtn(nx, label, attr) { return '<button class="nx-go" data-nx="' + nx + '"' + (attr || '') + '>' + esc(label) + '</button>'; }
 /* the first things a newcomer usually wants */
 function nxStartBtns(withLang, withStart) {
   var es = LANG === 'es';
   return '<div class="nx-acts">' +
-    nxBtn('ask', es ? 'Introducción del proyecto' : 'Introduce the project', ' data-q="' + (es ? '¿Cómo funciona el proyecto?' : 'How does the project work?') + '"') +
-    nxBtn('ask', es ? '¿Cómo se usa?' : 'How do I use it?', ' data-q="' + (es ? '¿Cómo se usa?' : 'How do I use it?') + '"') +
-    nxBtn('ask', es ? '¿Qué opciones tengo?' : 'What options do I have?', ' data-q="' + (es ? '¿Qué opciones tengo?' : 'What options do I have?') + '"') +
-    (withStart ? nxBtn('go', es ? '▶ Iniciar diseño de misión' : '▶ Start mission design', ' data-v="start"') : '') +
-    (withLang ? '<button class="nx-go nx-lang" data-nx="lang">🌐 ' + (es ? 'Switch to English' : 'Cambiar a español') + '</button>' : '') + '</div>';
+    nxBtn('ask', es ? '🔊 Introducción' : '🔊 Introduction', ' data-q="' + (es ? '¿Cómo funciona el proyecto?' : 'How does the project work?') + '"') +
+    nxBtn('ask', es ? '¿Cómo se usa?' : 'How to use it?', ' data-q="' + (es ? '¿Cómo se usa?' : 'How do I use it?') + '"') +
+    nxBtn('ask', es ? 'Opciones' : 'Options', ' data-q="' + (es ? '¿Qué opciones tengo?' : 'What options do I have?') + '"') +
+    (withStart ? nxBtn('go', es ? '▶ Iniciar misión' : '▶ Start mission', ' data-v="start"') : '') +
+    (withLang ? '<button class="nx-go nx-lang" data-nx="lang">🌐 ' + (es ? 'English' : 'Español') + '</button>' : '') + '</div>';
 }
 function nxGreet() {
   var es = LANG === 'es';
   if (PROFILE) { nxWhoMsg({ isNew: false, quiet: true }); return; }
-  nxMsg('bot', nxWelcomeText(), '<p class="nx-alt">' + esc(es ? 'Don’t read Spanish? Switch to English with the ES / EN button at the top right, or with the button below.'
-    : '¿Prefieres español? Cambia con el botón ES / EN de arriba a la derecha, o con el botón de abajo.') + '</p>' + nxStartBtns(true));
+  nxMsg('bot', es ? '👋 Hola, soy NEXUS, tu guía. ¿En qué te ayudo?' : '👋 Hi, I am NEXUS, your guide. How can I help?', nxStartBtns(true));
   if (profTab() !== '-') nxWhoAsk();
   /* a newcomer reads the welcome first: start at the top of the chat */
   var log = document.getElementById('nx-log'); if (log) log.scrollTop = 0;
@@ -242,17 +248,15 @@ function nxGreet() {
 /* ---------- who is exploring: a name picks the saved game, no password ---------- */
 function nxWhoAsk() {
   var es = LANG === 'es', list = profList().sort(function (a, b) { return (b.seen || 0) - (a.seen || 0); });
-  var txt = list.length ? (es ? '¿Quién explora ahora? Si ya estuviste aquí, toca tu nombre y sigues donde te quedaste. Si eres nuevo, escribe tu nombre: guardo tu avance con él, sin contraseña ni registro.'
-      : 'Who is exploring now? If you have been here before, tap your name and carry on where you left off. If you are new, type your name: I save your progress under it, with no password and no sign-up.')
-    : (es ? '¿Cómo te llamas? Con tu nombre guardo tu avance en este equipo, sin contraseña ni registro. Cuando vuelvas, sigues donde te quedaste.'
-      : 'What is your name? I save your progress on this device under your name, with no password and no sign-up. When you come back, you carry on where you left off.');
+  var txt = list.length ? (es ? '¿Quién explora ahora?' : 'Who is exploring now?') : (es ? '¿Cómo te llamas?' : 'What is your name?');
   var h = '';
   if (list.length) h += '<div class="nx-who">' + list.map(function (p) {
     return '<button class="nx-whob' + (PROFILE && PROFILE.id === p.id ? ' on' : '') + '" data-nx="who" data-v="' + p.id + '"><b>👤 ' + esc(p.name) + '</b><small>' + esc(profSummaryText(profSummary(p.id))) + '</small></button>';
   }).join('') + '</div>';
   h += '<form class="nx-who-form"><input type="text" maxlength="28" autocomplete="off" placeholder="' + esc(es ? 'Escribe tu nombre' : 'Type your name') + '" aria-label="' + esc(es ? 'Tu nombre' : 'Your name') + '">' +
     '<button type="submit" class="nx-go">' + esc(es ? 'Entrar' : 'Enter') + '</button></form>' +
-    '<button class="nx-fix" data-nx="guest">' + esc(es ? 'Seguir sin nombre, como invitado' : 'Continue without a name, as a guest') + '</button>';
+    '<p class="nx-hint">' + esc(es ? 'Guardo tu avance con tu nombre. Sin contraseña.' : 'I save your progress under your name. No password.') + '</p>' +
+    '<button class="nx-fix" data-nx="guest">' + esc(es ? 'Seguir sin nombre' : 'Continue without a name') + '</button>';
   nxMsg('bot', txt, h);
 }
 function nxWhoEnter(name) {
@@ -267,13 +271,13 @@ function nxWhoEnter(name) {
 function nxWhoMsg(r) {
   var es = LANG === 'es', n = PROFILE.name, s = profSummary(PROFILE.id), txt, h;
   if (!r.isNew && s.any) {
-    txt = es ? 'Bienvenido de nuevo, ' + n + '. Te quedaste aquí: ' + profSummaryText(s) + '. ¿Continúas o empiezas a explorar desde cero?'
-      : 'Welcome back, ' + n + '. You left off here: ' + profSummaryText(s) + '. Do you continue, or start exploring from zero?';
-    h = '<div class="nx-acts">' + nxBtn('cont', es ? '▶ Continuar donde me quedé' : '▶ Continue where I left off') + nxBtn('zero', es ? 'Empezar desde cero' : 'Start from zero') + '</div>';
+    txt = es ? 'Hola de nuevo, ' + n + '. Te quedaste en: ' + profSummaryText(s) + '. ¿Continúas?'
+      : 'Welcome back, ' + n + '. You left off at: ' + profSummaryText(s) + '. Continue?';
+    h = '<div class="nx-acts">' + nxBtn('cont', es ? '▶ Continuar' : '▶ Continue') + nxBtn('zero', es ? 'Empezar desde cero' : 'Start from zero') + '</div>';
   } else {
-    txt = r.isNew ? (es ? 'Listo, ' + n + '. Desde ahora tu avance se guarda con tu nombre en este equipo.' + (r.carried ? ' La misión que tenías abierta ya quedó guardada contigo.' : '') + ' ¿Por dónde empezamos?'
-        : 'All set, ' + n + '. From now on your progress is saved under your name on this device.' + (r.carried ? ' The mission you had open is now saved with you.' : '') + ' Where shall we start?')
-      : (es ? 'Hola de nuevo, ' + n + '. Todavía no tienes avance guardado. ¿Por dónde empezamos?' : 'Hello again, ' + n + '. You have no saved progress yet. Where shall we start?');
+    txt = r.isNew ? (es ? 'Listo, ' + n + '. Tu avance queda guardado con tu nombre.' + (r.carried ? ' Tu misión abierta ya es tuya.' : '') + ' ¿Por dónde empezamos?'
+        : 'All set, ' + n + '. Your progress is saved under your name.' + (r.carried ? ' Your open mission is now yours.' : '') + ' Where do we start?')
+      : (es ? 'Hola de nuevo, ' + n + '. ¿Por dónde empezamos?' : 'Hello again, ' + n + '. Where do we start?');
     h = nxStartBtns(false, S.phase === 0);
   }
   if (r.quiet) nxMsg('bot', txt, h); else nxBot(txt, 'rule', '', '', '', h);
@@ -282,26 +286,25 @@ function nxWhoMsg(r) {
 function nxCont() {
   var es = LANG === 'es';
   if (S.phase === 0 && loadSave()) { nxGo('resume'); return; }
-  nxBot(es ? 'Tus insignias y niveles están como los dejaste. Elige qué explorar; yo sigo aquí por si me necesitas.' : 'Your badges and levels are as you left them. Pick what to explore; I stay here in case you need me.', 'rule', '', '', '', nxStartBtns(false, S.phase === 0));
+  nxBot(es ? 'Todo sigue como lo dejaste. ¿Qué exploramos?' : 'Everything is as you left it. What shall we explore?', 'rule', '', '', '', nxStartBtns(false, S.phase === 0));
 }
 function nxZero(sure) {
   var es = LANG === 'es', n = PROFILE ? PROFILE.name : (es ? 'el invitado' : 'the guest');
   if (!sure) {
-    nxBot(es ? '¿Seguro? Borraré la misión guardada, las insignias y los niveles de ' + n + '. Los demás exploradores no cambian.' : 'Are you sure? I will erase the saved mission, badges and levels of ' + n + '. The other explorers are not touched.', 'rule', '', '', '',
-      '<div class="nx-acts">' + nxBtn('zeroyes', es ? 'Sí, empezar desde cero' : 'Yes, start from zero') + nxBtn('cont', es ? 'No, continuar' : 'No, continue') + '</div>');
+    nxBot(es ? '¿Borro la misión, las insignias y los niveles de ' + n + '?' : 'Erase the mission, badges and levels of ' + n + '?', 'rule', '', '', '',
+      '<div class="nx-acts">' + nxBtn('zeroyes', es ? 'Sí, desde cero' : 'Yes, from zero') + nxBtn('cont', es ? 'No' : 'No') + '</div>');
     return;
   }
   profWipe(PROFILE ? PROFILE.id : '');
   S = freshState();
   if (typeof render === 'function') render();
-  nxBot(es ? 'Hecho: empiezas desde cero. ¿Por dónde empezamos?' : 'Done: you start from zero. Where shall we start?', 'rule', '', '', '', nxStartBtns(false, true));
+  nxBot(es ? 'Listo, desde cero. ¿Por dónde empezamos?' : 'Done, from zero. Where do we start?', 'rule', '', '', '', nxStartBtns(false, true));
 }
 function nxGuest() {
   profGuest(); NX.asked = true;
   if (typeof render === 'function') render();
   nxPaint();
-  nxBot(LANG === 'es' ? 'De acuerdo. Sin nombre, tu avance se guarda como invitado en este navegador. Puedes poner tu nombre cuando quieras con el botón 👤 de arriba.'
-    : 'All right. Without a name, your progress is saved as a guest in this browser. You can add your name whenever you like with the 👤 button at the top.', 'rule', '', '', '', nxStartBtns(false, S.phase === 0));
+  nxBot(LANG === 'es' ? 'De acuerdo, sigues como invitado. Tu nombre lo pones cuando quieras con 👤.' : 'All right, you continue as a guest. Add your name any time with 👤.', 'rule', '', '', '', nxStartBtns(false, S.phase === 0));
 }
 /* the name on the top bar */
 function whoPaint() {
@@ -327,13 +330,13 @@ function nxLang() {
   nxPaint(); whoPaint();
   if (!had) return;
   if (!NX.asked) { document.getElementById('nx-log').innerHTML = ''; nxGreet(); }
-  else nxBot(LANG === 'es' ? 'Ahora te hablo en español. Para volver al inglés pulsa ES / EN arriba a la derecha.' : 'I will speak English from now on. To go back to Spanish press ES / EN at the top right.', 'rule');
+  else nxBot(LANG === 'es' ? 'Ahora en español.' : 'Now in English.', 'rule');
 }
 
 function nxPaint() {
   var root = document.getElementById('nexus'), es = LANG === 'es', keep = root.querySelector('.nx-log');
-  var chips = es ? ['¿Cómo funciona el proyecto?', 'Me perdí, ¿dónde estoy?', '¿Qué opciones tengo?', '¿Cómo se usa?', '¿Cómo guardo mi avance?', '¿Cómo cambio el idioma?', '¿Qué falta?', '¿Qué puedes hacer?']
-    : ['How does the project work?', 'I’m lost, where am I?', 'What options do I have?', 'How do I use it?', 'How do I save my progress?', 'How do I change language?', 'What is missing?', 'What can you do?'];
+  var chips = es ? ['¿Dónde estoy?', '¿Qué falta?', '¿Cómo se usa?', 'Opciones', 'Mi avance', 'Idioma']
+    : ['Where am I?', 'What is missing?', 'How to use it?', 'Options', 'My progress', 'Language'];
   var n = nxLearned().length, hasMic = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
   root.innerHTML = '<header class="nx-head"><span class="vcap-orb"><i></i><i></i><i></i></span><div><b>NEXUS</b><span>' + esc(es ? 'IA de a bordo · sistema experto que aprende' : 'Onboard AI · an expert system that learns') + '</span></div>' +
     '<button class="icon-btn nx-hb" data-nx="side" title="' + esc(es ? 'Cambiar de lado' : 'Switch side') + '" aria-label="' + esc(es ? 'Cambiar de lado' : 'Switch side') + '">⇄</button>' +
@@ -343,7 +346,7 @@ function nxPaint() {
     '<div class="nx-log" id="nx-log" aria-live="polite"></div>' +
     '<div class="nx-chips">' + chips.map(function (c) { return '<button class="nx-chip" data-nx="chip">' + esc(c) + '</button>'; }).join('') + '</div>' +
     '<div class="nx-teach" id="nx-teach" hidden></div>' +
-    '<form class="nx-form"><input id="nx-q" type="text" autocomplete="off" placeholder="' + esc(es ? 'Escribe tu pregunta…' : 'Type your question…') + '">' +
+    '<form class="nx-form"><input id="nx-q" type="text" autocomplete="off" placeholder="' + esc(es ? 'Pregúntame algo…' : 'Ask me anything…') + '">' +
     (hasMic ? '<button type="button" class="nx-mic' + (NX.listening ? ' on' : '') + '" data-nx="mic" aria-label="' + esc(es ? 'Preguntar con la voz' : 'Ask by voice') + '">🎤</button>' : '') +
     '<button type="submit" class="nx-send" aria-label="' + esc(es ? 'Enviar' : 'Send') + '">➤</button></form>' +
     '<footer class="nx-foot"><button class="nx-me-b" data-nx="whoask">👤 ' + esc(PROFILE ? PROFILE.name : (es ? 'Invitado' : 'Guest')) + ' · ' + esc(es ? 'cambiar' : 'switch') + '</button><span>🧠 ' + esc(es ? 'Conocimiento aprendido: ' : 'Learned knowledge: ') + '<b>' + n + '</b></span>' +
@@ -357,13 +360,27 @@ function nxMsg(who, text, extra) {
   var d = document.createElement('div'); d.className = 'nx-msg nx-' + who; d.innerHTML = '<p>' + esc(text) + '</p>' + (extra || '');
   log.appendChild(d); log.scrollTop = log.scrollHeight;
 }
-function nxBot(text, src, by, q, act, extra) {
-  var es = LANG === 'es', lab = act === 'lang' ? '🌐 ' + (es ? 'Switch to English' : 'Cambiar a español') : act === 'who' ? '👤 ' + (es ? 'Mi nombre y mi avance' : 'My name and progress') : '▶ ' + (es ? 'Abrir ahora' : 'Open now');
+/* The chat stays brief: a long answer shows its first lines and NEXUS says
+   the whole thing out loud; "Read all" brings the full text when wanted. */
+function nxShort(t) {
+  if (t.length <= 190) return t;
+  var parts = t.split(/([.!?»”]\s+)/), out = '';
+  for (var i = 0; i < parts.length; i += 2) {
+    var nxt = out + parts[i] + (parts[i + 1] || '');
+    if (out && nxt.length > 170) break;
+    out = nxt;
+  }
+  return out.trim();
+}
+function nxBot(text, src, by, q, act, extra, full) {
+  var es = LANG === 'es', lab = act === 'lang' ? '🌐 ' + (es ? 'English' : 'Español') : act === 'who' ? '👤 ' + (es ? 'Mi nombre' : 'My name') : '▶ ' + (es ? 'Abrir' : 'Open');
+  if (!full) { full = text; text = nxShort(text); }
+  var more = full !== text ? '<button class="nx-more" data-nx="more">' + esc(es ? 'Leer todo' : 'Read all') + '</button><span class="nx-full" hidden>' + esc(full) + '</span>' : '';
   var go = act ? '<button class="nx-go" data-nx="go" data-v="' + act + '">' + esc(lab) + '</button>' : '', tag = src === 'learned' ? '<span class="nx-src">🧠 ' + esc(es ? 'Aprendido' : 'Learned') + (by ? ' · ' + esc(by) : '') + '</span>' : '';
-  var fix = q ? '<button class="nx-fix" data-nx="fix" data-q="' + esc(q) + '">' + esc(es ? 'Corregir o mejorar esta respuesta' : 'Correct or improve this answer') + '</button>' : '';
-  nxMsg('bot', text, go + (extra || '') + tag + fix);
+  var fix = q ? '<button class="nx-fix" data-nx="fix" data-q="' + esc(q) + '">' + esc(es ? 'Corregir' : 'Correct') + '</button>' : '';
+  nxMsg('bot', text, more + go + (extra || '') + tag + fix);
   /* with the chat open the text is already on screen: speak it, skip the caption */
-  if (typeof voiceSay === 'function') voiceSay('nexus', text, { noCap: NX.open });
+  if (typeof voiceSay === 'function') voiceSay('nexus', full, { noCap: NX.open });
 }
 
 function nxAsk(text) {
@@ -374,12 +391,12 @@ function nxAsk(text) {
   nxMsg('me', q);
   var r = nxAnswer(q);
   if (r && r.partial) {
-    nxBot((LANG === 'es' ? 'No lo sé con certeza. Lo más cercano que sé: ' : 'I am not sure. The closest thing I know: ') + r.text + (LANG === 'es' ? ' ¿Me enseñas la respuesta exacta?' : ' Will you teach me the exact answer?'), 'rule');
+    nxBot(LANG === 'es' ? 'No estoy seguro. ¿Me enseñas la respuesta?' : 'I am not sure. Will you teach me the answer?', 'rule', '', '', '', '', (LANG === 'es' ? 'No lo sé con certeza. Lo más cercano que sé: ' : 'I am not sure. The closest thing I know: ') + r.text);
     nxTeachBox(q);
     return;
   }
-  if (r) { nxBot(r.text, r.src, r.by, q, r.act); return; }
-  nxBot(LANG === 'es' ? 'Todavía no lo sé. ¿Me lo enseñas? Escribe la respuesta y la recordaré para la próxima vez.' : 'I do not know that yet. Will you teach me? Type the answer and I will remember it next time.', 'rule');
+  if (r) { nxBot(r.short || r.text, r.src, r.by, q, r.act, '', r.short ? r.text : ''); return; }
+  nxBot(LANG === 'es' ? 'Eso aún no lo sé. ¿Me lo enseñas?' : 'I do not know that yet. Will you teach me?', 'rule');
   nxTeachBox(q);
 }
 
@@ -463,6 +480,7 @@ function nxClick(e) {
   if (a === 'close') nxClose();
   else if (a === 'chip') nxAsk(b.textContent);
   else if (a === 'ask') nxAsk(b.getAttribute('data-q'));
+  else if (a === 'more') { var bub = b.parentNode; bub.querySelector('p').textContent = bub.querySelector('.nx-full').textContent; b.remove(); }
   else if (a === 'lang') document.getElementById('lang-toggle').click();
   else if (a === 'who') { var pl = profList().filter(function (p) { return p.id === b.getAttribute('data-v'); })[0]; if (pl) nxWhoEnter(pl.name); }
   else if (a === 'whoask') nxWhoAsk();

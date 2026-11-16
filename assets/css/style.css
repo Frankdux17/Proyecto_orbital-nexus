@@ -1886,3 +1886,9 @@ body:has(.tour-back:not([hidden])) .nx.mini{display:none}
 /* while the crew dialog is open, captions go to the top so they never cover its buttons */
 body:has(#crew:not([hidden])) .vcap{top:64px;bottom:auto;left:50%;right:auto;transform:translate(-50%,0)}
 @media (max-height:760px){.tour.crew .tour-art{display:none}.tour.crew{padding-top:22px}}
+/* NEXUS chat kept brief: short lines, "read all" on demand */
+.nx-more{display:inline-block;margin:6px 8px 0 0;border:0;background:none;color:#4fd1e0;font:700 12px inherit;cursor:pointer;padding:0;text-decoration:underline}
+.nx-hint{margin:6px 0 0!important;font-size:11.5px;color:#9fb0d0}
+.nx-msg{font-size:14.5px}
+.nx-go{font-size:13px;padding:8px 14px}
+.nx-chip{font-size:12.5px;padding:6px 12px}
