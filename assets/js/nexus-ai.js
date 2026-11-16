@@ -222,8 +222,8 @@ function nxBoot(known) {
 
 /* said out loud; the chat itself only shows a short greeting */
 function nxWelcomeText() {
-  return LANG === 'es' ? 'Bienvenido a ORBITAL NEXUS. Soy NEXUS y estoy aquí para guiarte y ayudarte. Si quieres te doy una introducción del proyecto: qué hace, cómo se usa y qué opciones tiene. Dime tu nombre y guardo tu avance. Si prefieres inglés, cambia el idioma arriba a la derecha. Cualquier cosa que no sepas, solo dímelo: yo te guío.'
-    : 'Welcome to ORBITAL NEXUS. I am NEXUS and I am here to guide you and help you. If you like, I can introduce the project: what it does, how to use it and what options it has. Tell me your name and I will save your progress. If you prefer Spanish, switch language at the top right. Anything you do not know, just tell me: I will guide you.';
+  return LANG === 'es' ? 'Bienvenido a ORBITAL NEXUS. Soy NEXUS y estoy aquí para guiarte y ayudarte. Si quieres te doy una introducción del proyecto: qué hace, cómo se usa y qué opciones tiene. Puedes avanzar ya, o decirme tu nombre para reconocerte y guardar tu avance, sin contraseña. Si prefieres inglés, cambia el idioma arriba a la derecha. Cualquier cosa que no sepas, solo dímelo: yo te guío.'
+    : 'Welcome to ORBITAL NEXUS. I am NEXUS and I am here to guide you and help you. If you like, I can introduce the project: what it does, how to use it and what options it has. You can go ahead right away, or tell me your name so I recognise you and save your progress, with no password. If you prefer Spanish, switch language at the top right. Anything you do not know, just tell me: I will guide you.';
 }
 function nxBtn(nx, label, attr) { return '<button class="nx-go" data-nx="' + nx + '"' + (attr || '') + '>' + esc(label) + '</button>'; }
 /* the first things a newcomer usually wants */
@@ -248,15 +248,16 @@ function nxGreet() {
 /* ---------- who is exploring: a name picks the saved game, no password ---------- */
 function nxWhoAsk() {
   var es = LANG === 'es', list = profList().sort(function (a, b) { return (b.seen || 0) - (a.seen || 0); });
-  var txt = list.length ? (es ? '¿Quién explora ahora?' : 'Who is exploring now?') : (es ? '¿Cómo te llamas?' : 'What is your name?');
+  var txt = list.length ? (es ? '¿Quién explora ahora? Toca tu nombre, escribe uno nuevo o avanza sin nombre.' : 'Who is exploring now? Tap your name, type a new one, or go ahead without one.')
+    : (es ? '¿Avanzas ya, o me dices tu nombre para reconocerte y guardar tu avance?' : 'Go ahead now, or tell me your name so I recognise you and save your progress?');
   var h = '';
   if (list.length) h += '<div class="nx-who">' + list.map(function (p) {
     return '<button class="nx-whob' + (PROFILE && PROFILE.id === p.id ? ' on' : '') + '" data-nx="who" data-v="' + p.id + '"><b>👤 ' + esc(p.name) + '</b><small>' + esc(profSummaryText(profSummary(p.id))) + '</small></button>';
   }).join('') + '</div>';
   h += '<form class="nx-who-form"><input type="text" maxlength="28" autocomplete="off" placeholder="' + esc(es ? 'Escribe tu nombre' : 'Type your name') + '" aria-label="' + esc(es ? 'Tu nombre' : 'Your name') + '">' +
     '<button type="submit" class="nx-go">' + esc(es ? 'Entrar' : 'Enter') + '</button></form>' +
-    '<p class="nx-hint">' + esc(es ? 'Guardo tu avance con tu nombre. Sin contraseña.' : 'I save your progress under your name. No password.') + '</p>' +
-    '<button class="nx-fix" data-nx="guest">' + esc(es ? 'Seguir sin nombre' : 'Continue without a name') + '</button>';
+    '<div class="nx-acts">' + nxBtn('guest', es ? '▶ Avanzar sin nombre' : '▶ Go ahead without a name') + '</div>' +
+    '<p class="nx-hint">' + esc(es ? 'Acceso libre: sin contraseña ni registro. Con tu nombre sigues donde lo dejaste cuando vuelvas.' : 'Free access: no password, no sign-up. With your name you pick up where you left off when you return.') + '</p>';
   nxMsg('bot', txt, h);
 }
 function nxWhoEnter(name) {
@@ -304,7 +305,7 @@ function nxGuest() {
   profGuest(); NX.asked = true;
   if (typeof render === 'function') render();
   nxPaint();
-  nxBot(LANG === 'es' ? 'De acuerdo, sigues como invitado. Tu nombre lo pones cuando quieras con 👤.' : 'All right, you continue as a guest. Add your name any time with 👤.', 'rule', '', '', '', nxStartBtns(false, S.phase === 0));
+  nxBot(LANG === 'es' ? 'Adelante. Si luego quieres guardar tu avance, pon tu nombre con 👤.' : 'Go ahead. If you want to save your progress later, add your name with 👤.', 'rule', '', '', '', nxStartBtns(false, S.phase === 0));
 }
 /* the name on the top bar */
 function whoPaint() {

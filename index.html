@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -18,25 +18,25 @@
 <canvas id="starfield" aria-hidden="true"></canvas>
 
 <header class="topbar">
-  <div class="brand" role="link" tabindex="0" title="Inicio · Home">
+  <div class="brand" role="link" tabindex="0" title="Home · Inicio">
     <img class="brand-logo" src="assets/img/logo-mark.png" alt="" width="90" height="34">
     <div class="brand-text">
       <strong>ORBITAL NEXUS</strong>
-      <span id="brand-sub">Simulador de diseño de misiones</span>
+      <span id="brand-sub">Mission design simulator</span>
     </div>
   </div>
 
   <nav class="stepper" id="stepper" aria-label="Mission phases"></nav>
 
   <div class="topbar-right">
-    <button class="lab-top" id="lab-top" type="button" data-act="lab" title="Laboratorio de ingeniería · Engineering lab">
+    <button class="lab-top" id="lab-top" type="button" data-act="lab" title="Engineering lab · Laboratorio de ingeniería">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6M10 3v6l-5.5 9.2A2 2 0 0 0 6.2 21h11.6a2 2 0 0 0 1.7-2.8L14 9V3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M7.5 15h9" stroke="currentColor" stroke-width="1.7"/></svg>
-      <span id="lab-top-txt">Laboratorio</span>
+      <span id="lab-top-txt">Lab</span>
     </button>
-    <button class="who-btn" id="who-btn" type="button" data-act="who" title="Tu nombre y tu avance · Your name and progress"><span aria-hidden="true">👤</span><b id="who-name">Invitado</b></button>
-    <button class="icon-btn nx-btn" type="button" data-act="nexus" aria-label="NEXUS" title="Pregunta a NEXUS · Ask NEXUS">🛰️</button>
-    <button class="icon-btn crew-btn" type="button" data-act="crew" aria-label="Tripulación · Crew" title="Tripulación y voces · Crew and voices">👩‍🚀</button>
-    <button class="icon-btn help-btn" type="button" data-act="tour" aria-label="Ayuda · Help" title="Cómo se juega · How to play">?</button>
+    <button class="who-btn" id="who-btn" type="button" data-act="who" title="Your name and progress · Tu nombre y tu avance"><span aria-hidden="true">👤</span><b id="who-name">Guest</b></button>
+    <button class="icon-btn nx-btn" type="button" data-act="nexus" aria-label="NEXUS" title="Ask NEXUS · Pregunta a NEXUS">🛰️</button>
+    <button class="icon-btn crew-btn" type="button" data-act="crew" aria-label="Crew · Tripulación" title="Crew and voices · Tripulación y voces">👩‍🚀</button>
+    <button class="icon-btn help-btn" type="button" data-act="tour" aria-label="Help · Ayuda" title="How to play · Cómo se juega">?</button>
     <button class="icon-btn" id="snd-toggle" type="button" aria-label="Sound">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path class="snd-on" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path class="snd-off" d="M16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
     </button>

@@ -1,6 +1,8 @@
 /* ORBITAL NEXUS — bilingual string table (ES / EN) */
-var LANG = 'es';
-try { LANG = localStorage.getItem('on_lang') || ((navigator.language || 'es').toLowerCase().indexOf('en') === 0 ? 'en' : 'es'); } catch (e) { LANG = 'es'; }
+/* The page opens in English (the Space Apps jury reads English); ES / EN
+   switches to Spanish and the choice is remembered on that browser. */
+var LANG = 'en';
+try { LANG = localStorage.getItem('on_lang') === 'es' ? 'es' : 'en'; } catch (e) { LANG = 'en'; }
 
 /* L({es:'',en:''}) -> localized string */
 function L(o) { if (o == null) return ''; if (typeof o === 'string') return o; return o[LANG] != null ? o[LANG] : (o.en || o.es || ''); }

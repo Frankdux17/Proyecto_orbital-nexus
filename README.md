@@ -5,8 +5,8 @@
 **▶ Play / Jugar:** https://frankdux17.github.io/Proyecto_orbital-nexus/ ·
 **One-click demo / Demo rápida:** https://frankdux17.github.io/Proyecto_orbital-nexus/#demo
 
-Everything runs on the website: no install, no sign-in, Spanish and English, phone and PC.
-Todo funciona en la web: sin instalar, sin registrarse, en español e inglés, en celular y PC.
+Everything runs on the website: no install, no sign-in, no password; it opens in English and switches to Spanish with ES / EN; phone and PC.
+Todo funciona en la web: sin instalar, sin registrarse y sin contraseña; abre en inglés y pasa a español con ES / EN; en celular y PC.
 
 **An interactive space mission design game.** Pick a destination, build the spacecraft,
 fight for every watt and every gigabit, then operate the mission turn by turn while
