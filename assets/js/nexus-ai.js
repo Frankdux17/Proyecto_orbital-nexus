@@ -247,19 +247,53 @@ function nxGreet() {
 
 /* ---------- who is exploring: a name picks the saved game, no password ---------- */
 function nxWhoAsk() {
-  var es = LANG === 'es', list = profList().sort(function (a, b) { return (b.seen || 0) - (a.seen || 0); });
-  var txt = list.length ? (es ? '¿Quién explora ahora? Toca tu nombre, escribe uno nuevo o avanza sin nombre.' : 'Who is exploring now? Tap your name, type a new one, or go ahead without one.')
-    : (es ? '¿Avanzas ya, o me dices tu nombre para reconocerte y guardar tu avance?' : 'Go ahead now, or tell me your name so I recognise you and save your progress?');
-  var h = '';
-  if (list.length) h += '<div class="nx-who">' + list.map(function (p) {
-    return '<button class="nx-whob' + (PROFILE && PROFILE.id === p.id ? ' on' : '') + '" data-nx="who" data-v="' + p.id + '"><b>👤 ' + esc(p.name) + '</b><small>' + esc(profSummaryText(profSummary(p.id))) + '</small></button>';
-  }).join('') + '</div>';
-  h += '<form class="nx-who-form"><input type="text" maxlength="28" autocomplete="off" placeholder="' + esc(es ? 'Escribe tu nombre' : 'Type your name') + '" aria-label="' + esc(es ? 'Tu nombre' : 'Your name') + '">' +
+  var es = LANG === 'es', n = profList().length;
+  var txt = es ? '¿Avanzas ya, o me dices tu nombre para reconocerte y guardar tu avance?' : 'Go ahead now, or tell me your name so I recognise you and save your progress?';
+  var h = '<form class="nx-who-form"><input type="text" maxlength="28" autocomplete="off" placeholder="' + esc(es ? 'Escribe tu nombre' : 'Type your name') + '" aria-label="' + esc(es ? 'Tu nombre' : 'Your name') + '">' +
     '<button type="submit" class="nx-go">' + esc(es ? 'Entrar' : 'Enter') + '</button></form>' +
-    '<div class="nx-acts">' + nxBtn('guest', es ? '▶ Avanzar sin nombre' : '▶ Go ahead without a name') + '</div>' +
-    '<p class="nx-hint">' + esc(es ? 'Acceso libre: sin contraseña ni registro. Con tu nombre sigues donde lo dejaste cuando vuelvas.' : 'Free access: no password, no sign-up. With your name you pick up where you left off when you return.') + '</p>';
+    '<div class="nx-acts">' + (n ? nxBtn('whodlg', '👤 ' + (es ? 'Ya estuve aquí' : 'I was here before') + ' (' + n + ')') : '') +
+    nxBtn('guest', es ? '▶ Avanzar sin nombre' : '▶ Go ahead without a name') + '</div>' +
+    '<p class="nx-hint">' + esc(es ? 'Acceso libre: sin contraseña ni registro.' : 'Free access: no password, no sign-up.') + '</p>';
   nxMsg('bot', txt, h);
 }
+
+/* ---------- explorers panel: every saved name in one place (👤 on the top bar) ---------- */
+function whoOpen() {
+  var root = document.getElementById('who');
+  if (!root) {
+    root = document.createElement('div'); root.id = 'who'; root.className = 'tour-back'; root.setAttribute('role', 'dialog'); root.setAttribute('aria-modal', 'true');
+    document.body.appendChild(root);
+    root.addEventListener('submit', function (e) { e.preventDefault(); var v = root.querySelector('.who-form input').value; if (profNorm(v)) { whoClose(); nxOpen(true); nxWhoEnter(v); } });
+    root.addEventListener('click', function (e) {
+      var b = e.target.closest ? e.target.closest('[data-who]') : null;
+      if (!b) { if (e.target === root) whoClose(); return; }
+      var a = b.getAttribute('data-who');
+      if (a === 'close') whoClose();
+      else if (a === 'guest') { whoClose(); nxOpen(true); nxGuest(); }
+      else if (a === 'pick') { var p = profList().filter(function (x) { return x.id === b.getAttribute('data-v'); })[0]; if (p) { whoClose(); nxOpen(true); nxWhoEnter(p.name); } }
+    });
+  }
+  if (NX.open) nxMini(true);
+  root.hidden = false; OVERLAY_OPEN = true;
+  whoDlgPaint();
+}
+function whoClose() { var r = document.getElementById('who'); if (r) r.hidden = true; OVERLAY_OPEN = false; }
+function whoDlgPaint() {
+  var root = document.getElementById('who'), es = LANG === 'es', list = profList().sort(function (a, b) { return (b.seen || 0) - (a.seen || 0); }), rows = '';
+  list.forEach(function (p) {
+    var me = PROFILE && PROFILE.id === p.id, d = p.seen ? new Date(p.seen).toLocaleDateString(es ? 'es' : 'en', { day: 'numeric', month: 'short' }) : '';
+    rows += '<button class="who-card' + (me ? ' on' : '') + '" data-who="pick" data-v="' + p.id + '"><b>👤 ' + esc(p.name) + (me ? '<i>' + esc(es ? 'tú' : 'you') + '</i>' : '') + '<small>' + esc(d) + '</small></b><span>' + esc(profSummaryText(profSummary(p.id))) + '</span></button>';
+  });
+  root.innerHTML = '<div class="tour who" tabindex="-1"><button class="icon-btn tour-x" data-who="close" aria-label="' + esc(es ? 'Cerrar' : 'Close') + '">' + icon('close', 'ico') + '</button>' +
+    '<span class="tour-k">' + esc(es ? 'Exploradores' : 'Explorers') + '</span><h2>' + esc(es ? '¿Quién explora ahora?' : 'Who is exploring now?') + '</h2>' +
+    '<p>' + esc(list.length ? (es ? 'Toca tu nombre para seguir donde te quedaste. Acceso libre, sin contraseña.' : 'Tap your name to carry on where you left off. Free access, no password.')
+      : (es ? 'Aún no hay nombres guardados en este equipo. Escribe el tuyo para guardar tu avance, sin contraseña.' : 'No names saved on this device yet. Type yours to save your progress, with no password.')) + '</p>' +
+    (list.length ? '<div class="who-list">' + rows + '</div>' : '') +
+    '<form class="who-form"><input type="text" maxlength="28" autocomplete="off" placeholder="' + esc(es ? 'Nombre nuevo' : 'New name') + '" aria-label="' + esc(es ? 'Nombre nuevo' : 'New name') + '">' +
+    '<button type="submit" class="btn primary">' + esc(es ? 'Entrar' : 'Enter') + '</button></form>' +
+    '<div class="tour-btns"><button class="btn ghost" data-who="guest">' + esc(es ? 'Avanzar sin nombre' : 'Go ahead without a name') + '</button></div></div>';
+}
+
 function nxWhoEnter(name) {
   var r = profEnter(name);
   if (!r) return;
@@ -484,7 +518,7 @@ function nxClick(e) {
   else if (a === 'more') { var bub = b.parentNode; bub.querySelector('p').textContent = bub.querySelector('.nx-full').textContent; b.remove(); }
   else if (a === 'lang') document.getElementById('lang-toggle').click();
   else if (a === 'who') { var pl = profList().filter(function (p) { return p.id === b.getAttribute('data-v'); })[0]; if (pl) nxWhoEnter(pl.name); }
-  else if (a === 'whoask') nxWhoAsk();
+  else if (a === 'whoask' || a === 'whodlg') whoOpen();
   else if (a === 'guest') nxGuest();
   else if (a === 'cont') nxCont();
   else if (a === 'zero') nxZero(false);
@@ -504,7 +538,7 @@ function nxClick(e) {
 
 function nxGo(act) {
   if (act === 'lang') { document.getElementById('lang-toggle').click(); return; }
-  if (act === 'who') { nxWhoAsk(); return; }
+  if (act === 'who') { whoOpen(); return; }
   nxMini(true);
   var b = document.createElement('button');
   b.setAttribute('data-act', act);

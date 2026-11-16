@@ -1410,7 +1410,7 @@ function wire() {
     if (act === 'portal') { portalOpen(); return; }
     if (act === 'crew') { crewOpen(); return; }
     if (act === 'nexus') { if (NX.open) nxClose(); else nxOpen(); return; }
-    if (act === 'who') { nxOpen(); nxWhoAsk(); return; }
+    if (act === 'who') { whoOpen(); return; }
     if (act === 'whoenter') { var wl = profList().filter(function (p) { return p.id === el.getAttribute('data-v'); })[0]; if (wl) { nxOpen(true); nxWhoEnter(wl.name); } return; }
     if (act === 'fix') { applyFix(el.getAttribute('data-v')); return; }
     if (act === 'diff') { S.diff = el.getAttribute('data-v'); setPref('on_diff', S.diff); render(); return; }

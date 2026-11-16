@@ -1892,3 +1892,12 @@ body:has(#crew:not([hidden])) .vcap{top:64px;bottom:auto;left:50%;right:auto;tra
 .nx-msg{font-size:14.5px}
 .nx-go{font-size:13px;padding:8px 14px}
 .nx-chip{font-size:12.5px;padding:6px 12px}
+/* explorers panel: all saved names in one scrolling list, out of the chat */
+.tour.who{width:min(520px,100%);max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);display:flex;flex-direction:column;text-align:left;padding-top:24px}
+.tour.who h2{margin-right:40px}
+.who-list{display:grid;gap:8px;overflow-y:auto;min-height:72px;margin:0 0 14px;padding-right:4px}
+.who-list .who-card b small{margin-left:auto;font-weight:500;font-size:11.5px;color:var(--txt-faint)}
+.who-form{display:flex;gap:8px;margin-bottom:12px}
+.who-form input{flex:1;min-width:0;padding:10px 12px;border-radius:10px;border:1px solid var(--line-strong);background:var(--panel-2);color:var(--txt);font:inherit}
+.who-form input:focus{outline:none;border-color:var(--accent)}
+.tour.who .tour-btns{justify-content:flex-start}
