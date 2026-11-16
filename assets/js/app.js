@@ -225,8 +225,9 @@ function viewSplash() {
     visionPanel() +
     '<div class="splash-sec"><h2>' + esc(es ? 'Elige tu nivel' : 'Choose your level') + '</h2>' +
     '<div class="diffs" role="group" aria-label="' + esc(es ? 'Dificultad' : 'Difficulty') + '">' + dh + '</div>' +
-    '<p class="splash-note">' + esc(es ? 'Tu progreso se guarda solo: puedes dejar la misión en un descanso y retomarla después. Atajos: Enter avanza, 1–4 responde a una anomalía.'
-      : 'Progress saves itself: leave the mission during a break and pick it up later. Shortcuts: Enter advances, 1–4 answers an anomaly.') + '</p></div>' +
+    '<p class="splash-note">' + esc(es ? 'Tu progreso se guarda solo y con tu nombre: puedes dejar la misión en un descanso y retomarla después, y otra persona puede jugar la suya sin borrar la tuya. Atajos: Enter avanza, 1–4 responde a una anomalía.'
+      : 'Progress saves itself under your name: leave the mission during a break and pick it up later, and someone else can play theirs without erasing yours. Shortcuts: Enter advances, 1–4 answers an anomaly.') + '</p></div>' +
+    whoPanel() +
     teamStrip() +
     '<div class="splash-sec"><h2>' + esc(es ? 'Explora los destinos en 3D' : 'Explore the destinations in 3D') + '</h2>' +
     '<p>' + esc(es ? 'Toca un destino para ver su trayectoria, cada fase del ciclo de vida de una misión (al estilo de CubeSat 101) y probarla con un visor de realidad virtual tipo Cardboard.'
@@ -1340,6 +1341,8 @@ function render() {
   if (LAST_PHASE !== S.phase) window.scrollTo(0, 0);
   LAST_PHASE = S.phase;
   saveGame();
+  document.body.classList.toggle('nav-on', !$('navbar').hidden);
+  if (typeof whoPaint === 'function') whoPaint();
   if (S.phase === 6) vizStart();
   try { voiceAfterRender(c); } catch (e) { }
   celebrateCheck();
@@ -1382,6 +1385,7 @@ function applyRange(k, v) {
   } else S[k] = v;
 }
 
+var STEP_ASIDE = ['start', 'tour', 'quickdemo', 'drone', 'scan', 'portal', 'crew', 'lab', 'demo', 'explore', 'practice', 'resume', 'share'];
 var SIZING_KEYS = ['arrayArea', 'rtgUnits', 'batteryWh', 'propellantKg'];
 function wire() {
   document.addEventListener('click', function (e) {
@@ -1389,6 +1393,8 @@ function wire() {
     var el = e.target.closest ? e.target.closest('[data-act]') : null;
     if (!el) return;
     var act = el.getAttribute('data-act');
+    /* a screen is about to open: NEXUS steps aside and stays as a pill */
+    if (NX.open && STEP_ASIDE.indexOf(act) >= 0) nxMini(true);
     if (act === 'start') {
       var d0 = S.diff; clearSave(); S = freshState(); S.diff = d0; enterPhase(1);
       if (!pref('on_tour', '')) tourOpen();
@@ -1404,6 +1410,8 @@ function wire() {
     if (act === 'portal') { portalOpen(); return; }
     if (act === 'crew') { crewOpen(); return; }
     if (act === 'nexus') { if (NX.open) nxClose(); else nxOpen(); return; }
+    if (act === 'who') { nxOpen(); nxWhoAsk(); return; }
+    if (act === 'whoenter') { var wl = profList().filter(function (p) { return p.id === el.getAttribute('data-v'); })[0]; if (wl) { nxOpen(true); nxWhoEnter(wl.name); } return; }
     if (act === 'fix') { applyFix(el.getAttribute('data-v')); return; }
     if (act === 'diff') { S.diff = el.getAttribute('data-v'); setPref('on_diff', S.diff); render(); return; }
     if (act === 'resume') { resumeGame(); return; }
@@ -1490,6 +1498,7 @@ function wire() {
     document.documentElement.lang = LANG;
     if (S.pendingEvent) showEvent(S.pendingEvent, comp());
     render();
+    nxLang();
   });
 }
 
@@ -1510,6 +1519,7 @@ function resumeGame() {
  * boot                                                             *
  * ---------------------------------------------------------------- */
 injectArt();
+var KNOWN = profRestore(), DEEP = /#(d=|demo)/.test(location.hash);
 S = freshState();
 starfield();
 wire();
@@ -1521,3 +1531,5 @@ if (!loadShared()) {
   /* index.html#demo opens the ready-made mission */
   if (location.hash === '#demo') { history.replaceState(null, '', location.href.split('#')[0]); quickDemo(); }
 }
+/* NEXUS welcomes every visitor; on a shared or demo link it waits as a pill */
+nxBoot(KNOWN || DEEP);

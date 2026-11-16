@@ -1,7 +1,96 @@
 /* ORBITAL NEXUS — game feel: sound, badges, toasts, autosave, difficulty, keyboard */
 
-function pref(k, def) { try { var v = localStorage.getItem(k); return v == null ? def : v; } catch (e) { return def; } }
-function setPref(k, v) { try { localStorage.setItem(k, v); } catch (e) { } }
+/* ---------------------------------------------------------------- *
+ * explorers — several people use the same screen, so each one keeps *
+ * a separate game under their name. No password, no account: the    *
+ * name only picks which saved progress to load. Everything below in *
+ * PROFILE_KEYS is stored once per explorer; language, sound and     *
+ * what NEXUS learned are shared by everyone on this browser.        *
+ * ---------------------------------------------------------------- */
+var PROFILE_KEYS = ['on_save', 'on_badges', 'on_dests', 'on_crew', 'on_portal', 'on_scan_lv', 'on_tour', 'on_diff', 'on_ascent_help'];
+var PROFILE = null;   /* { id, name } or null for a guest */
+function pkey(k, id) {
+  if (id === undefined) id = PROFILE ? PROFILE.id : '';
+  return id && PROFILE_KEYS.indexOf(k) >= 0 ? k + '::' + id : k;
+}
+function pref(k, def) { try { var v = localStorage.getItem(pkey(k)); return v == null ? def : v; } catch (e) { return def; } }
+function setPref(k, v) { try { localStorage.setItem(pkey(k), v); } catch (e) { } }
+
+function profNorm(s) {
+  return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, ' ').trim().replace(/ /g, '-');
+}
+function profList() {
+  try { var l = JSON.parse(localStorage.getItem('on_profiles')); return Array.isArray(l) ? l : []; } catch (e) { return []; }
+}
+function profStore(l) { try { localStorage.setItem('on_profiles', JSON.stringify(l)); } catch (e) { } }
+function profTab(v) {
+  try {
+    if (v === undefined) return sessionStorage.getItem('on_profile_tab');
+    sessionStorage.setItem('on_profile_tab', v);
+  } catch (e) { }
+  return null;
+}
+/* what one explorer has done so far; id '' is the guest */
+function profSummary(id) {
+  function g(k) { try { return JSON.parse(localStorage.getItem(pkey(k, id || ''))); } catch (e) { return null; } }
+  function count(o) { var n = 0; for (var k in (o || {})) if (o[k]) n++; return n; }
+  var sv = g('on_save');
+  var s = { save: sv && sv.phase > 0 ? sv : null, badges: count(g('on_badges')), scan: count(g('on_scan_lv')), portal: count(g('on_portal')), dests: (g('on_dests') || []).length };
+  s.any = !!(s.save || s.badges || s.scan || s.portal);
+  return s;
+}
+function profSummaryText(s) {
+  var es = LANG === 'es', p = [];
+  if (s.save) {
+    var d = DATA.find(DATA.destinations, s.save.destId);
+    p.push((es ? 'misión en fase ' : 'mission in phase ') + Math.min(s.save.phase, 7) + (es ? ' de 7, ' : ' of 7, ') + t(STEPS[Math.min(s.save.phase, 7) - 1]).toLowerCase() +
+      (d ? (es ? ', rumbo a ' : ', bound for ') + L(d.name) : '') + (s.save.phase === 6 ? (es ? ', turno ' : ', turn ') + s.save.turn : ''));
+  }
+  if (s.badges) p.push(s.badges + (es ? ' de ' : ' of ') + BADGES.length + (es ? ' insignias' : ' badges'));
+  if (s.scan) p.push((es ? 'escáner: ' : 'scanner: ') + s.scan + (es ? ' de 5 niveles' : ' of 5 levels'));
+  if (s.portal) p.push((es ? 'portal: ' : 'portal: ') + s.portal + (es ? ' de 4 rescates' : ' of 4 rescues'));
+  return p.length ? p.join(' · ') : (es ? 'sin avance todavía' : 'no progress yet');
+}
+/* enter as this name: a known name loads its game, a new one starts clean.
+   A guest who types a name in the middle of a mission keeps that mission. */
+function profEnter(name) {
+  name = String(name || '').replace(/[<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 28);
+  var id = profNorm(name);
+  if (!id) return null;
+  var list = profList(), p = null;
+  for (var i = 0; i < list.length; i++) if (list[i].id === id) p = list[i];
+  if (p && PROFILE && PROFILE.id === id) return { isNew: false, same: true };   /* already playing as this name */
+  var isNew = !p, carry = isNew && !PROFILE && S && S.phase > 0;
+  if (!carry && S && S.phase > 0) saveGame();
+  if (isNew) { p = { id: id, name: name, created: Date.now() }; list.push(p); }
+  p.seen = Date.now();
+  profStore(list);
+  PROFILE = { id: id, name: p.name };
+  profTab(id);
+  if (isNew) setPref('on_crew', JSON.stringify({ cmd: name }));
+  if (carry) { try { localStorage.removeItem('on_save'); } catch (e) { } saveGame(); }
+  else S = freshState();
+  return { isNew: isNew, carried: carry };
+}
+/* go back to playing without a name */
+function profGuest() {
+  if (S && S.phase > 0) saveGame();
+  PROFILE = null; profTab('-');
+  S = freshState();
+}
+/* same tab, page reloaded: keep whoever was playing */
+function profRestore() {
+  var id = profTab();
+  if (!id) return false;
+  if (id === '-') return true;
+  var list = profList();
+  for (var i = 0; i < list.length; i++) if (list[i].id === id) { PROFILE = { id: id, name: list[i].name }; return true; }
+  return false;
+}
+/* erase one explorer's progress (the name stays in the list) */
+function profWipe(id) {
+  PROFILE_KEYS.forEach(function (k) { if (k !== 'on_crew') { try { localStorage.removeItem(pkey(k, id || '')); } catch (e) { } } });
+}
 
 /* ---------------------------------------------------------------- *
  * difficulty — three levels, like the NASA telescope game           *
@@ -91,7 +180,7 @@ function toast(html, cls) {
 }
 
 /* ---------------------------------------------------------------- *
- * badges — kept per viewer in localStorage                          *
+ * badges — kept per explorer in localStorage                        *
  * ---------------------------------------------------------------- */
 var BADGES = [
   { id: 'liftoff', icon: '🚀', name: { es: 'Despegue', en: 'Liftoff' }, desc: { es: 'Lanza una misión con éxito.', en: 'Launch a mission successfully.' } },
@@ -179,16 +268,16 @@ function checkEndBadges(c, sc) {
  * ---------------------------------------------------------------- */
 function saveGame() {
   try {
-    if (S.phase > 0) localStorage.setItem('on_save', JSON.stringify(S));
+    if (S.phase > 0) localStorage.setItem(pkey('on_save'), JSON.stringify(S));
   } catch (e) { }
 }
 function loadSave() {
   try {
-    var s = JSON.parse(localStorage.getItem('on_save'));
+    var s = JSON.parse(localStorage.getItem(pkey('on_save')));
     return s && s.phase > 0 ? s : null;
   } catch (e) { return null; }
 }
-function clearSave() { try { localStorage.removeItem('on_save'); } catch (e) { } }
+function clearSave() { try { localStorage.removeItem(pkey('on_save')); } catch (e) { } }
 
 /* ---------------------------------------------------------------- *
  * keyboard: Enter advances, 1–4 picks an event response             *

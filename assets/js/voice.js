@@ -58,7 +58,7 @@ function voicePick(male) {
 function voiceSay(who, text, opts) {
   opts = opts || {};
   if (!text) return;
-  voiceCaption(who, text);
+  if (!opts.noCap) voiceCaption(who, text);
   if (!voicePref() || !('speechSynthesis' in window)) return;
   try {
     if (!opts.queue) speechSynthesis.cancel();
@@ -167,6 +167,7 @@ function crewOpen() {
     });
   }
   root.hidden = false; OVERLAY_OPEN = true;
+  var cap = document.getElementById('vcap'); if (cap) cap.classList.remove('show');
   crewPaint();
   var f = root.querySelector('input'); if (f) f.focus();
 }

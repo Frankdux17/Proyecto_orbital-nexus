@@ -75,7 +75,7 @@ resembles.
 - **Arrival mini game**: time the orbit insertion burn (or the parachute on Mars). Accuracy saves propellant or improves the landing odds.
 - **Live mission view** during operations: the orbit, the science cone, data packets flowing to Earth and loss of line of sight behind the planet, all driven by your sliders.
 - **Every phase is tagged** with its mission segment (launch, space, ground, user), JPL Concept Maturity Level and Mission Design Lab study type.
-- **11 badges**, sound effects (mutable), keyboard shortcuts and **autosave**, so a mission can be paused on a short break and resumed later.
+- **24 badges**, sound effects (mutable), keyboard shortcuts and **autosave per explorer**, so a mission can be paused on a short break and resumed later.
 
 **The central lesson is deliberately brutal: only data you successfully downlink counts.**
 A spectrometer that fills the memory and never transmits scores exactly zero.
@@ -167,6 +167,14 @@ A spectrometer that fills the memory and never transmits scores exactly zero.
   the catalogue and the glossary, says when it is not sure, and lets a scientist teach it —
   learned knowledge is reused, can be corrected, and exports to JSON for a notebook. Voices and
   speech recognition follow the chosen language (Spanish or English); everything is captioned.
+- **NEXUS welcomes every visitor and each explorer keeps a separate game.** NEXUS is open from
+  the first second: it offers an introduction (what the project does, how to use it, what
+  options it has), points to the ES / EN switch for people who do not read Spanish, and stays
+  as a "Need help?" pill when closed. It asks for a name — no password, no account — and saves
+  the mission, badges, levels and crew under it, so several reviewers can use the same screen
+  without overwriting each other. Returning explorers tap their name, are told where they left
+  off and choose to continue or start from zero; the home screen lists everyone's progress.
+  Saves live in the browser (localStorage) on that device.
 - **Share and play.** “Share my design” creates a link with the whole spacecraft for a classmate
   to open and improve; a new mini game flies a Dragonfly-style drone over Titan's dunes
   (1.35 m/s² gravity, air four times denser than Earth's, a methane lake and an RTG-charged
@@ -397,6 +405,14 @@ Tierra.** Un espectrómetro que llena la memoria y nunca transmite vale exactame
   glosario, dice cuando no está seguro y deja que un científico le enseñe; lo aprendido se
   reutiliza, se puede corregir y se exporta a JSON para un cuaderno. Las voces siguen el idioma
   elegido y todo lleva subtítulos.
+- **NEXUS recibe a cada visitante y cada explorador guarda su propia partida.** NEXUS está
+  abierto desde el primer segundo: ofrece una introducción (qué hace el proyecto, cómo se usa,
+  qué opciones tiene), indica el botón ES / EN a quien no lee español y, al cerrarlo, queda como
+  un botón «¿Te ayudo?». Pide un nombre —sin contraseña ni cuenta— y guarda con él la misión,
+  las insignias, los niveles y la tripulación, así varios revisores usan la misma pantalla sin
+  borrarse entre sí. Quien vuelve toca su nombre, ve dónde se quedó y elige continuar o empezar
+  desde cero; la portada muestra el avance de todos. Se guarda en el navegador (localStorage)
+  de ese equipo.
 - **Comparte y juega.** «Compartir mi diseño» crea un enlace con la nave completa para que un
   compañero la abra y la mejore; un minijuego nuevo vuela un dron tipo Dragonfly sobre las
   dunas de Titán (gravedad de 1,35 m/s², aire cuatro veces más denso, un lago de metano y una
