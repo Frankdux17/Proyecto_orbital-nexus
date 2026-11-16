@@ -262,7 +262,7 @@ menu choice.
 ## Credits
 
 Built for the NASA Space Apps Challenge by **Proyecto ORBITAL NEXUS** —
-**Frank Edelin Piña Irarica**, systems engineer.
+**Frank Edelin Piña Irarica**, Systems Engineering student at Universidad Privada de Trujillo (Peru).
 
 Reference data drawn from public NASA sources — planetary fact sheets, the JPL Deep Space
 Network Telecommunications Link Design Handbook (810-005), NASA radioisotope power system
@@ -460,5 +460,5 @@ cada ecuación, cada constante y cada simplificación consciente del modelo.
 ## Créditos
 
 Desarrollado para el NASA Space Apps Challenge por **Proyecto ORBITAL NEXUS** —
-**Frank Edelin Piña Irarica**, ingeniero de sistemas.
+**Frank Edelin Piña Irarica**, estudiante de Ingeniería de Sistemas de la Universidad Privada de Trujillo (Perú).
 Licencia MIT.
