@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Inicio{% endblock %} · ORBITAL NEXUS</title>
+<link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/webapp.css') }}">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="{{ url_for('home') }}">
+    <img src="{{ url_for('static', filename='img/logo-mark.png') }}" alt="" width="74" height="28">
+    <span><strong>ORBITAL NEXUS</strong><small>Centro de misiones</small></span>
+  </a>
+  <nav class="menu" aria-label="Módulos">
+    <a href="{{ url_for('home') }}" {% if request.endpoint == 'home' %}aria-current="page"{% endif %}>Inicio</a>
+    <a href="{{ url_for('simulator') }}">Simulador</a>
+    {% if g.user %}
+      <a href="{{ url_for('missions.index') }}" {% if request.blueprint == 'missions' %}aria-current="page"{% endif %}>Misiones</a>
+      {% if g.user['role'] == 'admin' %}
+        <a href="{{ url_for('admin.users') }}" {% if request.blueprint == 'admin' %}aria-current="page"{% endif %}>Usuarios</a>
+      {% endif %}
+    {% endif %}
+  </nav>
+  <div class="session">
+    {% if g.user %}
+      <span class="who">{{ g.user['name'] }} <em class="role role-{{ g.user['role'] }}">{{ g.user['role'] }}</em></span>
+      <form method="post" action="{{ url_for('auth.logout') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn ghost" type="submit">Cerrar sesión</button>
+      </form>
+    {% else %}
+      <a class="btn ghost" href="{{ url_for('auth.login') }}">Iniciar sesión</a>
+      <a class="btn primary" href="{{ url_for('auth.register') }}">Crear cuenta</a>
+    {% endif %}
+  </div>
+</header>
+
+<main class="wrap">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flashes" role="status">
+        {% for category, message in messages %}
+          <p class="flash flash-{{ category }}">{{ message }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="foot">
+  ORBITAL NEXUS · NASA Space Apps Challenge 2026 · Python Flask + SQLite ·
+  <a href="https://github.com/Frankdux17/Proyecto_orbital-nexus">Código en GitHub</a>
+</footer>
+<script>
+document.addEventListener('submit', function (ev) {
+  var msg = ev.target.dataset.confirm;
+  if (msg && !window.confirm(msg)) ev.preventDefault();
+});
+</script>
+</body>
+</html>

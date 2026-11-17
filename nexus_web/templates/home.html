@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <div>
+    <p class="eyebrow">NASA Space Apps Challenge 2026 · Space Mission Design Game</p>
+    <h1>Diseña, lanza y opera una misión espacial</h1>
+    <p class="lead">Cada decisión cambia la masa, la potencia, el delta-v, los datos y el presupuesto al mismo tiempo.
+      ORBITAL NEXUS hace visible esa cadena de consecuencias y guarda tus misiones en tu cuenta.</p>
+    <div class="actions">
+      <a class="btn primary" href="{{ url_for('simulator') }}">Abrir el simulador</a>
+      {% if g.user %}
+        <a class="btn ghost" href="{{ url_for('missions.create') }}">Registrar una misión</a>
+      {% else %}
+        <a class="btn ghost" href="{{ url_for('auth.register') }}">Crear cuenta</a>
+      {% endif %}
+    </div>
+  </div>
+  <img src="{{ url_for('static', filename='img/hero.jpg') }}" alt="Nave espacial sobre un planeta">
+</section>
+
+<section class="stats" aria-label="Cifras">
+  <div><b>{{ stats.misiones }}</b><span>misiones registradas</span></div>
+  <div><b>{{ stats.usuarios }}</b><span>cuentas</span></div>
+  <div><b>{{ stats.destinos }}</b><span>destinos</span></div>
+  <div><b>{{ stats.programas }}</b><span>clases de programa</span></div>
+</section>
+
+<section class="cards">
+  <article class="card">
+    <h2>El reto</h2>
+    <p>Diseñar una misión exige equilibrar objetivos, instrumentos, lanzador, presupuesto, potencia, masa y comunicaciones.
+      Para quien nunca vivió una misión completa, esos compromisos se quedan en lo abstracto.</p>
+  </article>
+  <article class="card">
+    <h2>La solución</h2>
+    <p>Un simulador en seis fases con física real: ecuación del cohete, potencia solar 1/r² y presupuesto de enlace.
+      Solo cuentan los datos que logras bajar a Tierra.</p>
+  </article>
+  <article class="card">
+    <h2>Módulos</h2>
+    <ul>
+      <li><a href="{{ url_for('simulator') }}">Simulador</a>: el juego completo.</li>
+      <li><a href="{{ url_for('missions.index') }}">Misiones</a>: bitácora con alta, consulta, edición y baja.</li>
+      <li>Usuarios: cuentas, sesión y roles (explorer y admin).</li>
+    </ul>
+  </article>
+</section>
+{% endblock %}

@@ -15,3 +15,10 @@ entregables/
 
 # original poster: it carries the NASA and Space Apps logos, so it stays local
 Desaf*Orbital*Tierra.png
+
+# Flask app: local database, caches and virtualenv
+instance/
+*.db
+__pycache__/
+.pytest_cache/
+.venv/

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Misiones{% endblock %}
+{% block content %}
+<div class="head">
+  <div>
+    <h1>{% if g.user['role'] == 'admin' %}Todas las misiones{% else %}Mis misiones{% endif %}</h1>
+    <p class="sub">{{ missions|length }} {{ 'misión' if missions|length == 1 else 'misiones' }}{% if status or query %} con este filtro{% endif %}</p>
+  </div>
+  <a class="btn primary" href="{{ url_for('missions.create') }}">Nueva misión</a>
+</div>
+
+<form method="get" class="filters">
+  <label>Buscar por nombre
+    <input type="search" name="q" value="{{ query }}">
+  </label>
+  <label>Estado
+    <select name="estado">
+      <option value="">Todos</option>
+      {% for key, label in statuses.items() %}
+        <option value="{{ key }}" {% if key == status %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <button class="btn ghost" type="submit">Filtrar</button>
+</form>
+
+{% if missions %}
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr>
+      <th>Misión</th><th>Destino</th><th>Programa</th>
+      <th class="num">Masa (kg)</th><th class="num">Presupuesto (M USD)</th><th>Estado</th>
+      {% if g.user['role'] == 'admin' %}<th>Autor</th>{% endif %}
+      <th><span class="sr">Acciones</span></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for m in missions %}
+    <tr>
+      <td><a href="{{ url_for('missions.detail', mission_id=m['id']) }}">{{ m['name'] }}</a></td>
+      <td>{{ destinations[m['destination']].name }}</td>
+      <td>{{ programs[m['program']].name }}</td>
+      <td class="num">{{ '%.0f'|format(m['mass_kg']) }}</td>
+      <td class="num">{{ '%.1f'|format(m['budget_musd']) }}</td>
+      <td><span class="tag tag-{{ m['status'] }}">{{ statuses[m['status']] }}</span></td>
+      {% if g.user['role'] == 'admin' %}<td>{{ m['owner_name'] }}</td>{% endif %}
+      <td class="row-actions">
+        <a class="btn small ghost" href="{{ url_for('missions.edit', mission_id=m['id']) }}">Editar</a>
+        <form method="post" action="{{ url_for('missions.delete', mission_id=m['id']) }}"
+              data-confirm="¿Eliminar la misión «{{ m['name'] }}»? No se puede deshacer.">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn small danger" type="submit">Eliminar</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+<div class="empty">
+  {% if status or query %}
+    <p>Ninguna misión coincide con el filtro.</p>
+    <a class="btn ghost" href="{{ url_for('missions.index') }}">Quitar filtro</a>
+  {% else %}
+    <p>Todavía no registraste ninguna misión.</p>
+    <a class="btn primary" href="{{ url_for('missions.create') }}">Registrar la primera</a>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

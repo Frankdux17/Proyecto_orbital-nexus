@@ -1,0 +1,19 @@
+# Render Blueprint: New + > Blueprint > elegir este repositorio (rama flask-web).
+services:
+  - type: web
+    name: orbital-nexus
+    runtime: python
+    plan: free
+    branch: flask-web
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    healthCheckPath: /salud
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false

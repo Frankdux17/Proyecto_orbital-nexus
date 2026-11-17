@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Editar misión' if editing else 'Nueva misión' }}{% endblock %}
+{% block content %}
+<section class="panel">
+  <h1>{{ 'Editar misión' if editing else 'Nueva misión' }}</h1>
+  <form method="post" class="form grid">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label class="wide">Nombre de la misión
+      <input type="text" name="name" value="{{ mission.name or '' }}" minlength="3" maxlength="80" required autofocus>
+    </label>
+    <label>Clase de programa
+      <select name="program" required>
+        <option value="">Elige una clase</option>
+        {% for key, p in programs.items() %}
+          <option value="{{ key }}" {% if key == mission.program %}selected{% endif %}>{{ p.name }} (hasta {{ p.budget }} M USD)</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Destino
+      <select name="destination" required>
+        <option value="">Elige un destino</option>
+        {% for key, d in destinations.items() %}
+          <option value="{{ key }}" {% if key == mission.destination %}selected{% endif %}>{{ d.name }} · Δv {{ d.dv }} km/s</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Masa de la nave (kg)
+      <input type="number" name="mass_kg" value="{{ mission.mass_kg if mission.mass_kg is not none else '' }}" min="1" max="100000" step="any" required>
+    </label>
+    <label>Presupuesto (M USD)
+      <input type="number" name="budget_musd" value="{{ mission.budget_musd if mission.budget_musd is not none else '' }}" min="0.1" step="any" required>
+    </label>
+    <label>Estado
+      <select name="status">
+        {% for key, label in statuses.items() %}
+          <option value="{{ key }}" {% if key == mission.status %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="wide">Objetivo científico <small>opcional, hasta 500 caracteres</small>
+      <textarea name="objective" rows="4" maxlength="500">{{ mission.objective or '' }}</textarea>
+    </label>
+    <div class="actions wide">
+      <button class="btn primary" type="submit">{{ 'Guardar cambios' if editing else 'Registrar misión' }}</button>
+      <a class="btn ghost" href="{{ url_for('missions.detail', mission_id=mission.id) if editing else url_for('missions.index') }}">Cancelar</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

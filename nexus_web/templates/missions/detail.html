@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{{ mission['name'] }}{% endblock %}
+{% block content %}
+{% set prog = programs[mission['program']] %}
+{% set dest = destinations[mission['destination']] %}
+<section class="panel">
+  <div class="head">
+    <div>
+      <p class="eyebrow">Misión n.º {{ mission['id'] }} · {{ mission['owner_name'] }}</p>
+      <h1>{{ mission['name'] }}</h1>
+    </div>
+    <span class="tag tag-{{ mission['status'] }}">{{ statuses[mission['status']] }}</span>
+  </div>
+
+  <dl class="facts">
+    <div><dt>Destino</dt><dd>{{ dest.name }}</dd></div>
+    <div><dt>Programa</dt><dd>{{ prog.name }}</dd></div>
+    <div><dt>Delta-v de la nave</dt><dd>{{ dest.dv }} km/s</dd></div>
+    <div><dt>Masa</dt><dd>{{ '%.0f'|format(mission['mass_kg']) }} kg</dd></div>
+    <div><dt>Presupuesto</dt><dd>{{ '%.1f'|format(mission['budget_musd']) }} M USD</dd></div>
+    <div><dt>Uso del tope</dt><dd>{{ '%.0f'|format(100 * mission['budget_musd'] / prog.budget) }} % de {{ prog.budget }} M USD</dd></div>
+  </dl>
+  <div class="meter" aria-hidden="true"><i style="width: {{ [100 * mission['budget_musd'] / prog.budget, 100]|min }}%"></i></div>
+
+  <h2>Objetivo científico</h2>
+  <p class="objective">{{ mission['objective'] or 'Sin objetivo registrado.' }}</p>
+
+  <p class="hint">Creada: {{ mission['created_at'] }} UTC · Última edición: {{ mission['updated_at'] }} UTC</p>
+
+  <div class="actions">
+    <a class="btn primary" href="{{ url_for('missions.edit', mission_id=mission['id']) }}">Editar</a>
+    <form method="post" action="{{ url_for('missions.delete', mission_id=mission['id']) }}"
+          data-confirm="¿Eliminar esta misión? No se puede deshacer.">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn danger" type="submit">Eliminar</button>
+    </form>
+    <a class="btn ghost" href="{{ url_for('missions.index') }}">Volver a la lista</a>
+  </div>
+</section>
+{% endblock %}

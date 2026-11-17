@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Usuarios{% endblock %}
+{% block content %}
+<div class="head">
+  <div>
+    <h1>Usuarios</h1>
+    <p class="sub">Solo el rol admin ve esta página. {{ users|length }} cuentas.</p>
+  </div>
+</div>
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>Nombre</th><th>Correo</th><th>Rol</th><th class="num">Misiones</th><th>Alta (UTC)</th><th><span class="sr">Acciones</span></th></tr>
+  </thead>
+  <tbody>
+    {% for u in users %}
+    <tr>
+      <td>{{ u['name'] }}{% if u['id'] == g.user['id'] %} <small>(tú)</small>{% endif %}</td>
+      <td>{{ u['email'] }}</td>
+      <td><em class="role role-{{ u['role'] }}">{{ u['role'] }}</em></td>
+      <td class="num">{{ u['missions'] }}</td>
+      <td>{{ u['created_at'] }}</td>
+      <td class="row-actions">
+        {% if u['id'] != g.user['id'] %}
+        <form method="post" action="{{ url_for('admin.set_role', user_id=u['id']) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="role" value="{{ 'explorer' if u['role'] == 'admin' else 'admin' }}">
+          <button class="btn small ghost" type="submit">{{ 'Quitar admin' if u['role'] == 'admin' else 'Hacer admin' }}</button>
+        </form>
+        <form method="post" action="{{ url_for('admin.delete_user', user_id=u['id']) }}"
+              data-confirm="¿Eliminar la cuenta de {{ u['name'] }} y sus misiones? No se puede deshacer.">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn small danger" type="submit">Eliminar</button>
+        </form>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

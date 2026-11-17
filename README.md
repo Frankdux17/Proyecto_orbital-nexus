@@ -462,3 +462,34 @@ cada ecuación, cada constante y cada simplificación consciente del modelo.
 Desarrollado para el NASA Space Apps Challenge por **Proyecto ORBITAL NEXUS** —
 **Frank Edelin Piña Irarica**, estudiante de Ingeniería de Sistemas de la Universidad Privada de Trujillo (Perú).
 Licencia MIT.
+
+---
+
+## Aplicación web con Python Flask y SQLite (rama `flask-web`)
+
+La rama `flask-web` envuelve el simulador con una aplicación Flask que agrega cuentas de usuario,
+roles y una bitácora de misiones guardada en SQLite. La rama `main` no cambia: sigue publicando el
+juego en GitHub Pages.
+
+| Módulo | Rutas | Qué hace |
+|---|---|---|
+| Inicio | `/` | Reto, solución y cifras leídas de la base de datos |
+| Simulador | `/simulador` | El juego completo (el mismo `index.html`) |
+| Usuarios | `/registro`, `/ingresar`, `/salir` | Registro, inicio y cierre de sesión; contraseñas cifradas |
+| Misiones | `/misiones/…` | CRUD: crear, consultar (búsqueda y filtro), editar y eliminar |
+| Administración | `/admin/usuarios` | Solo rol `admin`: ver cuentas, cambiar roles, eliminar usuarios |
+
+Roles: `explorer` (solo ve y cambia sus misiones) y `admin` (ve todo y administra usuarios).
+
+```bash
+pip install -r requirements-dev.txt
+
+# cuenta de administrador inicial (opcional)
+export ADMIN_EMAIL=admin@ejemplo.com ADMIN_PASSWORD=una-clave-larga   # PowerShell: $env:ADMIN_EMAIL = "..."
+
+python -m flask --app app run     # http://127.0.0.1:5000
+python -m pytest -v               # 36 pruebas automatizadas
+```
+
+Despliegue en Render: `render.yaml` define el servicio (`gunicorn app:app`, rama `flask-web`).
+En el plan gratuito el disco no es persistente, así que la base SQLite se reinicia en cada despliegue.
