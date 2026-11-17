@@ -467,6 +467,8 @@ Licencia MIT.
 
 ## Aplicación web con Python Flask y SQLite (rama `flask-web`)
 
+**Aplicación desplegada en Render:** https://orbital-nexus.onrender.com (plan gratuito: la primera visita puede tardar cerca de un minuto en despertar).
+
 La rama `flask-web` envuelve el simulador con una aplicación Flask que agrega cuentas de usuario,
 roles y una bitácora de misiones guardada en SQLite. La rama `main` no cambia: sigue publicando el
 juego en GitHub Pages.
